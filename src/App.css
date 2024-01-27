@@ -1,0 +1,51 @@
+.App {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  background-color: #b9dfdc;
+  align-items: stretch;
+  padding: 20px;
+}
+
+div.card {
+  border-radius: 5px;
+  background: #b9dfdc;
+  box-shadow: 13px 13px 26px #9fc0bd, -13px -13px 26px #d3fefb;
+}
+
+div.editor {
+  padding: 20px;
+}
+
+div.music-render {
+  background-color: white;
+}
+
+div.player {
+  flex: 1 0 0;
+  gap: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  /* position: absolute; */
+}
+
+.no-select {
+  user-select: none;
+}
+
+iframe {
+  border: none;
+  border-radius: 5px;
+}
+
+div.vertical-container {
+  display: flex;
+  flex-direction: column;
+  flex: 3 0 0;
+  gap: 10px;
+}
