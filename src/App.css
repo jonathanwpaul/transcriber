@@ -10,11 +10,11 @@
   padding: 20px;
 }
 
-div.card {
+/* div.card {
   border-radius: 5px;
   background: #b9dfdc;
   box-shadow: 13px 13px 26px #9fc0bd, -13px -13px 26px #d3fefb;
-}
+} */
 
 div.editor {
   padding: 20px;
@@ -46,6 +46,5 @@ iframe {
 div.vertical-container {
   display: flex;
   flex-direction: column;
-  flex: 3 0 0;
   gap: 10px;
 }

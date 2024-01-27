@@ -13,7 +13,13 @@ import YouTube from 'react-youtube'
 
 export const Player = () => {
   const [url, setUrl] = useState('https://www.youtube.com/watch?v=azphxfZc4_E')
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [playerStatus, setPlayerStatus] = useState({
+    isPlaying: false,
+    duration: 0,
+    sectionStart: 0,
+    sectionEnd: 0,
+  })
+  const { isPlaying, duration, sectionStart, sectionEnd } = playerStatus
   const getId = url => {
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
@@ -28,8 +34,8 @@ export const Player = () => {
     width: 320,
     height: 195,
     playerVars: {
-      controls: 0,
-      fs: 0,
+      controls: 1,
+      fs: 1,
     },
   }
 
@@ -37,16 +43,20 @@ export const Player = () => {
 
   const onReady = e => {
     playerRef.current = e.target
+    setPlayerStatus({
+      ...playerStatus,
+      duration: playerRef.current.getDuration(),
+    })
   }
 
   const onPlay = () => {
     playerRef.current.playVideo()
-    setIsPlaying(true)
+    setPlayerStatus({ ...playerStatus, isPlaying: true })
   }
 
   const onPause = () => {
     playerRef.current.pauseVideo()
-    setIsPlaying(false)
+    setPlayerStatus({ ...playerStatus, isPlaying: false })
   }
 
   const restartPlayer = () => {
@@ -58,6 +68,13 @@ export const Player = () => {
   }
   //   const handlePin = () => {}
 
+  const handleIntervalChange = (_, newValue) => {
+    setPlayerStatus({
+      ...playerStatus,
+      sectionStart: newValue[0],
+      sectionEnd: newValue[1],
+    })
+  }
   return (
     // <Draggable
     //   id='#playback-menu'
@@ -94,14 +111,15 @@ export const Player = () => {
           <SkipNext />
         </IconButton>
       </div>
-      <div>
+      <div className='vertical-container'>
         <YouTube
           opts={videoOptions}
           videoId={videoId}
           onReady={onReady}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onEnd={() => setIsPlaying(false)}
+          onPlay={onPlay}
+          onPause={onPause}
+          on
+          //   onEnd={() => setIsPlaying(false)}
         />
         <Slider
           size='small'
@@ -113,11 +131,15 @@ export const Player = () => {
             new Date(value * 1000).toISOString().slice(11, 19)
           }
           min={0}
-          max={playerRef.current && playerRef.current.getDuration()}
+          max={duration}
         />
         <Slider
           size='small'
-          value={[2, 5]}
+          step={0.1}
+          min={0}
+          max={duration}
+          onChange={handleIntervalChange}
+          value={[sectionStart, sectionEnd]}
         />
       </div>
     </Card>
