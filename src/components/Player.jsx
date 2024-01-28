@@ -15,11 +15,12 @@ export const Player = () => {
   const [url, setUrl] = useState('https://www.youtube.com/watch?v=azphxfZc4_E')
   const [playerStatus, setPlayerStatus] = useState({
     isPlaying: false,
+    playbackRate: undefined,
     duration: 0,
     sectionStart: 0,
     sectionEnd: 0,
   })
-  const { isPlaying, duration, sectionStart, sectionEnd } = playerStatus
+  const { isPlaying, playbackRate, duration, sectionStart, sectionEnd } = playerStatus
   const getId = url => {
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
@@ -41,11 +42,39 @@ export const Player = () => {
 
   let playerRef = useRef()
 
+  useEffect(() => {
+  window.addEventListener("message", function(event) {
+    // Check that the event was sent from the YouTube IFrame.
+    if (event.source === iframeWindow) {
+      var data = JSON.parse(event.data);
+
+      // The "infoDelivery" event is used by YT to transmit any
+      // kind of information change in the player,
+      // such as the current time or a playback quality change.
+      if (
+        data.event === "infoDelivery" &&
+        data.info &&
+        data.info.currentTime
+      ) {
+        // currentTime is emitted very frequently,
+        // but we only care about whole second changes.
+        var time = Math.floor(data.info.currentTime);
+
+        if (time !== lastTimeUpdate) {
+          lastTimeUpdate = time;
+          console.log(time); // Update the dom, emit an event, whatever.
+        }
+      }
+    }}
+  )}, [])
+
   const onReady = e => {
     playerRef.current = e.target
+    console.log(e.target);
     setPlayerStatus({
       ...playerStatus,
       duration: playerRef.current.getDuration(),
+      playbackRate: playerRef.current.getPlaybackRate()
     })
   }
 
@@ -63,10 +92,15 @@ export const Player = () => {
     playerRef.current.seekTo(0)
   }
 
+  
   const handleSliderChange = (_, newValue) => {
     playerRef.current.seekTo(newValue)
   }
   //   const handlePin = () => {}
+
+  const handlePlaybackRateChange = (_, newValue) => {
+    playerRef.current.setPlaybackRate(newValue)
+  }
 
   const handleIntervalChange = (_, newValue) => {
     setPlayerStatus({
@@ -118,7 +152,7 @@ export const Player = () => {
           onReady={onReady}
           onPlay={onPlay}
           onPause={onPause}
-          on
+          onPlaybackRateChange={(e) => setPlayerStatus({...playerStatus, playbackRate: e.data})}
           //   onEnd={() => setIsPlaying(false)}
         />
         <Slider
@@ -140,6 +174,16 @@ export const Player = () => {
           max={duration}
           onChange={handleIntervalChange}
           value={[sectionStart, sectionEnd]}
+        />
+        <Slider
+          size='small'
+          step={0.1}
+          min={0.1}
+          max={2}
+          marks={true}
+          onChange={handlePlaybackRateChange}
+          default={1}
+          value={playbackRate}
         />
       </div>
     </Card>
