@@ -14,13 +14,24 @@ import YouTube from 'react-youtube'
 export const Player = () => {
   const [url, setUrl] = useState('https://www.youtube.com/watch?v=azphxfZc4_E')
   const [playerStatus, setPlayerStatus] = useState({
-    isPlaying: false,
-    playbackRate: undefined,
+    currentTime: 0,
     duration: 0,
+    isPlaying: false,
+    playbackRate: 1,
+    possiblePlaybackRates: [],
     sectionStart: 0,
     sectionEnd: 0,
   })
-  const { isPlaying, playbackRate, duration, sectionStart, sectionEnd } = playerStatus
+
+  const {
+    currentTime,
+    isPlaying,
+    playbackRate,
+    duration,
+    sectionStart,
+    sectionEnd,
+  } = playerStatus
+
   const getId = url => {
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
@@ -41,65 +52,61 @@ export const Player = () => {
   }
 
   let playerRef = useRef()
-
-  useEffect(() => {
-  window.addEventListener("message", function(event) {
-    // Check that the event was sent from the YouTube IFrame.
-    if (event.source === iframeWindow) {
-      var data = JSON.parse(event.data);
-
-      // The "infoDelivery" event is used by YT to transmit any
-      // kind of information change in the player,
-      // such as the current time or a playback quality change.
-      if (
-        data.event === "infoDelivery" &&
-        data.info &&
-        data.info.currentTime
-      ) {
-        // currentTime is emitted very frequently,
-        // but we only care about whole second changes.
-        var time = Math.floor(data.info.currentTime);
-
-        if (time !== lastTimeUpdate) {
-          lastTimeUpdate = time;
-          console.log(time); // Update the dom, emit an event, whatever.
-        }
-      }
-    }}
-  )}, [])
-
+  let timerRef = useRef()
+  /**
+   * initializes the playerStatus when the youtube api is ready
+   * @param {*} e the event from the youtube iframe
+   */
   const onReady = e => {
     playerRef.current = e.target
-    console.log(e.target);
+    console.log('video ready')
     setPlayerStatus({
-      ...playerStatus,
+      currentTime: e.target.getCurrentTime(),
       duration: playerRef.current.getDuration(),
-      playbackRate: playerRef.current.getPlaybackRate()
+      isPlaying: e.target.getPlayerState() === 1,
+      playbackRate: e.target.getPlaybackRate(),
+      possiblePlaybackRates: e.target.getAvailablePlaybackRates(),
+      sectionStart: 0,
+      sectionEnd: e.target.getDuration(),
     })
   }
 
-  const onPlay = () => {
-    playerRef.current.playVideo()
-    setPlayerStatus({ ...playerStatus, isPlaying: true })
+  const onPlay = e => {
+    console.log('onPlay executing')
+    timerRef.current = setInterval(
+      () =>
+        setPlayerStatus({
+          ...playerStatus,
+          isPlaying: true,
+          currentTime: e.target.getCurrentTime(),
+        }),
+      100 //every 0.1s
+    )
   }
 
   const onPause = () => {
-    playerRef.current.pauseVideo()
+    console.log('onPause executing')
     setPlayerStatus({ ...playerStatus, isPlaying: false })
+    clearInterval(timerRef.current)
   }
 
   const restartPlayer = () => {
-    playerRef.current.seekTo(0)
+    handleSliderChange(null, 0)
   }
 
-  
   const handleSliderChange = (_, newValue) => {
     playerRef.current.seekTo(newValue)
+    setPlayerStatus({ ...playerStatus, currentTime: newValue })
   }
-  //   const handlePin = () => {}
 
   const handlePlaybackRateChange = (_, newValue) => {
+    playerRef.current.pauseVideo()
     playerRef.current.setPlaybackRate(newValue)
+    setPlayerStatus({
+      ...playerStatus,
+      playbackRate: newValue,
+    })
+    playerRef.current.playVideo()
   }
 
   const handleIntervalChange = (_, newValue) => {
@@ -125,24 +132,25 @@ export const Player = () => {
         </IconButton>
       </div> */}
       <div>
-        <IconButton aria-label='previous'>
-          <SkipPrevious onClick={restartPlayer} />
+        <IconButton
+          onClick={restartPlayer}
+          aria-label='previous'
+        >
+          <SkipPrevious />
         </IconButton>
-        <IconButton aria-label='play/pause'>
+        <IconButton
+          onClick={() =>
+            isPlaying
+              ? playerRef.current?.pauseVideo()
+              : playerRef.current?.playVideo()
+          }
+          aria-label='play/pause'
+        >
           {isPlaying ? (
-            <PauseCircle
-              sx={{ height: 38, width: 38 }}
-              onClick={onPause}
-            />
+            <PauseCircle sx={{ height: 38, width: 38 }} />
           ) : (
-            <PlayArrow
-              sx={{ height: 38, width: 38 }}
-              onClick={onPlay}
-            />
+            <PlayArrow sx={{ height: 38, width: 38 }} />
           )}
-        </IconButton>
-        <IconButton aria-label='next'>
-          <SkipNext />
         </IconButton>
       </div>
       <div className='vertical-container'>
@@ -152,41 +160,48 @@ export const Player = () => {
           onReady={onReady}
           onPlay={onPlay}
           onPause={onPause}
-          onPlaybackRateChange={(e) => setPlayerStatus({...playerStatus, playbackRate: e.data})}
+          onPlaybackRateChange={
+            e => console.log(e.data)
+            // setPlayerStatus({ ...playerStatus, playbackRate: e.data })
+          }
           //   onEnd={() => setIsPlaying(false)}
         />
         <Slider
-          size='small'
-          step={0.1}
-          value={playerRef.current && playerRef.current.getCurrentTime()}
-          valueLabelDisplay='auto'
-          onChange={handleSliderChange}
-          valueLabelFormat={value =>
-            new Date(value * 1000).toISOString().slice(11, 19)
-          }
+          value={currentTime}
+          valueLabelDisplay='on'
+          valueLabelFormat={timestampFormatter}
           min={0}
           max={duration}
-        />
-        <Slider
+          onChange={handleSliderChange}
           size='small'
           step={0.1}
+        />
+        <Slider
           min={0}
           max={duration}
           onChange={handleIntervalChange}
-          value={[sectionStart, sectionEnd]}
-        />
-        <Slider
           size='small'
           step={0.1}
+          value={[sectionStart, sectionEnd]}
+          valueLabelDisplay='on'
+          valueLabelFormat={timestampFormatter}
+        />
+        <Slider
+          default={1}
           min={0.1}
           max={2}
-          marks={true}
+          marks
           onChange={handlePlaybackRateChange}
-          default={1}
+          size='small'
+          step={0.1}
           value={playbackRate}
+          valueLabelDisplay='on'
         />
       </div>
     </Card>
     // </Draggable>
   )
 }
+
+const timestampFormatter = value =>
+  new Date(value * 1000).toISOString().slice(11, 21)
