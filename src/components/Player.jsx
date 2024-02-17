@@ -178,15 +178,16 @@ export const Player = () => {
                 width: 6,
                 height: 40,
               },
-              // '& .MuiSlider-track': {
-              //   transform: 'translate(0, -40px)',
-              // },
+              '& .MuiSlider-track': {
+                top: 0,
+                height: 10,
+              },
               '.MuiSlider-rail': {
                 height: 0,
               },
             }}
             value={[sectionStart, sectionEnd]}
-            valueLabelDisplay='on'
+            // valueLabelDisplay='on'
             valueLabelFormat={timestampFormatter}
           />
         </div>
