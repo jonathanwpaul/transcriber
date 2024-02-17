@@ -1,14 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
-import { IconButton, Card, Slider } from '@mui/material'
-import {
-  SkipPrevious,
-  PlayArrow,
-  PauseCircle,
-  SkipNext,
-  //   DragIndicator,
-  //   PushPin,
-} from '@mui/icons-material'
-// import Draggable from 'react-draggable'
+import { IconButton, Card, Slider, TextField, Button } from '@mui/material'
+import { SkipPrevious, PlayArrow, PauseCircle } from '@mui/icons-material'
 import YouTube from 'react-youtube'
 
 export const Player = () => {
@@ -20,6 +12,9 @@ export const Player = () => {
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
   const [sectionStart, setSectionStart] = useState(0)
   const [sectionEnd, setSectionEnd] = useState(0)
+
+  const reachedLoopEnd = currentTime >= sectionEnd
+  const beforeLoopStart = currentTime < sectionStart
 
   const getId = url => {
     const regExp =
@@ -61,17 +56,8 @@ export const Player = () => {
   const onPlay = e => {
     timerRef.current = setInterval(
       () => {
-        const playerTime = e.target.getCurrentTime()
-        // TODO: if the loop end time is moved before the current time while it's playing, the interval function doesn't get the new section limit value, so it won't loop until the video is paused &played again
-        const reachedLoopEnd = playerTime >= sectionEnd
-
-        const beforeLoopStart = playerTime < sectionStart
-        if (reachedLoopEnd || beforeLoopStart) {
-          handleSliderChange(null, sectionStart)
-        } else {
-          setIsPlaying(true)
-          setCurrentTime(playerTime)
-        }
+        setIsPlaying(true)
+        setCurrentTime(e.target.getCurrentTime())
       },
       100 //every 0.1s
     )
@@ -95,15 +81,20 @@ export const Player = () => {
   const handlePlaybackRateChange = (_, newValue) => setPlaybackRate(newValue)
 
   const handleIntervalChange = (_, newValue) => {
-    setSectionStart(newValue[0])
+    // forces the currentTime to match the sectionStart when the section parameters are updated
+    if (newValue[0] !== sectionStart) {
+      handleSliderChange(null, newValue[0])
+      setSectionStart(newValue[0])
+    }
+
+    if (newValue[1] < currentTime) {
+      handleSliderChange(null, newValue[0])
+    }
     setSectionEnd(newValue[1])
   }
 
   return (
-    <Card
-      elevation={5}
-      className='player card'
-    >
+    <Card elevation={5} className='player'>
       <div>
         <YouTube
           opts={videoOptions}
@@ -111,22 +102,21 @@ export const Player = () => {
           onReady={onReady}
           onPlay={onPlay}
           onPause={onPause}
-          onPlaybackRateChange={
-            e => console.log(e.data)
-            // setPlayerStatus({ ...playerStatus, playbackRate: e.data })
-          }
-          //   onEnd={() => setIsPlaying(false)}
         />
       </div>
-      <div
-        className='vertical-container'
-        style={{ maxWidth: '60%' }}
-      >
+      <div className='vertical-container controls'>
         <div className='horizontal-container'>
-          <IconButton
-            onClick={restartPlayer}
-            aria-label='previous'
+          <TextField className='video-input'></TextField>
+          <Button
+            variant='contained'
+            className='button'
+            sx={{ textTransform: 'none' }}
           >
+            Go
+          </Button>
+        </div>
+        <div className='horizontal-container' style={{ alignItems: 'center' }}>
+          <IconButton onClick={restartPlayer} aria-label='previous'>
             <SkipPrevious />
           </IconButton>
           <IconButton
@@ -156,6 +146,20 @@ export const Player = () => {
           />
         </div>
         <div style={{ position: 'relative' }}>
+          {/* the playback slider (mirrors video playback slider) */}
+          <Slider
+            min={0}
+            max={duration}
+            onChange={handleSliderChange}
+            size='small'
+            step={0.1}
+            style={{
+              position: 'absolute',
+            }}
+            value={currentTime}
+            // valueLabelDisplay='on'
+            // valueLabelFormat={timestampFormatter}
+          />
           {/* the loop slider */}
           <Slider
             color='secondary'
@@ -165,34 +169,23 @@ export const Player = () => {
             size='small'
             step={0.1}
             style={{
-              position: 'absolute',
+              position: 'relative',
+              top: '50%',
             }}
             sx={{
               '& .MuiSlider-thumb': {
                 borderRadius: '50vw',
-                width: 8,
+                width: 6,
                 height: 40,
-                transform: 'translate(-50%, -100%)',
               },
-              '& .MuiSlider-track': {
-                transform: 'translate(0, -40px)',
+              // '& .MuiSlider-track': {
+              //   transform: 'translate(0, -40px)',
+              // },
+              '.MuiSlider-rail': {
+                height: 0,
               },
             }}
             value={[sectionStart, sectionEnd]}
-            valueLabelDisplay='on'
-            valueLabelFormat={timestampFormatter}
-          />
-          {/* the playback slider (mirrors video playback slider) */}
-          <Slider
-            min={0}
-            max={duration}
-            onChange={handleSliderChange}
-            size='small'
-            step={0.1}
-            style={{
-              position: 'relative',
-            }}
-            value={currentTime}
             valueLabelDisplay='on'
             valueLabelFormat={timestampFormatter}
           />
