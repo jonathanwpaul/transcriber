@@ -13,24 +13,13 @@ import YouTube from 'react-youtube'
 
 export const Player = () => {
   const [url, setUrl] = useState('https://www.youtube.com/watch?v=azphxfZc4_E')
-  const [playerStatus, setPlayerStatus] = useState({
-    currentTime: 0,
-    duration: 0,
-    isPlaying: false,
-    playbackRate: 1,
-    possiblePlaybackRates: [],
-    sectionStart: 0,
-    sectionEnd: 0,
-  })
-
-  const {
-    currentTime,
-    isPlaying,
-    playbackRate,
-    duration,
-    sectionStart,
-    sectionEnd,
-  } = playerStatus
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [playbackRate, setPlaybackRate] = useState(1)
+  const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
+  const [sectionStart, setSectionStart] = useState(0)
+  const [sectionEnd, setSectionEnd] = useState(0)
 
   const getId = url => {
     const regExp =
@@ -60,34 +49,37 @@ export const Player = () => {
   const onReady = e => {
     playerRef.current = e.target
     console.log('video ready')
-    setPlayerStatus({
-      currentTime: e.target.getCurrentTime(),
-      duration: playerRef.current.getDuration(),
-      isPlaying: e.target.getPlayerState() === 1,
-      playbackRate: e.target.getPlaybackRate(),
-      possiblePlaybackRates: e.target.getAvailablePlaybackRates(),
-      sectionStart: 0,
-      sectionEnd: e.target.getDuration(),
-    })
+    setCurrentTime(e.target.getCurrentTime())
+    setDuration(playerRef.current.getDuration())
+    setIsPlaying(e.target.getPlayerState() === 1)
+    setPlaybackRate(e.target.getPlaybackRate())
+    setPossiblePlaybackRates(e.target.getAvailablePlaybackRates())
+    setSectionStart(0)
+    setSectionEnd(e.target.getDuration())
   }
 
   const onPlay = e => {
-    console.log('onPlay executing')
     timerRef.current = setInterval(
-      () =>
-        setPlayerStatus({
-          ...playerStatus,
-          isPlaying: true,
-          currentTime: e.target.getCurrentTime(),
-        }),
+      () => {
+        const playerTime = e.target.getCurrentTime()
+        // TODO: if the loop end time is moved before the current time while it's playing, the interval function doesn't get the new section limit value, so it won't loop until the video is paused &played again
+        const reachedLoopEnd = playerTime >= sectionEnd
+
+        const beforeLoopStart = playerTime < sectionStart
+        if (reachedLoopEnd || beforeLoopStart) {
+          handleSliderChange(null, sectionStart)
+        } else {
+          setIsPlaying(true)
+          setCurrentTime(playerTime)
+        }
+      },
       100 //every 0.1s
     )
   }
 
   const onPause = () => {
-    console.log('onPause executing')
-    setPlayerStatus({ ...playerStatus, isPlaying: false })
     clearInterval(timerRef.current)
+    setIsPlaying(false)
   }
 
   const restartPlayer = () => {
@@ -95,65 +87,24 @@ export const Player = () => {
   }
 
   const handleSliderChange = (_, newValue) => {
+    clearInterval(timerRef.current)
     playerRef.current.seekTo(newValue)
-    setPlayerStatus({ ...playerStatus, currentTime: newValue })
+    setCurrentTime(newValue)
   }
 
-  const handlePlaybackRateChange = (_, newValue) => {
-    playerRef.current.pauseVideo()
-    playerRef.current.setPlaybackRate(newValue)
-    setPlayerStatus({
-      ...playerStatus,
-      playbackRate: newValue,
-    })
-    playerRef.current.playVideo()
-  }
+  const handlePlaybackRateChange = (_, newValue) => setPlaybackRate(newValue)
 
   const handleIntervalChange = (_, newValue) => {
-    setPlayerStatus({
-      ...playerStatus,
-      sectionStart: newValue[0],
-      sectionEnd: newValue[1],
-    })
+    setSectionStart(newValue[0])
+    setSectionEnd(newValue[1])
   }
+
   return (
-    // <Draggable
-    //   id='#playback-menu'
-    //   bounds='parent'
-    //   handle='#handle'
-    // >
-    <Card className='player card'>
-      {/* <div className='vertical-container'>
-        <IconButton aria-label='move'>
-          <PushPin onClick={handlePin} />
-        </IconButton>
-        <IconButton aria-label='move'>
-          <DragIndicator id='handle' />
-        </IconButton>
-      </div> */}
+    <Card
+      elevation={5}
+      className='player card'
+    >
       <div>
-        <IconButton
-          onClick={restartPlayer}
-          aria-label='previous'
-        >
-          <SkipPrevious />
-        </IconButton>
-        <IconButton
-          onClick={() =>
-            isPlaying
-              ? playerRef.current?.pauseVideo()
-              : playerRef.current?.playVideo()
-          }
-          aria-label='play/pause'
-        >
-          {isPlaying ? (
-            <PauseCircle sx={{ height: 38, width: 38 }} />
-          ) : (
-            <PlayArrow sx={{ height: 38, width: 38 }} />
-          )}
-        </IconButton>
-      </div>
-      <div className='vertical-container'>
         <YouTube
           opts={videoOptions}
           videoId={videoId}
@@ -166,40 +117,88 @@ export const Player = () => {
           }
           //   onEnd={() => setIsPlaying(false)}
         />
-        <Slider
-          value={currentTime}
-          valueLabelDisplay='on'
-          valueLabelFormat={timestampFormatter}
-          min={0}
-          max={duration}
-          onChange={handleSliderChange}
-          size='small'
-          step={0.1}
-        />
-        <Slider
-          min={0}
-          max={duration}
-          onChange={handleIntervalChange}
-          size='small'
-          step={0.1}
-          value={[sectionStart, sectionEnd]}
-          valueLabelDisplay='on'
-          valueLabelFormat={timestampFormatter}
-        />
-        <Slider
-          default={1}
-          min={0.1}
-          max={2}
-          marks
-          onChange={handlePlaybackRateChange}
-          size='small'
-          step={0.1}
-          value={playbackRate}
-          valueLabelDisplay='on'
-        />
+      </div>
+      <div
+        className='vertical-container'
+        style={{ maxWidth: '60%' }}
+      >
+        <div className='horizontal-container'>
+          <IconButton
+            onClick={restartPlayer}
+            aria-label='previous'
+          >
+            <SkipPrevious />
+          </IconButton>
+          <IconButton
+            onClick={() =>
+              isPlaying
+                ? playerRef.current?.pauseVideo()
+                : playerRef.current?.playVideo()
+            }
+            aria-label='play/pause'
+          >
+            {isPlaying ? (
+              <PauseCircle sx={{ height: 38, width: 38 }} />
+            ) : (
+              <PlayArrow sx={{ height: 38, width: 38 }} />
+            )}
+          </IconButton>
+          <Slider
+            default={1}
+            min={0.1}
+            max={2}
+            marks
+            onChange={handlePlaybackRateChange}
+            size='small'
+            step={0.1}
+            value={playbackRate}
+            valueLabelDisplay='on'
+          />
+        </div>
+        <div style={{ position: 'relative' }}>
+          {/* the loop slider */}
+          <Slider
+            color='secondary'
+            min={0}
+            max={duration}
+            onChange={handleIntervalChange}
+            size='small'
+            step={0.1}
+            style={{
+              position: 'absolute',
+            }}
+            sx={{
+              '& .MuiSlider-thumb': {
+                borderRadius: '50vw',
+                width: 8,
+                height: 40,
+                transform: 'translate(-50%, -100%)',
+              },
+              '& .MuiSlider-track': {
+                transform: 'translate(0, -40px)',
+              },
+            }}
+            value={[sectionStart, sectionEnd]}
+            valueLabelDisplay='on'
+            valueLabelFormat={timestampFormatter}
+          />
+          {/* the playback slider (mirrors video playback slider) */}
+          <Slider
+            min={0}
+            max={duration}
+            onChange={handleSliderChange}
+            size='small'
+            step={0.1}
+            style={{
+              position: 'relative',
+            }}
+            value={currentTime}
+            valueLabelDisplay='on'
+            valueLabelFormat={timestampFormatter}
+          />
+        </div>
       </div>
     </Card>
-    // </Draggable>
   )
 }
 

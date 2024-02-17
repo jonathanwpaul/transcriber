@@ -11,14 +11,18 @@ export const Editor = () => {
       className='editor vertical-container'
       id='editor'
     >
+      <Card
+        elevation={5}
+        className='music-render'
+        style={{ overflow: 'auto', flex: 1 }}
+      >
+        <MusicRender id='music-render' />
+      </Card>
       <TextField
         fullWidth
         multiline
         onChange={handleChange}
       />
-      <Card className='music-render'>
-        <MusicRender id='music-render' />
-      </Card>
     </div>
   )
 }
