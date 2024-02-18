@@ -1,3 +1,1 @@
-export const MusicRender = ({ id, onClick }) => (
-  <div onClick={onClick} id={id}></div>
-)
+export const MusicRender = props => <div {...props}></div>

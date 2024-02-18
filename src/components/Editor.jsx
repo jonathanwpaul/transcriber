@@ -1,48 +1,23 @@
 import { Card, TextField } from '@mui/material'
 import { Controls, MusicRender } from './'
 import abcjs from 'abcjs'
+import allNotes from 'abcjs/src/parse/all-notes.js' //invasively importing non-indexed module export
 import { useState } from 'react'
-
-const SCALE = 2
-const AVAILABLE_NOTES = [
-  'e,,',
-  'f,,',
-  'g,,',
-  'a,,',
-  'b,,',
-  'c,',
-  'd,',
-  'e,',
-  'f,',
-  'g,',
-  'a,',
-  'b,',
-  'c',
-  'd',
-  'e',
-  'f',
-  'g',
-  'a',
-  'b',
-  "c'",
-  "d'",
-  "e'",
-  "f'",
-  "g'",
-  "a'",
-  "b'",
-  "c''",
-]
+import { allPitches, moveNote, sanitize, tokenize } from '../utils'
+const SCALE = 1
 
 export const Editor = () => {
   const [durationValue, setDuration] = useState('1')
-  const [noteClicked, setNoteClicked] = useState()
-  console.log(AVAILABLE_NOTES.join(''))
+  const [noteInputMode, setNoteInputMode] = useState()
   const [abcString, setAbcString] = useState('')
+
+  // console.clear()
+  console.log(allPitches.join(''))
+
   const handleClickEditor = e => {
-    console.log('clicked', e)
+    console.log('clicked', { x: e.clientX, y: e.clientY })
     const staff = document.querySelector('.abcjs-top-line')?.parentElement
-    if (!staff) return // the abcstring is invalid (or empty)
+    // if (!staff) return // the abcstring is invalid (or empty)
 
     // figure out line spacing
     const [firstLineY, secondLineY] = Array.from(staff.childNodes)
@@ -59,11 +34,12 @@ export const Editor = () => {
 
     const differenceY = e.clientY - staffOffsetY
     const clickedIndexOffset = Math.round(differenceY / (lineSpacing / 2))
-    const clickedIndex = AVAILABLE_NOTES.indexOf('f') - clickedIndexOffset
-    const clickedNote = AVAILABLE_NOTES[clickedIndex]
+    const clickedIndex = allPitches.indexOf('f') - clickedIndexOffset
+    const clickedNote = allPitches[clickedIndex]
     clickedNote &&
       setAbcString(abcString => abcString + clickedNote + durationValue)
   }
+
   const handleClick = (
     abcelem,
     tuneNumber,
@@ -72,23 +48,58 @@ export const Editor = () => {
     drag,
     mouseEvent
   ) => {
-    console.log({ abcelem, tuneNumber, classes, analysis, drag, mouseEvent })
+    const originalText = abcString.substring(abcelem.startChar, abcelem.endChar)
+    if (
+      abcelem.pitches &&
+      drag &&
+      drag.step &&
+      abcelem.startChar >= 0 &&
+      abcelem.endChar >= 0
+    ) {
+      var arr = tokenize(originalText)
+      // arr now contains elements that are either a chord, a decoration, a note name, or anything else. It can be put back to its original string with .join("").
+      for (var i = 0; i < arr.length; i++) {
+        arr[i] = moveNote(arr[i], drag.step)
+      }
+      var newText = arr.join('')
+
+      setAbcString(
+        abcString.substring(0, abcelem.startChar) +
+          newText +
+          abcString.substring(abcelem.endChar)
+      )
+    } else if (abcelem.startChar >= 0 && abcelem.endChar >= 0) {
+    }
   }
 
-  abcjs.renderAbc('music-render', abcString, {
-    clickListener: handleClick,
-    scale: SCALE,
-    wrap: {
-      preferredMeasuresPerLine: 4,
-      minSpacing: 1.8,
-      maxSpacing: 2.7,
-      showDebug: ['grid', 'box'],
-      // dragging: true,
-    },
-  })
+  const handleMouseEnter = () => {
+    setNoteInputMode(true)
+  }
+
+  const handleMouseLeave = () => {
+    setNoteInputMode(false)
+  }
+
   const handleStringChange = e => {
     setAbcString(e.target.value)
   }
+
+  abcjs.renderAbc('music-render', abcString + (noteInputMode ? 'x' : ''), {
+    clickListener: handleClick,
+    scale: SCALE,
+    // wrap: {
+    //   preferredMeasuresPerLine: 4,
+    //   minSpacing: 2,
+    //   maxSpacing: 2,
+    // },
+    // staffwidth: 800,
+    viewportHorizontal: true,
+    // scrollHorizontal: true,
+    // showDebug: ['box'],
+    dragging: true,
+    selectionColor: 'green',
+    dragColor: 'blue',
+  })
 
   return (
     <div className='editor vertical-container' id='editor'>
@@ -98,7 +109,11 @@ export const Editor = () => {
         className='music-render'
         style={{ overflow: 'auto', flex: 1 }}
       >
-        <MusicRender onClick={e => console.log(e)} id='music-render' />
+        <MusicRender
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          id='music-render'
+        />
       </Card>
       <Card elevation={5} className='editor-inputs'>
         <TextField
