@@ -36,10 +36,11 @@ const AVAILABLE_NOTES = [
 
 export const Editor = () => {
   const [durationValue, setDuration] = useState('1')
+  const [noteClicked, setNoteClicked] = useState()
   console.log(AVAILABLE_NOTES.join(''))
   const [abcString, setAbcString] = useState('')
   const handleClickEditor = e => {
-    console.log('clicked', e.clientY)
+    console.log('clicked', e)
     const staff = document.querySelector('.abcjs-top-line')?.parentElement
     if (!staff) return // the abcstring is invalid (or empty)
 
@@ -71,17 +72,18 @@ export const Editor = () => {
     drag,
     mouseEvent
   ) => {
-    mouseEvent.preventDefault()
     console.log({ abcelem, tuneNumber, classes, analysis, drag, mouseEvent })
   }
 
-  abcjs.renderAbc('music-render', abcString + '|x', {
+  abcjs.renderAbc('music-render', abcString, {
     clickListener: handleClick,
     scale: SCALE,
     wrap: {
       preferredMeasuresPerLine: 4,
       minSpacing: 1.8,
       maxSpacing: 2.7,
+      showDebug: ['grid', 'box'],
+      // dragging: true,
     },
   })
   const handleStringChange = e => {
@@ -96,7 +98,7 @@ export const Editor = () => {
         className='music-render'
         style={{ overflow: 'auto', flex: 1 }}
       >
-        <MusicRender id='music-render' />
+        <MusicRender onClick={e => console.log(e)} id='music-render' />
       </Card>
       <Card elevation={5} className='editor-inputs'>
         <TextField
