@@ -5,45 +5,9 @@
   height: 100vh;
   box-sizing: border-box;
   align-items: stretch;
+  overflow: scroll;
   padding: 20px;
   gap: 20px;
-}
-
-/* div.card {
-  border-radius: 5px;
-  background: #b9dfdc;
-  box-shadow: 13px 13px 26px #9fc0bd, -13px -13px 26px #d3fefb;
-} */
-div.editor-inputs {
-  padding: 5px;
-  display: flex;
-  gap: 10px;
-}
-div.editor {
-  flex: 1 0 0;
-}
-
-div.video-input {
-  width: 100%;
-}
-div.controls {
-  max-width: 60%;
-  align-items: stretch;
-  flex: 1;
-  justify-content: center;
-}
-div.music-render {
-  background-color: white;
-  display: flex;
-  align-items: center;
-}
-
-div.player {
-  gap: 10px;
-  display: flex;
-  justify-content: space-around;
-  padding: 30px;
-  /* position: absolute; */
 }
 
 iframe {
@@ -60,4 +24,41 @@ div.vertical-container {
 div.horizontal-container {
   display: flex;
   gap: 10px;
+}
+
+/* APP COMPONENTS */
+div.editor {
+  height: 80%;
+  min-height: 0;
+}
+
+div.editor-inputs {
+  padding: 5px;
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+div.music-render {
+  overflow: scroll;
+  min-height: 0;
+  flex: 1;
+}
+
+div.player {
+  gap: 10px;
+  display: flex;
+  justify-content: space-around;
+  padding: 30px;
+  flex-shrink: 0;
+}
+
+div.video-input {
+  width: 100%;
+}
+div.controls {
+  max-width: 60%;
+  align-items: stretch;
+  flex: 1;
+  justify-content: center;
 }
