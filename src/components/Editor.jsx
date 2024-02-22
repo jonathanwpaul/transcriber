@@ -105,8 +105,9 @@ export const Editor = () => {
     setSaves(keys)
   }
 
-  const loadSave = async e => {
-    const { value } = await Preferences.get({ key: e.target.value })
+  const loadSave = async selectedValue => {
+    console.log('loading save: ', selectedValue)
+    const { value } = await Preferences.get({ key: selectedValue })
     console.log(value)
     setAbcString(value)
   }

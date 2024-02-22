@@ -1,11 +1,7 @@
-import { Save } from '@mui/icons-material'
-import {
-  IconButton,
-  MenuItem,
-  Select,
-  ToggleButton,
-  ToggleButtonGroup,
-} from '@mui/material'
+import { useState } from 'react'
+import { FolderOpen, Save } from '@mui/icons-material'
+import { IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { Dialog } from './Dialog'
 
 export const Controls = ({
   durationValue,
@@ -16,6 +12,7 @@ export const Controls = ({
   loadSave,
   saves,
 }) => {
+  const [dialogOpen, setDialogOpen] = useState()
   return (
     <div className='horizontal-container' style={{ alignContent: 'center' }}>
       <ToggleButtonGroup
@@ -43,11 +40,21 @@ export const Controls = ({
         ))}
       </ToggleButtonGroup>
       <IconButton onClick={handleSave}>
-        <Save></Save>
+        <Save />
       </IconButton>
-      <Select onChange={loadSave}>
-        {saves && saves.map(save => <MenuItem value={save}>{save}</MenuItem>)}
-      </Select>
+      <IconButton onClick={() => setDialogOpen(true)}>
+        <FolderOpen />
+      </IconButton>
+      <Dialog
+        open={dialogOpen}
+        onClose={value => {
+          loadSave(value)
+          setDialogOpen(false)
+        }}
+        items={saves}
+        fullWidth
+        maxWidth='md'
+      />
     </div>
   )
 }
