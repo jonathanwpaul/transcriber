@@ -9,49 +9,12 @@ import { Preferences } from '@capacitor/preferences'
 const SCALE = 1
 
 export const Editor = () => {
+  const [meter, setMeter] = useState('4/4')
   const [durationValue, setDuration] = useState('1')
   const [noteInputMode, setNoteInputMode] = useState()
   const [inputMode, setInputMode] = useState('note')
   const [abcString, setAbcString] = useState('')
   const [saves, setSaves] = useState([])
-
-  // console.log(allPitches.join(''))
-  const handleClickEditor = e => {
-    console.log('clicked', { x: e.clientX, y: e.clientY })
-    const staff = document.querySelector('.abcjs-top-line')?.parentElement
-    if (!staff) return // the abcstring is invalid (or empty)
-
-    // figure out line spacing
-    const [firstLineY, secondLineY] = Array.from(staff.childNodes)
-      .slice(2)
-      .map(line => line.attributes.d.value.split(' ')[5])
-    const lineSpacing = (secondLineY - firstLineY) * SCALE
-
-    // create array of potential input note points
-    const staffOffsetY = staff.getBoundingClientRect().top
-    console.log(staffOffsetY)
-    // let staffLines = []
-    // for (let i = 0; i < 10; i++) {
-    //   staffLines.push(staffOffsetY + (i * lineSpacing) / 2)
-    // }
-
-    const differenceY = e.clientY - staffOffsetY
-    const clickedIndexOffset = Math.round(differenceY / (lineSpacing / 2))
-    const clickedIndex = allPitches.indexOf('f') - clickedIndexOffset
-    const clickedNote = allPitches[clickedIndex]
-    console.log('clickedNote: ', clickedNote)
-    var insertValue
-    if (inputMode === 'rest') {
-      insertValue = 'z' + durationValue
-    } else if (clickedNote) {
-      insertValue = clickedNote + durationValue
-    } else {
-      insertValue = ''
-    }
-
-    setAbcString(abcString => abcString + insertValue)
-  }
-
   const handleClick = (
     abcelem,
     tuneNumber,
@@ -85,6 +48,48 @@ export const Editor = () => {
     }
   }
 
+  const handleClickEditor = e => {
+    const renderDiv = document.querySelector('#music-render')
+    const x = e.clientX - renderDiv.offsetLeft
+    const y = e.clientY - renderDiv.offsetTop
+
+    console.log('clicked', { x, y })
+    console.log(visualObjs[0].lines[0])
+    // const staff = document.querySelector('.abcjs-top-line')?.parentElement
+    // if (!staff) return // the abcstring is invalid (or empty)
+
+    // // figure out line spacing
+    // const [firstLineY, secondLineY] = Array.from(staff.childNodes)
+    //   .slice(2)
+    //   .map(line => line.attributes.d.value.split(' ')[5])
+    // const lineSpacing = (secondLineY - firstLineY) * SCALE
+
+    // // create array of potential input note points
+    // const staffOffsetY = staff.getBoundingClientRect().top
+    // console.log(staffOffsetY)
+    // // let staffLines = []
+    // // for (let i = 0; i < 10; i++) {
+    // //   staffLines.push(staffOffsetY + (i * lineSpacing) / 2)
+    // // }
+
+    //TODO: KEEP
+    // const differenceY = e.clientY - staffOffsetY
+    // const clickedIndexOffset = Math.round(differenceY / (lineSpacing / 2))
+    // const clickedIndex = allPitches.indexOf('f') - clickedIndexOffset
+    // const clickedNote = allPitches[clickedIndex]
+    // console.log('clickedNote: ', clickedNote)
+    // var insertValue
+    // if (inputMode === 'rest') {
+    //   insertValue = 'z' + durationValue
+    // } else if (clickedNote) {
+    //   insertValue = clickedNote + durationValue
+    // } else {
+    //   insertValue = ''
+    // }
+
+    // setAbcString(abcString => abcString + insertValue)
+  }
+
   const handleMouseEnter = () => {
     setNoteInputMode(true)
   }
@@ -111,24 +116,30 @@ export const Editor = () => {
     setAbcString(value)
   }
 
-  abcjs.renderAbc('music-render', abcString + (noteInputMode ? 'x' : ''), {
-    clickListener: handleClick,
-    scale: SCALE,
-    wrap: {
-      preferredMeasuresPerLine: 4,
-      minSpacing: 2,
-      maxSpacing: 2.8,
-    },
-    staffwidth:
-      document.querySelector('#music-render')?.getBoundingClientRect().width -
-        30 || 100,
-    // showDebug: ['box'],
-    dragging: true,
-    dragColor: 'blue',
-    selectionColor: 'green',
-    // viewportVertical: true,
-    // viewportHorizontal: true,
-  })
+  const visualObjs = abcjs.renderAbc(
+    'music-render',
+    abcString + (noteInputMode ? 'x' : ''),
+    {
+      clickListener: handleClick,
+      scale: SCALE,
+      // wrap: {
+      //   preferredMeasuresPerLine: 4,
+      //   minSpacing: 2,
+      //   maxSpacing: 2.8,
+      // },
+      staffwidth:
+        document.querySelector('#music-render')?.getBoundingClientRect().width -
+          30 || 100,
+      // showDebug: ['box'],
+      dragging: true,
+      dragColor: 'blue',
+      selectionColor: 'green',
+      // scrollHorizontal: true,
+      // viewportVertical: true,
+      // viewportHorizontal: true,
+    }
+  )
+  // console.log(visualObjs[0].lines[0].staffGroup.staffs[0])
 
   return (
     <div className='editor vertical-container' id='editor'>
