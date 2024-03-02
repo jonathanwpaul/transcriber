@@ -14,7 +14,7 @@ export const Controls = ({
 }) => {
   const [dialogOpen, setDialogOpen] = useState()
   return (
-    <div className='horizontal-container' style={{ alignContent: 'center' }}>
+    <div className='horizontal-container' style={{ alignItems: 'center' }}>
       <ToggleButtonGroup
         exclusive
         color='primary'
@@ -48,7 +48,7 @@ export const Controls = ({
       <Dialog
         open={dialogOpen}
         onClose={value => {
-          loadSave(value)
+          value && loadSave(value)
           setDialogOpen(false)
         }}
         items={saves}

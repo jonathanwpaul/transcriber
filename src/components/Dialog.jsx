@@ -22,7 +22,6 @@ export const Dialog = ({
     onClose(value)
   }
 
-  console.log(items)
   return (
     <MuiDialog onClose={handleClose} open={open} {...otherProps}>
       <DialogTitle>Saved entries:</DialogTitle>

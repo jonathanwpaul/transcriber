@@ -13,10 +13,11 @@ export const Editor = () => {
   const [noteInputMode, setNoteInputMode] = useState()
   const [inputMode, setInputMode] = useState('note')
   const [abcString, setAbcString] = useState('')
+  const [staffData, setStaffData] = useState()
   const [saves, setSaves] = useState([])
 
   // console.log(allPitches.join(''))
-  const handleClickEditor = e => {
+  const oldhandleClickEditor = e => {
     console.log('clicked', { x: e.clientX, y: e.clientY })
     const staff = document.querySelector('.abcjs-top-line')?.parentElement
     if (!staff) return // the abcstring is invalid (or empty)
@@ -50,6 +51,20 @@ export const Editor = () => {
     }
 
     setAbcString(abcString => abcString + insertValue)
+  }
+
+  const handleClickEditor = e => {
+    if (!staffData) return
+
+    const staffParams = staffData.map(staff => ({
+      staffTopLineY: staff[0].topLine,
+      staffBottomLineY: staff[0].bottomLine,
+      staffSpacingY: (staff[0].bottomLine - staff[0].topLine) / staff[0].lines,
+    }))
+
+    console.log('params: ', staffParams)
+    const clicked = { x: e.clientX, y: e.clientY }
+    console.log(clicked)
   }
 
   const handleClick = (
@@ -97,6 +112,7 @@ export const Editor = () => {
     setAbcString(e.target.value)
   }
 
+  //TODO: specify key to save
   const handleSave = async () => {
     console.log(abcString)
     await Preferences.set({ key: 3, value: abcString })
@@ -112,31 +128,40 @@ export const Editor = () => {
     setAbcString(value)
   }
 
-  abcjs.renderAbc('music-render', abcString + (noteInputMode ? 'x' : ''), {
-    clickListener: handleClick,
-    scale: SCALE,
-    wrap: {
-      preferredMeasuresPerLine: 4,
-      minSpacing: 2,
-      maxSpacing: 2.8,
-    },
-    staffwidth:
-      document.querySelector('#music-render')?.getBoundingClientRect().width -
-        30 || 100,
-    // showDebug: ['box'],
-    dragging: true,
-    dragColor: 'blue',
-    selectionColor: 'green',
-    // viewportVertical: true,
-    // viewportHorizontal: true,
-  })
+  useEffect(() => {
+    const visualObj = abcjs.renderAbc(
+      'music-render',
+      abcString + (noteInputMode ? 'x' : ''),
+      {
+        clickListener: handleClick,
+        scale: SCALE,
+        wrap: {
+          preferredMeasuresPerLine: 4,
+          minSpacing: 2,
+          maxSpacing: 2.8,
+        },
+        staffwidth:
+          document.querySelector('#music-render')?.getBoundingClientRect()
+            .width - 30 || 100,
+        // showDebug: ['box'],
+        dragging: true,
+        dragColor: 'blue',
+        selectionColor: 'green',
+        // viewportVertical: true,
+        // viewportHorizontal: true,
+      }
+    )[0]
+    setStaffData(visualObj.lines.map(line => line.staffGroup.staffs))
+  }, [abcString, noteInputMode])
+
+  console.log(staffData)
 
   return (
     <div className='editor vertical-container' id='editor'>
       <Card
         elevation={5}
         className='music-render'
-        onClick={handleClickEditor}
+        onMouseUp={handleClickEditor}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
