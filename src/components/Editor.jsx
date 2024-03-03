@@ -2,19 +2,23 @@ import { Card, TextField } from '@mui/material'
 import { Controls, MusicRender } from './'
 import abcjs from 'abcjs'
 // import allNotes from 'abcjs/src/parse/all-notes.js' //invasively importing non-indexed module export
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { allPitches, moveNote, tokenize } from '../utils'
 import { Preferences } from '@capacitor/preferences'
 
 const SCALE = 1
 
 export const Editor = () => {
+  const [selectedAbcElem, setSelectedAbcElem] = useState()
   const [durationValue, setDuration] = useState('1')
   const [noteInputMode, setNoteInputMode] = useState()
   const [inputMode, setInputMode] = useState('note')
   const [abcString, setAbcString] = useState('')
-  const [staffData, setStaffData] = useState()
+  const [visualObj, setVisualObj] = useState()
   const [saves, setSaves] = useState([])
+
+  const staffData = visualObj?.lines.map(line => line.staffGroup.staffs)
+  const clef = visualObj?.lines.staff && visualObj.lines.staff[0].clef
 
   // console.log(allPitches.join(''))
   const oldhandleClickEditor = e => {
@@ -53,18 +57,60 @@ export const Editor = () => {
     setAbcString(abcString => abcString + insertValue)
   }
 
+  //assumes treble cleff only and one staff only
   const handleClickEditor = e => {
     if (!staffData) return
 
-    const staffParams = staffData.map(staff => ({
-      staffTopLineY: staff[0].topLine,
-      staffBottomLineY: staff[0].bottomLine,
-      staffSpacingY: (staff[0].bottomLine - staff[0].topLine) / staff[0].lines,
-    }))
+    console.log(visualObj)
+    const staffTopNoteIndex = allPitches.indexOf('f') //TODO: make this work for other clefs
+    const staffParams = staffData.map(staff => {
+      return {
+        staffTopLineY: staff[0].topLine,
+        staffBottomLineY: staff[0].bottomLine,
+        staffSpacingY:
+          (staff[0].bottomLine - staff[0].topLine) / (staff[0].lines - 1),
+      }
+    })
 
-    console.log('params: ', staffParams)
-    const clicked = { x: e.clientX, y: e.clientY }
+    console.table(staffParams)
+
+    const clicked = { x: e.clientX, y: e.clientY - 20 } //UGLY: uses hardcoded top
     console.log(clicked)
+
+    //figure out which staff was clicked on
+    // const potentialStaffs = staffParams.filter(
+    //   staff => staff.staffTopLineY <= clicked.y
+    // )
+
+    // const staffIndex =
+    //   potentialStaffs.length > 0 ? potentialStaffs.length - 1 : 0
+
+    //assume last staff is where user is clicking
+    const staffIndex = staffParams.length - 1
+
+    console.log({ staffIndex })
+    //figure out which note was clicked on
+    const clickDifferenceY = clicked.y - staffParams[staffIndex].staffTopLineY
+    const indexDifference = Math.round(
+      clickDifferenceY / (staffParams[0].staffSpacingY / 2)
+    )
+    const clickedNote = allPitches[staffTopNoteIndex - indexDifference]
+
+    //check if this would overflow the barlength, and add a bar line if needed
+    const barLength = visualObj.getBarLength()
+    // TODO: get current bar's length
+
+    //append the clicked note to the abcstring
+    var insertValue
+    if (inputMode === 'rest') {
+      insertValue = 'z' + durationValue
+    } else if (clickedNote) {
+      insertValue = clickedNote + durationValue
+    } else {
+      insertValue = ''
+    }
+
+    setAbcString(abcString => abcString + insertValue)
   }
 
   const handleClick = (
@@ -75,6 +121,7 @@ export const Editor = () => {
     drag,
     mouseEvent
   ) => {
+    mouseEvent.stopPropagation()
     const originalText = abcString.substring(abcelem.startChar, abcelem.endChar)
     if (
       abcelem.pitches &&
@@ -96,9 +143,11 @@ export const Editor = () => {
           newText +
           abcString.substring(abcelem.endChar)
       )
-    } else if (abcelem.startChar >= 0 && abcelem.endChar >= 0) {
     }
+    setSelectedAbcElem(abcelem)
   }
+
+  const handleMouseMove = () => {}
 
   const handleMouseEnter = () => {
     setNoteInputMode(true)
@@ -129,32 +178,26 @@ export const Editor = () => {
   }
 
   useEffect(() => {
-    const visualObj = abcjs.renderAbc(
-      'music-render',
-      abcString + (noteInputMode ? 'x' : ''),
-      {
-        clickListener: handleClick,
-        scale: SCALE,
-        wrap: {
-          preferredMeasuresPerLine: 4,
-          minSpacing: 2,
-          maxSpacing: 2.8,
-        },
-        staffwidth:
-          document.querySelector('#music-render')?.getBoundingClientRect()
-            .width - 30 || 100,
-        // showDebug: ['box'],
-        dragging: true,
-        dragColor: 'blue',
-        selectionColor: 'green',
-        // viewportVertical: true,
-        // viewportHorizontal: true,
-      }
-    )[0]
-    setStaffData(visualObj.lines.map(line => line.staffGroup.staffs))
+    const visualObj = abcjs.renderAbc('music-render', abcString, {
+      clickListener: handleClick,
+      scale: SCALE,
+      wrap: {
+        preferredMeasuresPerLine: 4,
+        minSpacing: 2,
+        maxSpacing: 2.8,
+      },
+      staffwidth:
+        document.querySelector('#music-render')?.getBoundingClientRect().width -
+          30 || 100,
+      // showDebug: ['box'],
+      dragging: true,
+      dragColor: 'blue',
+      selectionColor: 'green',
+      // viewportVertical: true,
+      // viewportHorizontal: true,
+    })[0]
+    setVisualObj(visualObj)
   }, [abcString, noteInputMode])
-
-  console.log(staffData)
 
   return (
     <div className='editor vertical-container' id='editor'>
@@ -176,6 +219,9 @@ export const Editor = () => {
           maxRows={1.5}
         />
         <Controls
+          selectedAbcElem={selectedAbcElem}
+          abcString={abcString}
+          setAbcString={setAbcString}
           inputMode={inputMode}
           setInputMode={setInputMode}
           durationValue={durationValue}

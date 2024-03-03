@@ -4,6 +4,9 @@ import { IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
 import { Dialog } from './Dialog'
 
 export const Controls = ({
+  selectedAbcElem,
+  abcString,
+  setAbcString,
   durationValue,
   setDuration,
   inputMode,
@@ -15,10 +18,21 @@ export const Controls = ({
   const [dialogOpen, setDialogOpen] = useState()
   return (
     <div className='horizontal-container' style={{ alignItems: 'center' }}>
+      {/* duration button group (length of note or rest) */}
       <ToggleButtonGroup
         exclusive
         color='primary'
-        onChange={(_, newValue) => setDuration(newValue)}
+        onChange={(_, newValue) => {
+          setDuration(newValue)
+          console.log(abcString)
+          const { startChar, endChar } = selectedAbcElem
+          const newString =
+            abcString.slice(0, startChar) +
+            abcString.slice(startChar, endChar)[0] +
+            newValue +
+            abcString.slice(endChar)
+          setAbcString(newString)
+        }}
         value={durationValue}
       >
         {['8', '4', '2', '1', '/', '//', '///'].map(e => (
@@ -27,6 +41,8 @@ export const Controls = ({
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+
+      {/* input mode button group (note or rest) */}
       <ToggleButtonGroup
         exclusive
         color='primary'
