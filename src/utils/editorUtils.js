@@ -37,3 +37,9 @@ export function moveNote(note, step) {
   if (x >= 0) return allPitches[x - step]
   return note
 }
+
+export function updateAbcString(abcString, selectedAbcElem, newValue) {
+  console.log(abcString)
+  const { startChar, endChar } = selectedAbcElem
+  return abcString.slice(0, startChar) + newValue + abcString.slice(endChar)
+}

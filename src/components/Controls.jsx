@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { FolderOpen, Save } from '@mui/icons-material'
 import { IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
 import { Dialog } from './Dialog'
+import { allPitches, updateAbcString, tokenize } from '../utils'
 
 export const Controls = ({
   selectedAbcElem,
+  setSelectedAbcElem,
   abcString,
   setAbcString,
   durationValue,
@@ -16,23 +18,78 @@ export const Controls = ({
   saves,
 }) => {
   const [dialogOpen, setDialogOpen] = useState()
+
+  const handleDurationChange = (_, newValue) => {
+    if (newValue === null) return
+
+    setDuration(newValue)
+
+    if (selectedAbcElem) {
+      const originalText = abcString.substring(
+        selectedAbcElem.startChar,
+        selectedAbcElem.endChar
+      )
+
+      console.log(selectedAbcElem)
+      const tokenized = tokenize(originalText)
+      console.log(tokenized)
+
+      tokenized.pop() // remove the last element, which should be the duration of the note
+      console.log(tokenized)
+
+      setAbcString(
+        updateAbcString(
+          abcString,
+          selectedAbcElem,
+          tokenized.join('') + newValue
+        )
+      )
+      setSelectedAbcElem(undefined)
+    }
+  }
+
+  const handleNoteRestChange = (_, newValue) => {
+    if (newValue === null) return
+
+    setInputMode(newValue)
+
+    if (selectedAbcElem) {
+      const originalText = abcString.substring(
+        selectedAbcElem.startChar,
+        selectedAbcElem.endChar
+      )
+
+      const tokenized = tokenize(originalText)
+      console.log(tokenized)
+      let indexToSubstitute
+      for (let i = tokenized.length; i--; i > 0) {
+        //if the element is a note or rest
+        if (
+          allPitches.indexOf(tokenized[i]) >= 0 ||
+          tokenized[i]?.toLowerCase() === 'z'
+        ) {
+          indexToSubstitute = i
+          tokenized[i] = undefined
+          break
+        }
+      }
+
+      tokenized[indexToSubstitute] = newValue === 'note' ? 'c' : 'z'
+      console.log(tokenized)
+      setAbcString(
+        updateAbcString(abcString, selectedAbcElem, tokenized.join(''))
+      )
+      setSelectedAbcElem(undefined)
+    }
+  }
+
   return (
     <div className='horizontal-container' style={{ alignItems: 'center' }}>
       {/* duration button group (length of note or rest) */}
       <ToggleButtonGroup
         exclusive
         color='primary'
-        onChange={(_, newValue) => {
-          setDuration(newValue)
-          console.log(abcString)
-          const { startChar, endChar } = selectedAbcElem
-          const newString =
-            abcString.slice(0, startChar) +
-            abcString.slice(startChar, endChar)[0] +
-            newValue +
-            abcString.slice(endChar)
-          setAbcString(newString)
-        }}
+        onChange={handleDurationChange}
         value={durationValue}
       >
         {['8', '4', '2', '1', '/', '//', '///'].map(e => (
@@ -46,7 +103,7 @@ export const Controls = ({
       <ToggleButtonGroup
         exclusive
         color='primary'
-        onChange={(_, newValue) => setInputMode(newValue)}
+        onChange={handleNoteRestChange}
         value={inputMode}
       >
         {['note', 'rest'].map(e => (
