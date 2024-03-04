@@ -1,23 +1,34 @@
 import { useState } from 'react'
 import { FolderOpen, Save } from '@mui/icons-material'
 import { IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
-import { Dialog } from './Dialog'
-import { allPitches, updateAbcString, tokenize } from '../utils'
+import { FileDialog } from './FileDialog'
+import {
+  allPitches,
+  updateAbcString,
+  tokenize,
+  getDurationText,
+  durationMapping,
+} from '../utils'
+import { SaveAsDialog } from './SaveAsDialog'
 
 export const Controls = ({
   selectedAbcElem,
   setSelectedAbcElem,
   abcString,
   setAbcString,
-  durationValue,
+  duration,
   setDuration,
   inputMode,
   setInputMode,
   handleSave,
   loadSave,
+  getSaves,
   saves,
 }) => {
-  const [dialogOpen, setDialogOpen] = useState()
+  const [fileDialogOpen, setFileDialogOpen] = useState()
+  const [saveDialogOpen, setSaveDialogOpen] = useState()
+
+  const barOptions = ['[|', '|', '|]', ':|', '|:']
 
   const handleDurationChange = (_, newValue) => {
     if (newValue === null) return
@@ -30,18 +41,17 @@ export const Controls = ({
         selectedAbcElem.endChar
       )
 
-      console.log(selectedAbcElem)
       const tokenized = tokenize(originalText)
-      console.log(tokenized)
-
       tokenized.pop() // remove the last element, which should be the duration of the note
-      console.log(tokenized)
 
+      const textDuration = getDurationText(newValue)
+
+      console.log(textDuration)
       setAbcString(
         updateAbcString(
           abcString,
           selectedAbcElem,
-          tokenized.join('') + newValue
+          tokenized.join('') + textDuration
         )
       )
       setSelectedAbcElem(undefined)
@@ -83,6 +93,16 @@ export const Controls = ({
     }
   }
 
+  const handleInsertBarline = (_, newValue) => {
+    console.log(selectedAbcElem)
+    console.log(newValue)
+    setAbcString(
+      selectedAbcElem
+        ? updateAbcString(abcString, selectedAbcElem, newValue, true)
+        : abcString + newValue
+    )
+  }
+
   return (
     <div className='horizontal-container' style={{ alignItems: 'center' }}>
       {/* duration button group (length of note or rest) */}
@@ -90,15 +110,25 @@ export const Controls = ({
         exclusive
         color='primary'
         onChange={handleDurationChange}
-        value={durationValue}
+        value={duration}
       >
-        {['8', '4', '2', '1', '/', '//', '///'].map(e => (
-          <ToggleButton key={`${e}`} value={e}>
+        {durationMapping.map(e => (
+          <ToggleButton key={`${e.duration}`} value={e.duration}>
+            {e.label}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+      <ToggleButtonGroup
+        exclusive
+        color='primary'
+        onChange={handleInsertBarline}
+      >
+        {barOptions.map(e => (
+          <ToggleButton key={e} value={e}>
             {e}
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-
       {/* input mode button group (note or rest) */}
       <ToggleButtonGroup
         exclusive
@@ -112,19 +142,33 @@ export const Controls = ({
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <IconButton onClick={handleSave}>
+      <IconButton onClick={() => setSaveDialogOpen(true)}>
         <Save />
       </IconButton>
-      <IconButton onClick={() => setDialogOpen(true)}>
+      <IconButton
+        onClick={() => {
+          getSaves()
+          setFileDialogOpen(true)
+        }}
+      >
         <FolderOpen />
       </IconButton>
-      <Dialog
-        open={dialogOpen}
-        onClose={value => {
-          value && loadSave(value)
-          setDialogOpen(false)
+      <FileDialog
+        open={fileDialogOpen}
+        onClose={file => {
+          file && loadSave(file)
+          setFileDialogOpen(false)
         }}
         items={saves}
+        fullWidth
+        maxWidth='md'
+      />
+      <SaveAsDialog
+        open={saveDialogOpen}
+        onClose={filename => {
+          filename && handleSave(filename)
+          setSaveDialogOpen(false)
+        }}
         fullWidth
         maxWidth='md'
       />

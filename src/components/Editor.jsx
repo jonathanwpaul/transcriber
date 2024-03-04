@@ -1,44 +1,62 @@
-import { Card, TextField } from '@mui/material'
+import { Card, TextField, Snackbar, SnackbarContent } from '@mui/material'
 import { Controls, MusicRender } from './'
-import abcjs from 'abcjs'
-// import allNotes from 'abcjs/src/parse/all-notes.js' //invasively importing non-indexed module export
-import { useEffect, useState, useRef } from 'react'
-import { allPitches, moveNote, tokenize } from '../utils'
-import { Preferences } from '@capacitor/preferences'
+import { useState } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 
 const SCALE = 1
 
 export const Editor = () => {
   const [selectedAbcElem, setSelectedAbcElem] = useState()
-  const [durationValue, setDuration] = useState('1')
+  const [duration, setDuration] = useState(1 / 4)
   const [inputMode, setInputMode] = useState('note')
-  const [abcString, setAbcString] = useState('')
+  const [abcString, setAbcString] = useState('x')
   const [saves, setSaves] = useState([])
+  const [toastOpen, setToastOpen] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
 
   const handleStringChange = e => {
     setAbcString(e.target.value)
   }
 
   //TODO: specify key to save
-  const handleSave = async () => {
+  const handleSave = async filename => {
     console.log(abcString)
-    await Preferences.set({ key: 3, value: abcString })
-    const { keys } = await Preferences.keys()
-    console.log(keys)
-    setSaves(keys)
+    const resp = await Filesystem.writeFile({
+      path: filename + '.abc',
+      data: abcString,
+      directory: Directory.Data,
+      encoding: Encoding.UTF8,
+    })
+    console.log(resp)
+    setToastMessage(`file saved to ${resp.uri}!`)
+    setToastOpen(true)
   }
 
-  const loadSave = async selectedValue => {
-    console.log('loading save: ', selectedValue)
-    const { value } = await Preferences.get({ key: selectedValue })
-    console.log(value)
-    setAbcString(value)
+  const getSaves = async () => {
+    const resp = await Filesystem.readdir({
+      path: '',
+      directory: Directory.Data,
+    })
+    setSaves(resp.files)
+  }
+
+  const loadSave = async selectedFile => {
+    console.log('loading save: ', selectedFile)
+    const { data } = await Filesystem.readFile({
+      path: Capacitor.convertFileSrc(selectedFile.uri),
+      directory: selectedFile.data,
+    })
+    console.log(data)
+    setAbcString(data)
+    setToastMessage(`file loaded from ${selectedFile.uri}!`)
+    setToastOpen(true)
   }
 
   const renderProps = {
     selectedAbcElem,
     setSelectedAbcElem,
-    durationValue,
+    duration,
     setDuration,
     inputMode,
     setInputMode,
@@ -53,10 +71,11 @@ export const Editor = () => {
     setAbcString,
     inputMode,
     setInputMode,
-    durationValue,
+    duration,
     setDuration,
     handleSave,
     loadSave,
+    getSaves,
     saves,
   }
 
@@ -73,6 +92,14 @@ export const Editor = () => {
         />
         <Controls {...controlsProps} />
       </Card>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        color='primary'
+        open={toastOpen}
+        // autoHideDuration={2000}
+        onClose={() => setToastOpen(false)}
+        message={toastMessage}
+      />
     </div>
   )
 }

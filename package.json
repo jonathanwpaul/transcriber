@@ -5,6 +5,7 @@
   "dependencies": {
     "@capacitor/android": "^5.7.0",
     "@capacitor/core": "^5.7.0",
+    "@capacitor/filesystem": "^5.2.1",
     "@capacitor/preferences": "^5.0.7",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",

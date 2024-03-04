@@ -38,8 +38,28 @@ export function moveNote(note, step) {
   return note
 }
 
-export function updateAbcString(abcString, selectedAbcElem, newValue) {
+export function updateAbcString(abcString, selectedAbcElem, newValue, insert) {
   console.log(abcString)
   const { startChar, endChar } = selectedAbcElem
-  return abcString.slice(0, startChar) + newValue + abcString.slice(endChar)
+  return (
+    abcString.slice(0, insert ? endChar : startChar) +
+    newValue +
+    abcString.slice(endChar)
+  )
+}
+
+export const durationMapping = [
+  { label: 'W', text: '8', duration: 1 },
+  { label: 'H', text: '4', duration: 1 / 2 },
+  { label: 'Q', text: '2', duration: 1 / 4 },
+  { label: '8th', text: '1', duration: 1 / 8 },
+  { label: '16th', text: '/', duration: 1 / 16 },
+  { label: '32nd', text: '//', duration: 1 / 32 },
+  { label: '64th', text: '///', duration: 1 / 64 },
+  { label: '128th', text: '////', duration: 1 / 128 },
+]
+
+export function getDurationText(duration) {
+  const lookup = durationMapping.filter(e => e.duration === duration)
+  return lookup ? lookup[0]?.text : undefined
 }

@@ -3,7 +3,7 @@ import { Controls } from '.'
 import abcjs from 'abcjs'
 // import allNotes from 'abcjs/src/parse/all-notes.js' //invasively importing non-indexed module export
 import { useEffect, useState, useRef } from 'react'
-import { allPitches, moveNote, tokenize } from '../utils'
+import { allPitches, getDurationText, moveNote, tokenize } from '../utils'
 import { Preferences } from '@capacitor/preferences'
 
 const SCALE = 1
@@ -11,8 +11,10 @@ const SCALE = 1
 export const MusicRender = ({
   selectedAbcElem,
   setSelectedAbcElem,
-  durationValue,
+  duration,
+  setDuration,
   inputMode,
+  setInputMode,
   abcString,
   setAbcString,
 }) => {
@@ -47,9 +49,9 @@ export const MusicRender = ({
     console.log('clickedNote: ', clickedNote)
     var insertValue
     if (inputMode === 'rest') {
-      insertValue = 'z' + durationValue
+      insertValue = 'z' + duration
     } else if (clickedNote) {
-      insertValue = clickedNote + durationValue
+      insertValue = clickedNote + duration
     } else {
       insertValue = ''
     }
@@ -59,7 +61,7 @@ export const MusicRender = ({
 
   //assumes treble cleff only and one staff only
   const handleClickEditor = e => {
-    if (!staffData) return
+    if (!staffData || staffData.length === 0) return
 
     console.log(visualObj)
     const voices = visualObj.makeVoicesArray()
@@ -123,9 +125,9 @@ export const MusicRender = ({
     //append the clicked note to the abcstring
     var insertValue
     if (inputMode === 'rest') {
-      insertValue = 'z' + durationValue
+      insertValue = 'z' + getDurationText(duration)
     } else if (clickedNote) {
-      insertValue = clickedNote + durationValue
+      insertValue = clickedNote + getDurationText(duration)
     } else {
       insertValue = ''
     }
@@ -165,16 +167,19 @@ export const MusicRender = ({
       )
     }
     setSelectedAbcElem(abcelem)
+    abcelem.rest ? setInputMode('rest') : setInputMode('note')
+
+    setDuration(abcelem.abselem.duration)
   }
 
   useEffect(() => {
-    const returnObj = abcjs.renderAbc('music-render', abcString, {
+    const returnObjs = abcjs.renderAbc('music-render', abcString, {
       clickListener: handleClick,
       scale: SCALE,
       wrap: {
-        preferredMeasuresPerLine: 4,
+        preferredMeasuresPerLine: 8,
         minSpacing: 2,
-        maxSpacing: 2.8,
+        maxSpacing: 2.5,
       },
       staffwidth:
         document.querySelector('#music-render')?.getBoundingClientRect().width -
@@ -185,8 +190,9 @@ export const MusicRender = ({
       dragColor: 'purple',
       // viewportVertical: true,
       // viewportHorizontal: true,
-    })[0]
-    setVisualObj(returnObj)
+    })
+    setVisualObj(returnObjs && returnObjs[0])
+    setSelectedAbcElem(undefined)
   }, [abcString])
 
   return (

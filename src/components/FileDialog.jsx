@@ -1,5 +1,4 @@
 import {
-  DialogActions,
   DialogTitle,
   List,
   ListItem,
@@ -7,7 +6,7 @@ import {
   Dialog as MuiDialog,
 } from '@mui/material'
 
-export const Dialog = ({
+export const FileDialog = ({
   open,
   onClose,
   selectedValue,
@@ -28,7 +27,7 @@ export const Dialog = ({
       <List>
         {items.map(item => (
           <ListItem onClick={() => handleListItemClick(item)}>
-            <ListItemButton>{item}</ListItemButton>
+            <ListItemButton>{JSON.stringify(item)}</ListItemButton>
           </ListItem>
         ))}
       </List>
