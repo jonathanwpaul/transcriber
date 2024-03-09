@@ -59,7 +59,7 @@ export const Player = () => {
           </Button>
         </div>
       )}
-      {id && <VideoPlayer id={id} />}
+      {id && <VideoPlayer id={id} setId={setId} />}
     </Card>
   )
 }

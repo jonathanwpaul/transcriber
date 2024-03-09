@@ -5,7 +5,7 @@
   height: 100vh;
   box-sizing: border-box;
   align-items: stretch;
-  overflow: scroll;
+  overflow: auto;
   padding: 20px;
   gap: 20px;
 }
@@ -13,6 +13,8 @@
 iframe {
   border: none;
   border-radius: 5px;
+  height: 100%;
+  width: 100%;
 }
 
 div.vertical-container {
@@ -29,7 +31,6 @@ div.horizontal-container {
 /* APP COMPONENTS */
 div.editor {
   height: 80%;
-  min-height: 0;
 }
 
 div.editor-inputs {
@@ -40,18 +41,23 @@ div.editor-inputs {
 }
 
 div.music-render {
-  overflow: scroll;
+  overflow: auto;
   min-height: 0;
   flex: 1;
+  display: flex;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  /* align-items: center; */
 }
 
 div.player {
   gap: 10px;
   display: flex;
   justify-content: space-around;
-  align-items: center;
+  /* align-items: center; */
   padding: 30px;
-  flex: 1;
+  flex: 1 1 auto;
+
   /* flex: 1; */
 }
 

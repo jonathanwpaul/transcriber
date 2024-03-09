@@ -44,8 +44,8 @@ export const Editor = () => {
   const loadSave = async selectedFile => {
     console.log('loading save: ', selectedFile)
     const { data } = await Filesystem.readFile({
-      path: Capacitor.convertFileSrc(selectedFile.uri),
-      directory: selectedFile.data,
+      path: selectedFile.uri,
+      encoding: Encoding.UTF8,
     })
     console.log(data)
     setAbcString(data)

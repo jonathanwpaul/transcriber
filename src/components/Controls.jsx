@@ -98,8 +98,21 @@ export const Controls = ({
     console.log(newValue)
     setAbcString(
       selectedAbcElem
-        ? updateAbcString(abcString, selectedAbcElem, newValue, true)
+        ? updateAbcString(abcString, selectedAbcElem, newValue, 'after')
         : abcString + newValue
+    )
+  }
+
+  const handleAccidental = (_, newValue) => {
+    if (!selectedAbcElem) return
+    console.log(selectedAbcElem)
+    console.log(
+      tokenize(
+        abcString.slice(selectedAbcElem.startChar, selectedAbcElem.endChar)
+      )
+    )
+    setAbcString(
+      updateAbcString(abcString, selectedAbcElem, newValue, 'before')
     )
   }
 
@@ -121,18 +134,6 @@ export const Controls = ({
       <ToggleButtonGroup
         exclusive
         color='primary'
-        onChange={handleInsertBarline}
-      >
-        {barOptions.map(e => (
-          <ToggleButton key={e} value={e}>
-            {e}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
-      {/* input mode button group (note or rest) */}
-      <ToggleButtonGroup
-        exclusive
-        color='primary'
         onChange={handleNoteRestChange}
         value={inputMode}
       >
@@ -142,6 +143,29 @@ export const Controls = ({
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+      <ToggleButtonGroup exclusive color='primary' onChange={handleAccidental}>
+        {[
+          { label: '#', value: '^' },
+          { label: 'b', value: '_' },
+        ].map(e => (
+          <ToggleButton key={e.label} value={e.value}>
+            {e.label}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+      <ToggleButtonGroup
+        exclusive
+        color='primary'
+        onChange={handleInsertBarline}
+      >
+        {barOptions.map(e => (
+          <ToggleButton key={e} value={e}>
+            {e}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+      {/* input mode button group (note or rest) */}
+
       <IconButton onClick={() => setSaveDialogOpen(true)}>
         <Save />
       </IconButton>

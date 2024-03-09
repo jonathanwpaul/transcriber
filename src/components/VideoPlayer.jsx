@@ -1,22 +1,36 @@
 import { useState, useRef, useCallback } from 'react'
-import { IconButton, Card, Slider, TextField, Button } from '@mui/material'
-import { SkipPrevious, PlayArrow, PauseCircle } from '@mui/icons-material'
+import {
+  IconButton,
+  Card,
+  Slider,
+  TextField,
+  Button,
+  Tooltip,
+} from '@mui/material'
+import {
+  SkipPrevious,
+  PlayArrow,
+  PauseCircle,
+  StartOutlined,
+  RestartAlt,
+  Close,
+  CloseOutlined,
+  CancelOutlined,
+} from '@mui/icons-material'
 import YouTube from 'react-youtube'
 
-export const VideoPlayer = ({ id }) => {
-  const [url, setUrl] = useState('')
+export const VideoPlayer = ({ id, setId }) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
-  const [inputText, setInputText] = useState('')
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
   const [sectionStart, setSectionStart] = useState(0)
   const [sectionEnd, setSectionEnd] = useState(0)
 
   const videoOptions = {
-    width: 320,
-    height: 195,
+    // width: 320,
+    // height: 195,
     playerVars: {
       controls: 1,
       fs: 1,
@@ -25,7 +39,9 @@ export const VideoPlayer = ({ id }) => {
 
   const playerRef = useRef()
   const timerRef = useRef()
+  const sectionStartRef = useRef()
   const sectionEndRef = useRef()
+  sectionStartRef.current = sectionStart
   sectionEndRef.current = sectionEnd
   /**
    * initializes the playerStatus when the youtube api is ready
@@ -46,9 +62,9 @@ export const VideoPlayer = ({ id }) => {
   const timeIncrement = useCallback(() => {
     setCurrentTime(playerRef.current?.getCurrentTime())
     if (playerRef.current?.getCurrentTime() > sectionEndRef.current) {
-      handleSliderChange(null, sectionStart)
+      handleSliderChange(null, sectionStartRef.current)
     }
-  }, [sectionStart])
+  }, [])
 
   const onPlay = e => {
     setIsPlaying(true)
@@ -73,28 +89,45 @@ export const VideoPlayer = ({ id }) => {
     playerRef.current.seekTo(newValue)
   }
 
-  const handleButtonClick = () => {
-    setUrl(inputText)
+  const handlePlaybackRateChange = (_, newValue) => {
+    setPlaybackRate(newValue)
+    playerRef.current.setPlaybackRate(newValue)
   }
 
-  const handlePlaybackRateChange = (_, newValue) => setPlaybackRate(newValue)
-
   const handleIntervalChange = (_, newValue) => {
-    // forces the currentTime to match the sectionStart when the section parameters are updated
-    if (newValue[0] !== sectionStart) {
+    if (newValue[0] > currentTime) {
       handleSliderChange(null, newValue[0])
-      setSectionStart(newValue[0])
     }
+    setSectionStart(newValue[0])
 
     if (newValue[1] < currentTime) {
-      handleSliderChange(null, newValue[0])
+      handleSliderChange(null, newValue[1])
     }
     setSectionEnd(newValue[1])
   }
 
+  const preventHorizontalKeyboardNavigation = event => {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault()
+    }
+  }
+
+  const handleCloseVideo = () => {
+    playerRef.current = null
+    setId(null)
+  }
+
+  const markLoopStart = () => {
+    setSectionStart(currentTime)
+  }
+
+  const markLoopEnd = () => {
+    setSectionEnd(currentTime)
+  }
+  console.log(playerRef.current?.getPlaybackRate())
   return (
     <>
-      <div>
+      <div className='horizontal-container' style={{ gap: '50px' }}>
         <YouTube
           opts={videoOptions}
           videoId={id}
@@ -102,12 +135,46 @@ export const VideoPlayer = ({ id }) => {
           onPlay={onPlay}
           onPause={onPause}
         />
+
+        <Slider
+          defaultValue={playbackRate}
+          orientation='vertical'
+          onKeyDown={preventHorizontalKeyboardNavigation}
+          sx={{
+            '& input[type="range"]': {
+              WebkitAppearance: 'slider-vertical',
+            },
+          }}
+          onChange={handlePlaybackRateChange}
+          size='small'
+          min={playerRef.current?.getAvailablePlaybackRates()[0]}
+          step={0.05}
+          max={2}
+          value={playbackRate}
+          valueLabelFormat={val => val + 'x'}
+          valueLabelDisplay='on'
+        />
       </div>
       <div className='vertical-container controls'>
         <div className='horizontal-container' style={{ alignItems: 'center' }}>
-          <IconButton onClick={restartPlayer} aria-label='previous'>
-            <SkipPrevious />
-          </IconButton>
+          <Tooltip title='Close video'>
+            <IconButton
+              style={{ alignSelf: 'center' }}
+              onClick={handleCloseVideo}
+            >
+              <CancelOutlined />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title='Jump to beginning'>
+            <IconButton onClick={restartPlayer} aria-label='previous'>
+              <RestartAlt />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title='Mark loop start'>
+            <IconButton onClick={markLoopStart}>
+              <StartOutlined />
+            </IconButton>
+          </Tooltip>
           <IconButton
             onClick={() =>
               isPlaying
@@ -122,17 +189,11 @@ export const VideoPlayer = ({ id }) => {
               <PlayArrow sx={{ height: 38, width: 38 }} />
             )}
           </IconButton>
-          <Slider
-            default={1}
-            min={0.1}
-            max={2}
-            marks
-            onChange={handlePlaybackRateChange}
-            size='small'
-            step={0.1}
-            value={playbackRate}
-            valueLabelDisplay='on'
-          />
+          <Tooltip title='Mark loop end'>
+            <IconButton onClick={markLoopEnd}>
+              <StartOutlined sx={{ transform: 'rotate(180deg)' }} />
+            </IconButton>
+          </Tooltip>
         </div>
         <div style={{ position: 'relative' }}>
           {/* the loop slider */}
@@ -149,16 +210,29 @@ export const VideoPlayer = ({ id }) => {
             }}
             sx={{
               '& .MuiSlider-thumb': {
-                borderRadius: '50vw',
-                width: 12,
-                height: 30,
-                transform: 'translate(-50%)',
+                '&[data-index="0"]': {
+                  color: 'green',
+                },
+
+                '&[data-index="1"]': {
+                  color: 'red',
+                },
+                /* Border */
+                borderRadius: '0px 50% 50% 50%',
+
+                /* Angle at the top */
+                transform: 'translateX(-50%) translateY(-200%) rotate(225deg)',
+
+                /* Size */
+                height: '1rem',
+                width: '1rem',
               },
               '& .MuiSlider-track': {
                 // borderTopLeftRadius: '50vh',
                 // borderTopRightRadius: '50vh',
-                opacity: 0.2,
-                height: 10,
+                borderRadius: '5px',
+                opacity: 0.1,
+                height: 20,
               },
               '.MuiSlider-rail': {
                 height: 0,

@@ -41,11 +41,13 @@ export function moveNote(note, step) {
 export function updateAbcString(abcString, selectedAbcElem, newValue, insert) {
   console.log(abcString)
   const { startChar, endChar } = selectedAbcElem
-  return (
-    abcString.slice(0, insert ? endChar : startChar) +
-    newValue +
-    abcString.slice(endChar)
-  )
+
+  let insertValue = abcString.slice(startChar, endChar)
+  if (insert) {
+    insertValue =
+      insert === 'before' ? newValue + insertValue : insertValue + newValue
+  }
+  return abcString.slice(0, startChar) + insertValue + abcString.slice(endChar)
 }
 
 export const durationMapping = [

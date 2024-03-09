@@ -22,43 +22,6 @@ export const MusicRender = ({
   const staffData = visualObj?.lines.map(line => line.staffGroup.staffs)
   const clef = visualObj?.lines.staff && visualObj.lines.staff[0].clef
 
-  // console.log(allPitches.join(''))
-  const oldhandleClickEditor = e => {
-    console.log('clicked', { x: e.clientX, y: e.clientY })
-    const staff = document.querySelector('.abcjs-top-line')?.parentElement
-    if (!staff) return // the abcstring is invalid (or empty)
-
-    // figure out line spacing
-    const [firstLineY, secondLineY] = Array.from(staff.childNodes)
-      .slice(2)
-      .map(line => line.attributes.d.value.split(' ')[5])
-    const lineSpacing = (secondLineY - firstLineY) * SCALE
-
-    // create array of potential input note points
-    const staffOffsetY = staff.getBoundingClientRect().top
-    console.log(staffOffsetY)
-    // let staffLines = []
-    // for (let i = 0; i < 10; i++) {
-    //   staffLines.push(staffOffsetY + (i * lineSpacing) / 2)
-    // }
-
-    const differenceY = e.clientY - staffOffsetY
-    const clickedIndexOffset = Math.round(differenceY / (lineSpacing / 2))
-    const clickedIndex = allPitches.indexOf('f') - clickedIndexOffset
-    const clickedNote = allPitches[clickedIndex]
-    console.log('clickedNote: ', clickedNote)
-    var insertValue
-    if (inputMode === 'rest') {
-      insertValue = 'z' + duration
-    } else if (clickedNote) {
-      insertValue = clickedNote + duration
-    } else {
-      insertValue = ''
-    }
-
-    setAbcString(abcString => abcString + insertValue)
-  }
-
   //assumes treble cleff only and one staff only
   const handleClickEditor = e => {
     if (!staffData || staffData.length === 0) return
@@ -66,10 +29,14 @@ export const MusicRender = ({
     console.log(visualObj)
     const voices = visualObj.makeVoicesArray()
     const staffTopNoteIndex = allPitches.indexOf('f') //TODO: make this work for other clefs
+
+    const bounding = document
+      .querySelector('#music-render')
+      .getBoundingClientRect()
     const staffParams = staffData.map(staff => {
       return {
-        staffTopLineY: staff[0].topLine,
-        staffBottomLineY: staff[0].bottomLine,
+        staffTopLineY: staff[0].topLine + bounding.top,
+        staffBottomLineY: staff[0].bottomLine + bounding.top,
         staffSpacingY:
           (staff[0].bottomLine - staff[0].topLine) / (staff[0].lines - 1),
       }
@@ -77,7 +44,7 @@ export const MusicRender = ({
 
     console.table(staffParams)
 
-    const clicked = { x: e.clientX - 20, y: e.clientY - 20 } //UGLY: uses hardcoded top
+    const clicked = { x: e.clientX, y: e.clientY }
     console.log(clicked)
 
     // figure out which staff was clicked on (y)
@@ -197,7 +164,10 @@ export const MusicRender = ({
 
   return (
     <Card elevation={5} className='music-render' onMouseUp={handleClickEditor}>
-      <MusicRenderDiv id='music-render' />
+      <MusicRenderDiv
+        id='music-render'
+        style={{ margin: 'auto', minWidth: '100%' }}
+      />
     </Card>
   )
 }
