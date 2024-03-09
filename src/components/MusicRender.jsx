@@ -35,8 +35,8 @@ export const MusicRender = ({
       .getBoundingClientRect()
     const staffParams = staffData.map(staff => {
       return {
-        staffTopLineY: staff[0].topLine + bounding.top,
-        staffBottomLineY: staff[0].bottomLine + bounding.top,
+        staffTopLineY: staff[0].topLine,
+        staffBottomLineY: staff[0].bottomLine,
         staffSpacingY:
           (staff[0].bottomLine - staff[0].topLine) / (staff[0].lines - 1),
       }
@@ -44,7 +44,10 @@ export const MusicRender = ({
 
     console.table(staffParams)
 
-    const clicked = { x: e.clientX, y: e.clientY }
+    const clicked = {
+      x: e.clientX - bounding.left,
+      y: e.clientY - bounding.top,
+    }
     console.log(clicked)
 
     // figure out which staff was clicked on (y)
@@ -69,6 +72,8 @@ export const MusicRender = ({
     //   }))
     // )
     //TODO: figure out when voices array will have multiple elements
+    console.log(clicked.x)
+    console.table(voices[0].map(voice => [voice.elem.x, voice.elem.w]))
     const clickedVoice = voices[0].filter(
       voice =>
         voice.line === staffIndex && voice.elem.x + voice.elem.w >= clicked.x
@@ -151,7 +156,7 @@ export const MusicRender = ({
       staffwidth:
         document.querySelector('#music-render')?.getBoundingClientRect().width -
           30 || 100,
-      // showDebug: ['box'],
+      showDebug: ['box'],
       dragging: true,
       selectionColor: 'blue',
       dragColor: 'purple',

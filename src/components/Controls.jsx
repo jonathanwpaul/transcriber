@@ -50,7 +50,8 @@ export const Controls = ({
       setAbcString(
         updateAbcString(
           abcString,
-          selectedAbcElem,
+          selectedAbcElem.startChar,
+          selectedAbcElem.endChar,
           tokenized.join('') + textDuration
         )
       )
@@ -87,7 +88,12 @@ export const Controls = ({
       tokenized[indexToSubstitute] = newValue === 'note' ? 'c' : 'z'
       console.log(tokenized)
       setAbcString(
-        updateAbcString(abcString, selectedAbcElem, tokenized.join(''))
+        updateAbcString(
+          abcString,
+          selectedAbcElem.startChar,
+          selectedAbcElem.endChar,
+          tokenized.join('')
+        )
       )
       setSelectedAbcElem(undefined)
     }
@@ -98,21 +104,39 @@ export const Controls = ({
     console.log(newValue)
     setAbcString(
       selectedAbcElem
-        ? updateAbcString(abcString, selectedAbcElem, newValue, 'after')
+        ? updateAbcString(
+            abcString,
+            selectedAbcElem.startChar,
+            selectedAbcElem.endChar,
+            newValue
+          )
         : abcString + newValue
     )
   }
 
-  const handleAccidental = (_, newValue) => {
+  const handleAccidental = (_, enteredValue) => {
     if (!selectedAbcElem) return
-    console.log(selectedAbcElem)
-    console.log(
-      tokenize(
-        abcString.slice(selectedAbcElem.startChar, selectedAbcElem.endChar)
-      )
+    let tokenized = tokenize(
+      abcString.slice(selectedAbcElem.startChar, selectedAbcElem.endChar)
     )
+
+    const accidentalPossibilities = ['__', '_', '', '^', '^^']
+    const currentAccidental = tokenized[0]
+    console.log(tokenized)
+    let index = accidentalPossibilities.indexOf(currentAccidental)
+    console.log(accidentalPossibilities[index])
+
+    const newIndex = index + enteredValue
+
+    tokenized[0] = accidentalPossibilities[newIndex]
+
     setAbcString(
-      updateAbcString(abcString, selectedAbcElem, newValue, 'before')
+      updateAbcString(
+        abcString,
+        selectedAbcElem.startChar,
+        selectedAbcElem.endChar,
+        tokenized.join('')
+      )
     )
   }
 
@@ -145,8 +169,8 @@ export const Controls = ({
       </ToggleButtonGroup>
       <ToggleButtonGroup exclusive color='primary' onChange={handleAccidental}>
         {[
-          { label: '#', value: '^' },
-          { label: 'b', value: '_' },
+          { label: '#', value: 1 },
+          { label: 'b', value: -1 },
         ].map(e => (
           <ToggleButton key={e.label} value={e.value}>
             {e.label}
