@@ -5,7 +5,7 @@ export function tokenize(str) {
     var token = arr[i]
     if (token.length > 0) {
       if (token[0] !== '"' && token[0] !== '!') {
-        var arr2 = arr[i].split(/([A-Ga-g][,']*)/)
+        var arr2 = arr[i].split(/([A-Ga-gZz][,']*)/)
         output = output.concat(arr2)
       } else output.push(token)
     }

@@ -42,6 +42,7 @@ export const Controls = ({
       )
 
       const tokenized = tokenize(originalText)
+      console.log(tokenized)
       tokenized.pop() // remove the last element, which should be the duration of the note
 
       const textDuration = getDurationText(newValue)
@@ -69,6 +70,7 @@ export const Controls = ({
       )
 
       const tokenized = tokenize(originalText)
+      console.log(tokenized)
       let indexToSubstitute
       for (let i = tokenized.length; i--; i > 0) {
         //if the element is a note or rest
@@ -77,20 +79,19 @@ export const Controls = ({
           tokenized[i]?.toLowerCase() === 'z'
         ) {
           indexToSubstitute = i
-          tokenized[i] = undefined
           break
         }
       }
 
       tokenized[indexToSubstitute] = newValue === 'note' ? 'c' : 'z'
-      setAbcString(
-        updateAbcString(
-          abcString,
-          selectedAbcElem.startChar,
-          selectedAbcElem.endChar,
-          tokenized.join('')
-        )
+      const insertString = updateAbcString(
+        abcString,
+        selectedAbcElem.startChar,
+        selectedAbcElem.endChar,
+        tokenized.join('')
       )
+      console.log(insertString)
+      setAbcString(insertString)
     }
   }
 

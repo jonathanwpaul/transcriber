@@ -14,18 +14,7 @@ export const Editor = () => {
   const [toastOpen, setToastOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
 
-  console.log('selectedAbcElem: ', selectedAbcElem)
-  useEffect(() => {
-    const dataIndex =
-      selectedAbcElem?.abselem.elemset[0].getAttribute('data-index')
-    const node = document.querySelector(
-      `#music-render [data-index="${dataIndex}"]`
-    )
-    if (!node) return
-    console.log('reselecting previously selected element')
-    node.dispatchEvent(new Event('mousedown', { bubbles: true }))
-    node.dispatchEvent(new Event('mouseup', { bubbles: true }))
-  }, [selectedAbcElem, abcString])
+  console.log('editor render')
 
   const handleStringChange = e => {
     setAbcString(e.target.value)

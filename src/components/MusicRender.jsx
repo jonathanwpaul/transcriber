@@ -141,6 +141,7 @@ export const MusicRender = ({
     setDuration(abcelem.abselem.duration)
   }
 
+  //TODO: fix bug where note will disappear while dragging, causing the element to be removed
   useEffect(() => {
     const returnObjs = abcjs.renderAbc('music-render', abcString, {
       clickListener: handleClick,
@@ -161,6 +162,20 @@ export const MusicRender = ({
       // viewportHorizontal: true,
     })
     setVisualObj(returnObjs && returnObjs[0])
+  }, [abcString])
+
+  console.log({ selectedAbcElem })
+  useEffect(() => {
+    console.log({ selectedAbcElem })
+    const dataIndex =
+      selectedAbcElem?.abselem.elemset[0].getAttribute('data-index')
+    const node = document.querySelector(
+      `#music-render [data-index="${dataIndex}"]`
+    )
+    if (!node) return
+    console.log('reselecting previously selected element')
+    node.dispatchEvent(new Event('mousedown', { bubbles: true }))
+    node.dispatchEvent(new Event('mouseup', { bubbles: true }))
   }, [abcString])
 
   return (
