@@ -1,0 +1,13 @@
+diff --git a/node_modules/abcjs/src/write/interactive/selection.js b/node_modules/abcjs/src/write/interactive/selection.js
+index ee205fb..96e189d 100644
+--- a/node_modules/abcjs/src/write/interactive/selection.js
++++ b/node_modules/abcjs/src/write/interactive/selection.js
+@@ -269,7 +269,7 @@ function mouseDown(ev) {
+ 	var positioning = getMousePosition(this, _ev);
+ 
+ 	// Only start dragging if the user clicked close enough to an element and clicked with the main mouse button.
+-	if (positioning.clickedOn >= 0 && (ev.type === 'touchstart' || ev.button === 0) && this.selectables[positioning.clickedOn]) {
++	if (positioning.clickedOn >= 0 && (ev.type === 'touchstart' || ev.button === 0 || !ev.button) && this.selectables[positioning.clickedOn]) {
+ 		this.dragTarget = this.selectables[positioning.clickedOn];
+ 		this.dragIndex = positioning.clickedOn;
+ 		this.dragMechanism = "mouse";

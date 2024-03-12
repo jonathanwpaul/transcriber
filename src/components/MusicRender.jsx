@@ -3,7 +3,13 @@ import { Controls } from '.'
 import abcjs from 'abcjs'
 // import allNotes from 'abcjs/src/parse/all-notes.js' //invasively importing non-indexed module export
 import { useEffect, useState, useRef } from 'react'
-import { allPitches, getDurationText, moveNote, tokenize } from '../utils'
+import {
+  allPitches,
+  createXPathFromElement,
+  getDurationText,
+  moveNote,
+  tokenize,
+} from '../utils'
 import { Preferences } from '@capacitor/preferences'
 
 const SCALE = 1
@@ -20,13 +26,13 @@ export const MusicRender = ({
 }) => {
   const [visualObj, setVisualObj] = useState()
   const staffData = visualObj?.lines.map(line => line.staffGroup.staffs)
-  const clef = visualObj?.lines.staff && visualObj.lines.staff[0].clef
+  // const clef = visualObj?.lines.staff && visualObj.lines.staff[0].clef
+  // visualObj.makeVoicesArray()[0]
 
   //assumes treble cleff only and one staff only
   const handleClickEditor = e => {
     if (!staffData || staffData.length === 0) return
 
-    console.log(visualObj)
     const voices = visualObj.makeVoicesArray()
     const staffTopNoteIndex = allPitches.indexOf('f') //TODO: make this work for other clefs
 
@@ -42,13 +48,10 @@ export const MusicRender = ({
       }
     })
 
-    console.table(staffParams)
-
     const clicked = {
       x: e.clientX - bounding.left,
       y: e.clientY - bounding.top,
     }
-    console.log(clicked)
 
     // figure out which staff was clicked on (y)
     //FIX: won't register a different staff until you have clicked below the "f" line
@@ -58,8 +61,6 @@ export const MusicRender = ({
 
     const staffIndex =
       potentialStaffs.length > 0 ? potentialStaffs.length - 1 : 0
-
-    console.log({ staffIndex })
 
     // figure out which voice element was clicked on (x)
     // console.table(
@@ -72,14 +73,11 @@ export const MusicRender = ({
     //   }))
     // )
     //TODO: figure out when voices array will have multiple elements
-    console.log(clicked.x)
-    console.table(voices[0].map(voice => [voice.elem.x, voice.elem.w]))
+    // console.table(voices[0].map(voice => [voice.elem.x, voice.elem.w]))
     const clickedVoice = voices[0].filter(
       voice =>
         voice.line === staffIndex && voice.elem.x + voice.elem.w >= clicked.x
     )[0]
-
-    console.log(clickedVoice?.elem?.abcelem)
 
     if (clickedVoice) return
 
@@ -115,7 +113,6 @@ export const MusicRender = ({
     drag,
     mouseEvent
   ) => {
-    // mouseEvent.stopPropagation()
     const originalText = abcString.substring(abcelem.startChar, abcelem.endChar)
     if (
       abcelem.pitches &&
@@ -124,7 +121,6 @@ export const MusicRender = ({
       abcelem.startChar >= 0 &&
       abcelem.endChar >= 0
     ) {
-      console.log('clickListener')
       var arr = tokenize(originalText)
       // arr now contains elements that are either a chord, a decoration, a note name, or anything else. It can be put back to its original string with .join("").
       for (var i = 0; i < arr.length; i++) {
@@ -138,6 +134,7 @@ export const MusicRender = ({
           abcString.substring(abcelem.endChar)
       )
     }
+    // setSelectedAbcElem(abcelem.abselem.elemset[0])
     setSelectedAbcElem(abcelem)
     abcelem.rest ? setInputMode('rest') : setInputMode('note')
 

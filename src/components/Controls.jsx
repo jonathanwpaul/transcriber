@@ -46,7 +46,6 @@ export const Controls = ({
 
       const textDuration = getDurationText(newValue)
 
-      console.log(textDuration)
       setAbcString(
         updateAbcString(
           abcString,
@@ -71,7 +70,6 @@ export const Controls = ({
       )
 
       const tokenized = tokenize(originalText)
-      console.log(tokenized)
       let indexToSubstitute
       for (let i = tokenized.length; i--; i > 0) {
         //if the element is a note or rest
@@ -86,7 +84,6 @@ export const Controls = ({
       }
 
       tokenized[indexToSubstitute] = newValue === 'note' ? 'c' : 'z'
-      console.log(tokenized)
       setAbcString(
         updateAbcString(
           abcString,
@@ -100,8 +97,6 @@ export const Controls = ({
   }
 
   const handleInsertBarline = (_, newValue) => {
-    console.log(selectedAbcElem)
-    console.log(newValue)
     setAbcString(
       selectedAbcElem
         ? updateAbcString(
@@ -120,11 +115,10 @@ export const Controls = ({
       abcString.slice(selectedAbcElem.startChar, selectedAbcElem.endChar)
     )
 
+    console.log(tokenized)
     const accidentalPossibilities = ['__', '_', '', '^', '^^']
     const currentAccidental = tokenized[0]
-    console.log(tokenized)
     let index = accidentalPossibilities.indexOf(currentAccidental)
-    console.log(accidentalPossibilities[index])
 
     const newIndex = index + enteredValue
 

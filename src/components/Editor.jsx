@@ -1,7 +1,6 @@
 import { Card, TextField, Snackbar, SnackbarContent } from '@mui/material'
 import { Controls, MusicRender } from './'
-import { useState } from 'react'
-import { Capacitor } from '@capacitor/core'
+import { useEffect, useState } from 'react'
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 
 const SCALE = 1
@@ -10,25 +9,35 @@ export const Editor = () => {
   const [selectedAbcElem, setSelectedAbcElem] = useState()
   const [duration, setDuration] = useState(1 / 4)
   const [inputMode, setInputMode] = useState('note')
-  const [abcString, setAbcString] = useState('x')
+  const [abcString, setAbcString] = useState('xddddddd')
   const [saves, setSaves] = useState([])
   const [toastOpen, setToastOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
 
+  console.log(selectedAbcElem)
+  useEffect(() => {
+    const dataIndex =
+      selectedAbcElem?.abselem.elemset[0].getAttribute('data-index')
+    const node = document.querySelector(
+      `#music-render [data-index="${dataIndex}"]`
+    )
+    if (!node) return
+    node.dispatchEvent(new Event('mousedown', { bubbles: true }))
+    node.dispatchEvent(new Event('mouseup', { bubbles: true }))
+  }, [selectedAbcElem, abcString])
+
+  console.log('render Editor')
   const handleStringChange = e => {
     setAbcString(e.target.value)
   }
 
-  //TODO: specify key to save
   const handleSave = async filename => {
-    console.log(abcString)
     const resp = await Filesystem.writeFile({
       path: filename + '.abc',
       data: abcString,
       directory: Directory.Data,
       encoding: Encoding.UTF8,
     })
-    console.log(resp)
     setToastMessage(`file saved to ${resp.uri}!`)
     setToastOpen(true)
   }
@@ -42,12 +51,10 @@ export const Editor = () => {
   }
 
   const loadSave = async selectedFile => {
-    console.log('loading save: ', selectedFile)
     const { data } = await Filesystem.readFile({
       path: selectedFile.uri,
       encoding: Encoding.UTF8,
     })
-    console.log(data)
     setAbcString(data)
     setToastMessage(`file loaded from ${selectedFile.uri}!`)
     setToastOpen(true)

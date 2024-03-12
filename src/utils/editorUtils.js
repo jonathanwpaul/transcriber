@@ -32,7 +32,6 @@ export const allPitches = [
 ];
 
 export function moveNote(note, step) {
-  console.log(note)
   var x = allPitches.indexOf(note)
   if (x >= 0) return allPitches[x - step]
   return note

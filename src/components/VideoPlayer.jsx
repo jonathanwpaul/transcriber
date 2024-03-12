@@ -49,7 +49,6 @@ export const VideoPlayer = ({ id, setId }) => {
    */
   const onReady = e => {
     playerRef.current = e.target
-    console.log('video ready')
     setCurrentTime(e.target.getCurrentTime())
     setDuration(playerRef.current.getDuration())
     setIsPlaying(e.target.getPlayerState() === 1)
@@ -124,7 +123,6 @@ export const VideoPlayer = ({ id, setId }) => {
   const markLoopEnd = () => {
     setSectionEnd(currentTime)
   }
-  console.log(playerRef.current?.getPlaybackRate())
   return (
     <>
       <div className='horizontal-container' style={{ gap: '50px' }}>
