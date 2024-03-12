@@ -54,7 +54,6 @@ export const Controls = ({
           tokenized.join('') + textDuration
         )
       )
-      setSelectedAbcElem(undefined)
     }
   }
 
@@ -92,7 +91,6 @@ export const Controls = ({
           tokenized.join('')
         )
       )
-      setSelectedAbcElem(undefined)
     }
   }
 
@@ -103,7 +101,10 @@ export const Controls = ({
             abcString,
             selectedAbcElem.startChar,
             selectedAbcElem.endChar,
-            newValue
+            abcString.slice(
+              selectedAbcElem.startChar,
+              selectedAbcElem.endChar
+            ) + newValue
           )
         : abcString + newValue
     )

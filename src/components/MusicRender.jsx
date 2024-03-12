@@ -153,7 +153,7 @@ export const MusicRender = ({
       staffwidth:
         document.querySelector('#music-render')?.getBoundingClientRect().width -
           30 || 100,
-      showDebug: ['box'],
+      // showDebug: ['box'],
       dragging: true,
       selectionColor: 'blue',
       dragColor: 'purple',
@@ -161,7 +161,6 @@ export const MusicRender = ({
       // viewportHorizontal: true,
     })
     setVisualObj(returnObjs && returnObjs[0])
-    setSelectedAbcElem(undefined)
   }, [abcString])
 
   return (
