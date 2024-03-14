@@ -9,6 +9,7 @@ import {
   getDurationText,
   durationMapping,
   noteRegEx,
+  moveNote,
 } from '../utils'
 import { SaveAsDialog } from './SaveAsDialog'
 
@@ -130,8 +131,11 @@ export const Controls = ({
 
     const newIndex = index + enteredValue
 
-    tokenized[0] = accidentalPossibilities[newIndex]
-
+    if (newIndex >= accidentalPossibilities.length || newIndex < 0) {
+      tokenized = [moveNote(tokenized[1], -1 * enteredValue)] //multiply by -1 because the array is in opposite order
+    } else {
+      tokenized[0] = accidentalPossibilities[newIndex]
+    }
     setAbcString(
       updateAbcString(
         abcString,
