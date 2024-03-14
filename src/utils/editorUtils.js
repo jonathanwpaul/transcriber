@@ -1,3 +1,5 @@
+export const noteRegEx = /([A-Ga-gZz][,']*)/
+
 export function tokenize(str) {
   var arr = str.split(/(!.+?!|".+?")/)
   var output = []
@@ -5,7 +7,7 @@ export function tokenize(str) {
     var token = arr[i]
     if (token.length > 0) {
       if (token[0] !== '"' && token[0] !== '!') {
-        var arr2 = arr[i].split(/([A-Ga-gZz][,']*)/)
+        var arr2 = arr[i].split(noteRegEx)
         output = output.concat(arr2)
       } else output.push(token)
     }

@@ -1,6 +1,6 @@
 import { Card, TextField, Snackbar, SnackbarContent } from '@mui/material'
 import { Controls, MusicRender } from './'
-import { useEffect, useState } from 'react'
+import { Profiler, useCallback, useEffect, useState } from 'react'
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 
 const SCALE = 1
@@ -9,37 +9,43 @@ export const Editor = () => {
   const [selectedAbcElem, setSelectedAbcElem] = useState()
   const [duration, setDuration] = useState(1 / 4)
   const [inputMode, setInputMode] = useState('note')
-  const [abcString, setAbcString] = useState('xddddddd')
+  const [abcString, setAbcString] = useState('ddddddd')
   const [saves, setSaves] = useState([])
   const [toastOpen, setToastOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
 
   console.log('editor render')
+  console.log('inputMode:', inputMode)
+  console.log('duration:', duration)
+  console.log('abcString:', abcString)
 
   const handleStringChange = e => {
     setAbcString(e.target.value)
   }
 
-  const handleSave = async filename => {
-    const resp = await Filesystem.writeFile({
-      path: filename + '.abc',
-      data: abcString,
-      directory: Directory.Data,
-      encoding: Encoding.UTF8,
-    })
-    setToastMessage(`file saved to ${resp.uri}!`)
-    setToastOpen(true)
-  }
+  const handleSave = useCallback(
+    async filename => {
+      const resp = await Filesystem.writeFile({
+        path: filename + '.abc',
+        data: abcString,
+        directory: Directory.Data,
+        encoding: Encoding.UTF8,
+      })
+      setToastMessage(`file saved to ${resp.uri}!`)
+      setToastOpen(true)
+    },
+    [abcString]
+  )
 
-  const getSaves = async () => {
+  const getSaves = useCallback(async () => {
     const resp = await Filesystem.readdir({
       path: '',
       directory: Directory.Data,
     })
     setSaves(resp.files)
-  }
+  }, [])
 
-  const loadSave = async selectedFile => {
+  const loadSave = useCallback(async selectedFile => {
     const { data } = await Filesystem.readFile({
       path: selectedFile.uri,
       encoding: Encoding.UTF8,
@@ -47,7 +53,7 @@ export const Editor = () => {
     setAbcString(data)
     setToastMessage(`file loaded from ${selectedFile.uri}!`)
     setToastOpen(true)
-  }
+  }, [])
 
   const renderProps = {
     selectedAbcElem,
@@ -77,7 +83,14 @@ export const Editor = () => {
 
   return (
     <div className='editor vertical-container' id='editor'>
-      <MusicRender {...renderProps} />
+      <Profiler
+        id='test1'
+        onRender={(id, phase, actualDuration) => {
+          console.log({ phase, actualDuration })
+        }}
+      >
+        <MusicRender {...renderProps} />
+      </Profiler>
       <Card elevation={5} className='editor-inputs'>
         <TextField
           fullWidth

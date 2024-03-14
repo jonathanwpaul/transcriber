@@ -8,6 +8,7 @@ import {
   tokenize,
   getDurationText,
   durationMapping,
+  noteRegEx,
 } from '../utils'
 import { SaveAsDialog } from './SaveAsDialog'
 
@@ -25,6 +26,8 @@ export const Controls = ({
   getSaves,
   saves,
 }) => {
+  console.log('***controls render')
+
   const [fileDialogOpen, setFileDialogOpen] = useState()
   const [saveDialogOpen, setSaveDialogOpen] = useState()
 
@@ -33,8 +36,6 @@ export const Controls = ({
   const handleDurationChange = (_, newValue) => {
     if (newValue === null) return
 
-    setDuration(newValue)
-
     if (selectedAbcElem) {
       const originalText = abcString.substring(
         selectedAbcElem.startChar,
@@ -42,7 +43,6 @@ export const Controls = ({
       )
 
       const tokenized = tokenize(originalText)
-      console.log(tokenized)
       tokenized.pop() // remove the last element, which should be the duration of the note
 
       const textDuration = getDurationText(newValue)
@@ -55,14 +55,16 @@ export const Controls = ({
           tokenized.join('') + textDuration
         )
       )
+    } else {
+      setDuration(newValue)
     }
   }
 
   const handleNoteRestChange = (_, newValue) => {
     if (newValue === null) return
+    console.log('newValue ', newValue)
 
-    setInputMode(newValue)
-
+    console.log('selectedAbcElem', selectedAbcElem)
     if (selectedAbcElem) {
       const originalText = abcString.substring(
         selectedAbcElem.startChar,
@@ -70,28 +72,32 @@ export const Controls = ({
       )
 
       const tokenized = tokenize(originalText)
-      console.log(tokenized)
-      let indexToSubstitute
-      for (let i = tokenized.length; i--; i > 0) {
-        //if the element is a note or rest
-        if (
-          allPitches.indexOf(tokenized[i]) >= 0 ||
-          tokenized[i]?.toLowerCase() === 'z'
-        ) {
-          indexToSubstitute = i
-          break
-        }
-      }
+      console.log('tknzed ', tokenized)
+      const indexToSubstitute = tokenized.findIndex(val => noteRegEx.test(val))
+      // for (let i = tokenized.length; i--; i > 0) {
+      //   //if the element is a note or rest
+      //   if (
+      //     allPitches.indexOf(tokenized[i]) >= 0 ||
+      //     tokenized[i]?.toLowerCase() === 'z'
+      //   ) {
+      //     indexToSubstitute = i
+      //     break
+      //   }
+      // }
 
       tokenized[indexToSubstitute] = newValue === 'note' ? 'c' : 'z'
-      const insertString = updateAbcString(
-        abcString,
-        selectedAbcElem.startChar,
-        selectedAbcElem.endChar,
-        tokenized.join('')
+
+      console.log('tknzed post sub ', tokenized)
+      setAbcString(
+        updateAbcString(
+          abcString,
+          selectedAbcElem.startChar,
+          selectedAbcElem.endChar,
+          tokenized.join('')
+        )
       )
-      console.log(insertString)
-      setAbcString(insertString)
+    } else {
+      setInputMode(newValue)
     }
   }
 
