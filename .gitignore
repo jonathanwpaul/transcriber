@@ -8,7 +8,8 @@
 # testing
 /coverage
 
-# production
+# dist
+/android
 /build
 
 # misc
