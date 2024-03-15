@@ -3,12 +3,7 @@ import abcjs from 'abcjs'
 import React, { useEffect, useRef, useCallback, forwardRef } from 'react'
 import { moveNote, tokenize } from '../utils'
 
-export const MusicRender = ({
-  scaleFactor,
-  setDuration,
-  abcString,
-  setAbcString,
-}) => {
+const MusicRender = ({ scaleFactor, setDuration, abcString, setAbcString }) => {
   const wrapperRef = useRef()
 
   const handleClick = useCallback(
@@ -82,3 +77,5 @@ export const MusicRender = ({
 const MusicRenderDiv = forwardRef((props, ref) => (
   <div {...props} ref={ref}></div>
 ))
+
+export default MusicRender

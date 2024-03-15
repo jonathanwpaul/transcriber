@@ -1,3 +1,5 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 
-export const SaveLoadControls = ({ setScaleFactor }) => {
+const SaveLoadControls = ({ onClick }) => {}
+
+export default SaveLoadControls

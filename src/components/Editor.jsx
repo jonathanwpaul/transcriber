@@ -4,7 +4,7 @@ import { Card, TextField, Snackbar, SnackbarContent } from '@mui/material'
 import { Profiler, useCallback, useEffect, useState } from 'react'
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 
-export const Editor = () => {
+const Editor = () => {
   const [scaleFactor, setScaleFactor] = useState(1)
   const [duration, setDuration] = useState(1 / 4)
   const [abcString, setAbcString] = useState('ddddddd')
@@ -102,3 +102,5 @@ export const Editor = () => {
     </div>
   )
 }
+
+export default Editor

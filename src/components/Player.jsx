@@ -11,7 +11,7 @@ import { SkipPrevious, PlayArrow, PauseCircle } from '@mui/icons-material'
 import YouTube from 'react-youtube'
 import { VideoPlayer } from './VideoPlayer'
 
-export const Player = () => {
+const Player = () => {
   const [id, setId] = useState()
   const [inputText, setInputText] = useState()
   const [error, setError] = useState(false)
@@ -63,3 +63,5 @@ export const Player = () => {
     </Card>
   )
 }
+
+export default Player
