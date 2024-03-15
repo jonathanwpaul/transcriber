@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { FolderOpen, Save } from '@mui/icons-material'
 import { IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
-import { FileDialog } from './FileDialog'
+import { FileDialog } from '../FileDialog'
+import { ScaleFactorAdjust } from './components'
 import {
   allPitches,
   updateAbcString,
@@ -10,8 +11,8 @@ import {
   durationMapping,
   noteRegEx,
   moveNote,
-} from '../utils'
-import { SaveAsDialog } from './SaveAsDialog'
+} from '../../utils'
+import { SaveAsDialog } from '../SaveAsDialog'
 
 export const Controls = ({
   selectedAbcElem,
@@ -147,6 +148,9 @@ export const Controls = ({
     )
   }
 
+  const handleInsert = (_, value) => {
+    setAbcString(abcString => abcString + value)
+  }
   return (
     <div
       className='horizontal-container'
@@ -165,28 +169,21 @@ export const Controls = ({
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <ToggleButtonGroup
-        exclusive
-        color='primary'
-        onChange={handleNoteRestChange}
-        value={inputMode}
-      >
-        {['note', 'rest'].map(e => (
-          <ToggleButton key={`${e}`} value={e}>
-            {e}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
-      <ToggleButtonGroup exclusive color='primary' onChange={handleAccidental}>
+
+      {/* Accidentals */}
+      <ToggleButtonGroup exclusive color='primary' onChange={handleInsert}>
         {[
-          { label: '#', value: 1 },
-          { label: 'b', value: -1 },
+          { label: '#', value: '^' },
+          { label: 'n', value: '=' },
+          { label: 'b', value: '_' },
         ].map(e => (
           <ToggleButton key={e.label} value={e.value}>
             {e.label}
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+
+      {/* Barlines */}
       <ToggleButtonGroup
         exclusive
         color='primary'
@@ -198,11 +195,13 @@ export const Controls = ({
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-      {/* input mode button group (note or rest) */}
 
+      {/* save */}
       <IconButton onClick={() => setSaveDialogOpen(true)}>
         <Save />
       </IconButton>
+
+      {/* load */}
       <IconButton
         onClick={() => {
           getSaves()
@@ -211,6 +210,7 @@ export const Controls = ({
       >
         <FolderOpen />
       </IconButton>
+
       <FileDialog
         open={fileDialogOpen}
         onClose={file => {
@@ -230,36 +230,7 @@ export const Controls = ({
         fullWidth
         maxWidth='md'
       />
-      <ToggleButtonGroup exclusive color='primary'>
-        <ToggleButton
-          onClick={(_, newValue) => {
-            console.log(newValue)
-            setSCALE(scale => (scale + newValue > 0 ? scale + newValue : scale))
-          }}
-          key={'decrease'}
-          value={-0.5}
-        >
-          -
-        </ToggleButton>
-        <ToggleButton
-          onClick={() => {
-            setSCALE(1)
-          }}
-          key={'decrease'}
-          value={-0.5}
-        >
-          1
-        </ToggleButton>
-        <ToggleButton
-          onClick={(_, newValue) => {
-            setSCALE(scale => scale + newValue)
-          }}
-          key={'increase'}
-          value={0.5}
-        >
-          +
-        </ToggleButton>
-      </ToggleButtonGroup>
+      <ScaleAdjust />
     </div>
   )
 }

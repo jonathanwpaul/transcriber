@@ -1,18 +1,17 @@
+import MusicRender from './MusicRender'
+import Controls from './Controls/Controls'
 import { Card, TextField, Snackbar, SnackbarContent } from '@mui/material'
-import { Controls, MusicRender } from './'
 import { Profiler, useCallback, useEffect, useState } from 'react'
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 
 export const Editor = () => {
-  const [SCALE, setSCALE] = useState(1)
-  const [selectedAbcElem, setSelectedAbcElem] = useState()
+  const [scaleFactor, setScaleFactor] = useState(1)
   const [duration, setDuration] = useState(1 / 4)
-  const [inputMode, setInputMode] = useState('note')
   const [abcString, setAbcString] = useState('ddddddd')
   const [saves, setSaves] = useState([])
   const [toastOpen, setToastOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
-  console.log(SCALE)
+
   const handleStringChange = e => {
     setAbcString(e.target.value)
   }
@@ -50,25 +49,17 @@ export const Editor = () => {
   }, [])
 
   const renderProps = {
-    selectedAbcElem,
-    setSelectedAbcElem,
-    SCALE,
+    scaleFactor,
     duration,
     setDuration,
-    inputMode,
-    setInputMode,
     abcString,
     setAbcString,
   }
 
   const controlsProps = {
-    selectedAbcElem,
-    setSelectedAbcElem,
-    setSCALE,
+    setScaleFactor,
     abcString,
     setAbcString,
-    inputMode,
-    setInputMode,
     duration,
     setDuration,
     handleSave,
@@ -96,6 +87,8 @@ export const Editor = () => {
           InputProps={{ style: { height: '100%' } }}
           maxRows={5}
         />
+      </Card>
+      <Card elevation={5} className='editor-inputs'>
         <Controls {...controlsProps} />
       </Card>
       <Snackbar
