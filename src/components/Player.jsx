@@ -38,21 +38,21 @@ export const Player = () => {
   return (
     <Card elevation={5} className='player'>
       {!id && (
-        <div className='horizontal-container'>
+        <div className='horizontal-container' style={{ alignSelf: 'center' }}>
           <TextField
-            className='video-input'
-            onChange={handleChange}
-            value={inputText}
-            placeholder='YouTube URL'
-            variant='outlined'
             error={error}
+            fullWidth
             helperText={error}
+            onChange={handleChange}
+            placeholder='YouTube URL'
+            value={inputText}
+            variant='outlined'
           ></TextField>
           <Button
             className='button'
             disabled={!inputText}
             onClick={handleSubmit}
-            sx={{ alignSelf: 'stretch', textTransform: 'none' }}
+            sx={{ textTransform: 'none' }}
             variant='contained'
           >
             Go

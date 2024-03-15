@@ -11,11 +11,10 @@ import React, {
 } from 'react'
 import { allPitches, getDurationText, moveNote, tokenize } from '../utils'
 
-const SCALE = 1
-
 export const MusicRender = ({
   selectedAbcElem,
   setSelectedAbcElem,
+  SCALE,
   duration,
   setDuration,
   inputMode,
@@ -23,8 +22,6 @@ export const MusicRender = ({
   abcString,
   setAbcString,
 }) => {
-  console.log('***music render')
-
   const [visualObj, setVisualObj] = useState()
   const wrapperRef = useRef()
   // const handleClickOutside = event => {
@@ -60,10 +57,11 @@ export const MusicRender = ({
         .getBoundingClientRect()
       const staffParams = staffData.map(staff => {
         return {
-          staffTopLineY: staff[0].topLine,
-          staffBottomLineY: staff[0].bottomLine,
+          staffTopLineY: staff[0].topLine * SCALE,
+          staffBottomLineY: staff[0].bottomLine * SCALE,
           staffSpacingY:
-            (staff[0].bottomLine - staff[0].topLine) / (staff[0].lines - 1),
+            ((staff[0].bottomLine - staff[0].topLine) / (staff[0].lines - 1)) *
+            SCALE,
         }
       })
 
@@ -186,7 +184,7 @@ export const MusicRender = ({
       // viewportHorizontal: true,
     })
     setVisualObj(returnObjs && returnObjs[0])
-  }, [abcString])
+  }, [abcString, SCALE])
 
   useEffect(() => {
     console.log('calling reselect effect')

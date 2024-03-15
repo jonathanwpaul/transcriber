@@ -16,6 +16,7 @@ import { SaveAsDialog } from './SaveAsDialog'
 export const Controls = ({
   selectedAbcElem,
   setSelectedAbcElem,
+  setSCALE,
   abcString,
   setAbcString,
   duration,
@@ -147,7 +148,10 @@ export const Controls = ({
   }
 
   return (
-    <div className='horizontal-container' style={{ alignItems: 'center' }}>
+    <div
+      className='horizontal-container'
+      style={{ alignItems: 'center', flexWrap: 'wrap' }}
+    >
       {/* duration button group (length of note or rest) */}
       <ToggleButtonGroup
         exclusive
@@ -226,6 +230,36 @@ export const Controls = ({
         fullWidth
         maxWidth='md'
       />
+      <ToggleButtonGroup exclusive color='primary'>
+        <ToggleButton
+          onClick={(_, newValue) => {
+            console.log(newValue)
+            setSCALE(scale => (scale + newValue > 0 ? scale + newValue : scale))
+          }}
+          key={'decrease'}
+          value={-0.5}
+        >
+          -
+        </ToggleButton>
+        <ToggleButton
+          onClick={() => {
+            setSCALE(1)
+          }}
+          key={'decrease'}
+          value={-0.5}
+        >
+          1
+        </ToggleButton>
+        <ToggleButton
+          onClick={(_, newValue) => {
+            setSCALE(scale => scale + newValue)
+          }}
+          key={'increase'}
+          value={0.5}
+        >
+          +
+        </ToggleButton>
+      </ToggleButtonGroup>
     </div>
   )
 }

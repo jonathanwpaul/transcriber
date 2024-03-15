@@ -3,9 +3,8 @@ import { Controls, MusicRender } from './'
 import { Profiler, useCallback, useEffect, useState } from 'react'
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 
-const SCALE = 1
-
 export const Editor = () => {
+  const [SCALE, setSCALE] = useState(1)
   const [selectedAbcElem, setSelectedAbcElem] = useState()
   const [duration, setDuration] = useState(1 / 4)
   const [inputMode, setInputMode] = useState('note')
@@ -13,12 +12,7 @@ export const Editor = () => {
   const [saves, setSaves] = useState([])
   const [toastOpen, setToastOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
-
-  console.log('editor render')
-  console.log('inputMode:', inputMode)
-  console.log('duration:', duration)
-  console.log('abcString:', abcString)
-
+  console.log(SCALE)
   const handleStringChange = e => {
     setAbcString(e.target.value)
   }
@@ -58,6 +52,7 @@ export const Editor = () => {
   const renderProps = {
     selectedAbcElem,
     setSelectedAbcElem,
+    SCALE,
     duration,
     setDuration,
     inputMode,
@@ -69,6 +64,7 @@ export const Editor = () => {
   const controlsProps = {
     selectedAbcElem,
     setSelectedAbcElem,
+    setSCALE,
     abcString,
     setAbcString,
     inputMode,
@@ -97,7 +93,8 @@ export const Editor = () => {
           multiline
           onChange={handleStringChange}
           value={abcString}
-          maxRows={1.5}
+          InputProps={{ style: { height: '100%' } }}
+          maxRows={5}
         />
         <Controls {...controlsProps} />
       </Card>

@@ -61,9 +61,6 @@ div.player {
   /* flex: 1; */
 }
 
-div.video-input {
-  width: 100%;
-}
 div.controls {
   max-width: 60%;
   align-items: stretch;
