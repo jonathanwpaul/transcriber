@@ -1,8 +1,11 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
-import { getDurationText } from '../../../utils'
+import { allPitches, getDurationText } from '../../../utils'
 
 const NoteControls = ({ onChange, duration }) => {
-  const notes = "b,, c, d, e, f, g, a, b, c d e f g a b c' d' e' f'".split(' ')
+  const notes = allPitches.slice(
+    allPitches.indexOf('B'),
+    allPitches.indexOf("b'")
+  )
 
   return (
     <ToggleButtonGroup exclusive color='primary' onChange={onChange}>
