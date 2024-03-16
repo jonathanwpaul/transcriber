@@ -1,14 +1,5 @@
-import { useState, useRef, useCallback } from 'react'
-import {
-  IconButton,
-  Card,
-  Slider,
-  TextField,
-  Button,
-  Typography,
-} from '@mui/material'
-import { SkipPrevious, PlayArrow, PauseCircle } from '@mui/icons-material'
-import YouTube from 'react-youtube'
+import { useState } from 'react'
+import { Card, TextField, Button } from '@mui/material'
 import { VideoPlayer } from './VideoPlayer'
 
 const Player = () => {

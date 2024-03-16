@@ -1,7 +1,7 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 import { durationMapping } from '../../../utils'
 
-export const DurationControls = ({ onChange, duration }) => {
+const DurationControls = ({ onChange, duration }) => {
   return (
     <ToggleButtonGroup
       exclusive

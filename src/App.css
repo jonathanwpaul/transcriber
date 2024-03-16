@@ -30,7 +30,8 @@ div.horizontal-container {
 
 /* APP COMPONENTS */
 div.editor {
-  height: 80%;
+  /* height: 80%; */
+  flex: 1;
 }
 
 div.editor-inputs {
@@ -40,10 +41,15 @@ div.editor-inputs {
   flex-shrink: 0;
 }
 
+div.keyboard {
+  display: flex;
+  flex: 5;
+}
+
 div.music-render {
   overflow: auto;
   min-height: 0;
-  flex: 1;
+  flex: 10;
   display: flex;
   padding-bottom: 5px;
   padding-top: 5px;
@@ -56,7 +62,6 @@ div.player {
   justify-content: space-around;
   /* align-items: center; */
   padding: 30px;
-  flex: 1 1 auto;
 
   /* flex: 1; */
 }

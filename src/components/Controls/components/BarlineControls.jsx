@@ -1,6 +1,6 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 
-export const BarlineControls = ({ onChange }) => {
+const BarlineControls = ({ onChange }) => {
   const barOptions = ['[|', '|:', '|', ':|', '|]']
 
   return (

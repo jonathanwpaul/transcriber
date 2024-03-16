@@ -1,20 +1,10 @@
 import { useState, useRef, useCallback } from 'react'
+import { IconButton, Slider, Tooltip } from '@mui/material'
 import {
-  IconButton,
-  Card,
-  Slider,
-  TextField,
-  Button,
-  Tooltip,
-} from '@mui/material'
-import {
-  SkipPrevious,
   PlayArrow,
   PauseCircle,
   StartOutlined,
   RestartAlt,
-  Close,
-  CloseOutlined,
   CancelOutlined,
 } from '@mui/icons-material'
 import YouTube from 'react-youtube'
@@ -124,16 +114,31 @@ export const VideoPlayer = ({ id, setId }) => {
     setSectionEnd(currentTime)
   }
   return (
-    <>
-      <div className='horizontal-container' style={{ gap: '50px' }}>
+    <div className='horizontal-container' style={{ gap: 50, width: '100%' }}>
+      <div className='horizontal-container'>
+        <Tooltip title='Close video'>
+          <IconButton
+            style={{
+              alignSelf: 'flex-start',
+              backgroundColor: 'red',
+              color: 'white',
+              // position: 'relative',
+              padding: 5,
+              // left: '-5',
+            }}
+            onClick={handleCloseVideo}
+          >
+            <CancelOutlined />
+          </IconButton>
+        </Tooltip>
         <YouTube
           opts={videoOptions}
           videoId={id}
           onReady={onReady}
           onPlay={onPlay}
           onPause={onPause}
+          // style={{ position: 'fixed' }}
         />
-
         <Slider
           defaultValue={playbackRate}
           orientation='vertical'
@@ -144,25 +149,17 @@ export const VideoPlayer = ({ id, setId }) => {
             },
           }}
           onChange={handlePlaybackRateChange}
-          size='small'
+          size='large'
           min={playerRef.current?.getAvailablePlaybackRates()[0]}
           step={0.05}
           max={2}
           value={playbackRate}
           valueLabelFormat={val => val + 'x'}
-          valueLabelDisplay='on'
+          // valueLabelDisplay='on'
         />
       </div>
-      <div className='vertical-container controls'>
+      <div className='vertical-container controls' style={{ flex: 3 }}>
         <div className='horizontal-container' style={{ alignItems: 'center' }}>
-          <Tooltip title='Close video'>
-            <IconButton
-              style={{ alignSelf: 'center' }}
-              onClick={handleCloseVideo}
-            >
-              <CancelOutlined />
-            </IconButton>
-          </Tooltip>
           <Tooltip title='Jump to beginning'>
             <IconButton onClick={restartPlayer} aria-label='previous'>
               <RestartAlt />
@@ -193,41 +190,38 @@ export const VideoPlayer = ({ id, setId }) => {
             </IconButton>
           </Tooltip>
         </div>
-        <div style={{ position: 'relative' }}>
+        <div>
           {/* the loop slider */}
           <Slider
             color='secondary'
             min={0}
             max={duration}
             onChange={handleIntervalChange}
-            size='small'
+            size='large'
             step={0.1}
             style={{
-              // position: 'absolute',
               top: '50%',
+              // position: 'absolute',
             }}
             sx={{
               '& .MuiSlider-thumb': {
                 '&[data-index="0"]': {
                   color: 'green',
+                  transform: 'translateX(-50%) translateY(-150%)', // rotate(225deg)',
                 },
 
                 '&[data-index="1"]': {
                   color: 'red',
+                  transform: 'translateX(-50%) translateY(50%)', // rotate(45deg)',
                 },
                 /* Border */
-                borderRadius: '0px 50% 50% 50%',
-
-                /* Angle at the top */
-                transform: 'translateX(-50%) translateY(-200%) rotate(225deg)',
+                // borderRadius: '0px 50% 50% 50%',
 
                 /* Size */
-                height: '1rem',
-                width: '1rem',
+                height: '2rem',
+                width: '2rem',
               },
               '& .MuiSlider-track': {
-                // borderTopLeftRadius: '50vh',
-                // borderTopRightRadius: '50vh',
                 borderRadius: '5px',
                 opacity: 0.1,
                 height: 20,
@@ -237,7 +231,7 @@ export const VideoPlayer = ({ id, setId }) => {
               },
             }}
             value={[sectionStart, sectionEnd]}
-            // valueLabelDisplay='on'
+            valueLabelDisplay='auto'
             valueLabelFormat={timestampFormatter}
           />
           {/* the playback slider (mirrors video playback slider) */}
@@ -245,20 +239,20 @@ export const VideoPlayer = ({ id, setId }) => {
             min={0}
             max={duration}
             onChange={handleSliderChange}
-            size='small'
+            size='large'
             step={0.1}
             style={
               {
-                // position: 'relative',
+                // position: 'absolute',
               }
             }
             value={currentTime}
-            // valueLabelDisplay='on'
-            // valueLabelFormat={timestampFormatter}
+            valueLabelDisplay='auto'
+            valueLabelFormat={timestampFormatter}
           />
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

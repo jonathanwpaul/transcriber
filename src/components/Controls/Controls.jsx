@@ -1,34 +1,35 @@
 import { useState } from 'react'
 import { FolderOpen, Save } from '@mui/icons-material'
-import { IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
-import { FileDialog } from '../FileDialog'
+import {
+  Card,
+  IconButton,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material'
 import {
   AccidentalControls,
   BarlineControls,
+  CursorControls,
   DurationControls,
   NoteControls,
+  OctaveControls,
   SaveLoadControls,
   ScaleFactorControls,
 } from './components'
 import { updateAbcString, tokenize, noteRegEx, moveNote } from '../../utils'
-import { SaveAsDialog } from '../SaveAsDialog'
 
 const Controls = ({
-  selectedAbcElem,
-  setSelectedAbcElem,
-  setScaleFactor,
   abcString,
-  setAbcString,
+  cursorPosition,
   duration,
+  selectedAbcElem,
+  setAbcString,
+  setCursorPosition,
   setDuration,
-  handleSave,
-  loadSave,
-  getSaves,
-  saves,
+  setScaleFactor,
+  setSelectedAbcElem,
+  textFieldRef,
 }) => {
-  const [fileDialogOpen, setFileDialogOpen] = useState()
-  const [saveDialogOpen, setSaveDialogOpen] = useState()
-
   const handleDurationChange = (_, newValue) => {
     if (newValue === null) return
     setDuration(newValue)
@@ -39,48 +40,29 @@ const Controls = ({
   }
 
   return (
-    <div
-      className='horizontal-container'
-      style={{ alignItems: 'center', flexWrap: 'wrap' }}
-    >
-      <NoteControls onChange={handleInsert} duration={duration} />
-      <DurationControls onChange={handleDurationChange} duration={duration} />
-      <AccidentalControls onChange={handleInsert} />
-      <BarlineControls onChange={handleInsert} />
-      <ScaleFactorControls setScaleFactor={setScaleFactor} />
-      {/* save */}
-      <IconButton onClick={() => setSaveDialogOpen(true)}>
-        <Save />
-      </IconButton>
-      {/* load */}
-      <IconButton
-        onClick={() => {
-          getSaves()
-          setFileDialogOpen(true)
-        }}
-      >
-        <FolderOpen />
-      </IconButton>
-      <FileDialog
-        open={fileDialogOpen}
-        onClose={file => {
-          file && loadSave(file)
-          setFileDialogOpen(false)
-        }}
-        items={saves}
-        fullWidth
-        maxWidth='md'
-      />
-      <SaveAsDialog
-        open={saveDialogOpen}
-        onClose={filename => {
-          filename && handleSave(filename)
-          setSaveDialogOpen(false)
-        }}
-        fullWidth
-        maxWidth='md'
-      />
-    </div>
+    <>
+      <Card elevation={5} className='keyboard'>
+        <NoteControls onChange={handleInsert} duration={duration} />
+      </Card>
+      <Card elevation={5} className='editor-inputs'>
+        <div
+          className='horizontal-container'
+          style={{ alignItems: 'center', flexWrap: 'wrap' }}
+        >
+          {/* TODO: the octaves don't work when a duration is applied (which is pretty much always) since it inserts after the number */}
+          {/* <OctaveControls onChange={handleInsert} /> */}
+          <AccidentalControls onChange={handleInsert} />
+          <DurationControls
+            onChange={handleDurationChange}
+            duration={duration}
+          />
+          <BarlineControls onChange={handleInsert} />
+          {/* <CursorControls textFieldRef={textFieldRef} /> */}
+          <ScaleFactorControls setScaleFactor={setScaleFactor} />
+          <SaveLoadControls setAbcString={setAbcString} abcString={abcString} />
+        </div>
+      </Card>
+    </>
   )
 }
 

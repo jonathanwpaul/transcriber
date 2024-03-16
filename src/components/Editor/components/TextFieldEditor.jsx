@@ -1,6 +1,6 @@
 import { Card, TextField } from '@mui/material'
 
-const TextFieldEditor = ({ onChange, value }) => {
+const TextFieldEditor = ({ onChange, value, ...otherProps }) => {
   return (
     <Card elevation={5} className='editor-inputs'>
       <TextField
@@ -10,6 +10,7 @@ const TextFieldEditor = ({ onChange, value }) => {
         value={value}
         InputProps={{ style: { height: '100%' } }}
         maxRows={5}
+        {...otherProps}
       />
     </Card>
   )
