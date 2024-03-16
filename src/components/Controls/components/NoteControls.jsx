@@ -19,6 +19,8 @@ const NoteControls = ({ onChange, duration }) => {
   }
 
   console.log(keyboard)
+  const whiteKeyWidthPercent = 100 / notes.length
+  const blackKeyWidthPercent = whiteKeyWidthPercent / 2
 
   return (
     <ToggleButtonGroup
@@ -34,43 +36,46 @@ const NoteControls = ({ onChange, duration }) => {
           value: note + getDurationText(duration),
         }
         return white ? (
-          <WhiteKey {...props} />
+          <WhiteKey width={whiteKeyWidthPercent} {...props} />
         ) : (
-          <BlackKey margin={-0.22 * 100} {...props} />
+          <BlackKey width={blackKeyWidthPercent} {...props} />
         )
       })}
     </ToggleButtonGroup>
   )
 }
 
-const WhiteKey = ({ note, ...otherProps }) => (
+const WhiteKey = ({ note, width, ...otherProps }) => (
   <ToggleButton
+    {...otherProps}
     style={{
       borderBottomLeftRadius: 5,
       borderBottomRightRadius: 5,
       border: '1px solid black',
-      flex: 2,
+      float: 'left',
+      position: 'relative',
+      width: `${width}vw`,
     }}
-    {...otherProps}
   ></ToggleButton>
 )
 
-const BlackKey = ({ note, margin, ...otherProps }) => (
+const BlackKey = ({ note, width, ...otherProps }) => (
   <ToggleButton
+    {...otherProps}
     style={{
-      '&:hover': 'blue', //'#1f1f1f',
+      // '&:hover': 'blue', //'#1f1f1f',
       backgroundColor: 'black',
       borderBottomLeftRadius: 5,
       borderBottomRightRadius: 5,
       color: 'white',
-      flex: 1,
+      float: 'left',
       height: '55%',
-      // position: 'absolute',
-      // marginLeft: margin,
-      // marginRight: margin,
+      marginLeft: `${-width / 2}vw`,
+      marginRight: `${-width / 2}vw`,
+      position: 'relative',
+      width: `${width}vw`,
       zIndex: 1,
     }}
-    {...otherProps}
   ></ToggleButton>
 )
 
