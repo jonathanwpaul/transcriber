@@ -36,7 +36,14 @@ const Controls = ({
   }
 
   const handleInsert = (_, value) => {
-    setAbcString(abcString => abcString + value)
+    const textInput = textFieldRef.current
+    if (!textInput) return
+
+    const caretPos = textInput.selectionStart
+    setAbcString(
+      abcString.slice(0, caretPos) + value + abcString.slice(caretPos)
+    )
+    textInput.setSelectionRange(abcString.length, abcString.length)
   }
 
   return (
@@ -57,7 +64,12 @@ const Controls = ({
             duration={duration}
           />
           <BarlineControls onChange={handleInsert} />
-          {/* <CursorControls textFieldRef={textFieldRef} /> */}
+          <CursorControls
+            abcString={abcString}
+            cursorPosition={cursorPosition}
+            setCursorPosition={setCursorPosition}
+            textFieldRef={textFieldRef}
+          />
           <ScaleFactorControls setScaleFactor={setScaleFactor} />
           <SaveLoadControls setAbcString={setAbcString} abcString={abcString} />
         </div>

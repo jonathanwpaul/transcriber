@@ -4,6 +4,7 @@ import {
   ListItem,
   ListItemButton,
   Dialog as MuiDialog,
+  Typography,
 } from '@mui/material'
 
 export const FileDialog = ({
@@ -27,7 +28,16 @@ export const FileDialog = ({
       <List>
         {items.map(item => (
           <ListItem onClick={() => handleListItemClick(item)}>
-            <ListItemButton>{JSON.stringify(item)}</ListItemButton>
+            {/* name, mtime, size */}
+            <ListItemButton
+              className='vertical-container'
+              style={{ alignItems: 'flex-start' }}
+            >
+              <Typography>{item.name}</Typography>
+              <Typography variant='body'>
+                {'Modified: ' + new Date(item.mtime).toLocaleString()}
+              </Typography>
+            </ListItemButton>
           </ListItem>
         ))}
       </List>

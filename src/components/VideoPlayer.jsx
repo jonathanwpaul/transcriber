@@ -178,11 +178,7 @@ export const VideoPlayer = ({ id, setId }) => {
             }
             aria-label='play/pause'
           >
-            {isPlaying ? (
-              <PauseCircle sx={{ height: 38, width: 38 }} />
-            ) : (
-              <PlayArrow sx={{ height: 38, width: 38 }} />
-            )}
+            {isPlaying ? <PauseCircle /> : <PlayArrow />}
           </IconButton>
           <Tooltip title='Mark loop end'>
             <IconButton onClick={markLoopEnd}>

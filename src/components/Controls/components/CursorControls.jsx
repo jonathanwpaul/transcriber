@@ -1,16 +1,24 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 
-const CursorControls = ({ textFieldRef, setCursorPosition }) => {
-  if (!textFieldRef?.current) return
-
-  const handleMoveCursor = () => {
-    const textInput = textFieldRef.current
-    textInput.focus()
-    textInput.setSelectionRange(0, 0)
+const CursorControls = ({ abcString, cursorPosition, setCursorPosition }) => {
+  console.log('CursorControls: ', cursorPosition)
+  const handleMoveCursorLeft = () => {
+    const newCursorPosition =
+      cursorPosition > 0 ? cursorPosition - 1 : cursorPosition
+    setCursorPosition(newCursorPosition)
   }
+
+  const handleMoveCursorRight = () => {
+    const newCursorPosition =
+      cursorPosition < abcString.length ? cursorPosition + 1 : cursorPosition
+    setCursorPosition(newCursorPosition)
+  }
+
   return (
     <ToggleButtonGroup exclusive color='primary'>
-      <ToggleButton onClick={handleMoveCursor}>{'<'}</ToggleButton>
+      <ToggleButton onClick={handleMoveCursorLeft}>{'<'}</ToggleButton>
+      <ToggleButton onClick={handleMoveCursorRight}>{'>'}</ToggleButton>
+
       {/* <ToggleButton>Test</ToggleButton> */}
     </ToggleButtonGroup>
   )
