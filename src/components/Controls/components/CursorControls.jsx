@@ -1,7 +1,6 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 
 const CursorControls = ({ abcString, cursorPosition, setCursorPosition }) => {
-  console.log('CursorControls: ', cursorPosition)
   const handleMoveCursorLeft = () => {
     const newCursorPosition =
       cursorPosition > 0 ? cursorPosition - 1 : cursorPosition

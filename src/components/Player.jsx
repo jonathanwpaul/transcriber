@@ -27,7 +27,7 @@ const Player = () => {
   }
 
   return (
-    <Card elevation={5} className='player'>
+    <Card className='player'>
       {!id && (
         <div className='horizontal-container' style={{ alignSelf: 'center' }}>
           <TextField

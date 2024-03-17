@@ -1,9 +1,17 @@
 import { Card } from '@mui/material'
 import abcjs from 'abcjs'
 import React, { useEffect, useRef, useCallback, forwardRef } from 'react'
-import { moveNote, tokenize } from '../utils'
+import { ScaleFactorControls } from './components'
+import { moveNote, tokenize } from '../../../utils'
 
-const MusicRender = ({ scaleFactor, setDuration, abcString, setAbcString }) => {
+const MusicRender = ({
+  scaleFactor,
+  setDuration,
+  abcString,
+  setAbcString,
+  setCursorPosition,
+  setScaleFactor,
+}) => {
   const wrapperRef = useRef()
 
   const handleClick = useCallback(
@@ -37,6 +45,7 @@ const MusicRender = ({ scaleFactor, setDuration, abcString, setAbcString }) => {
         )
       }
       setDuration(abcelem.abselem.duration)
+      setCursorPosition(abcelem.endChar)
     },
     [abcString, setAbcString, setDuration]
   )
@@ -64,12 +73,15 @@ const MusicRender = ({ scaleFactor, setDuration, abcString, setAbcString }) => {
   }, [abcString, scaleFactor, handleClick])
 
   return (
-    <Card elevation={5} className='music-render'>
+    <Card className='music-render vertical-container'>
       <MusicRenderDiv
         id='music-render'
         ref={wrapperRef}
         style={{ margin: 'auto', minWidth: '100%' }}
       />
+      <div style={{ padding: 5 }}>
+        <ScaleFactorControls setScaleFactor={setScaleFactor} />
+      </div>
     </Card>
   )
 }

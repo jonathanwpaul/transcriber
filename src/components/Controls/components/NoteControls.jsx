@@ -18,7 +18,6 @@ const NoteControls = ({ onChange, duration }) => {
     keyboard.push(notes[i])
   }
 
-  console.log(keyboard)
   const whiteKeyWidthPercent = 100 / notes.length
   const blackKeyWidthPercent = whiteKeyWidthPercent / 2
 
@@ -52,9 +51,10 @@ const WhiteKey = ({ note, width, ...otherProps }) => (
       borderBottomLeftRadius: 5,
       borderBottomRightRadius: 5,
       border: '1px solid black',
-      float: 'left',
-      position: 'relative',
+      // float: 'left',
+      // position: 'relative',
       width: `${width}vw`,
+      backgroundColor: note === 'c' && '#e3eefa',
     }}
   ></ToggleButton>
 )
@@ -68,11 +68,11 @@ const BlackKey = ({ note, width, ...otherProps }) => (
       borderBottomLeftRadius: 5,
       borderBottomRightRadius: 5,
       color: 'white',
-      float: 'left',
+      // float: 'left',
       height: '55%',
       marginLeft: `${-width / 2}vw`,
       marginRight: `${-width / 2}vw`,
-      position: 'relative',
+      // position: 'relative',
       width: `${width}vw`,
       zIndex: 1,
     }}

@@ -11,10 +11,10 @@ import {
   BarlineControls,
   CursorControls,
   DurationControls,
+  InputControls,
   NoteControls,
   OctaveControls,
   SaveLoadControls,
-  ScaleFactorControls,
 } from './components'
 import { updateAbcString, tokenize, noteRegEx, moveNote } from '../../utils'
 
@@ -28,6 +28,8 @@ const Controls = ({
   setDuration,
   setScaleFactor,
   setSelectedAbcElem,
+  setTextEditor,
+  textEditor,
   textFieldRef,
 }) => {
   const handleDurationChange = (_, newValue) => {
@@ -36,44 +38,41 @@ const Controls = ({
   }
 
   const handleInsert = (_, value) => {
-    const textInput = textFieldRef.current
-    if (!textInput) return
-
-    const caretPos = textInput.selectionStart
     setAbcString(
-      abcString.slice(0, caretPos) + value + abcString.slice(caretPos)
+      abcString.slice(0, cursorPosition) +
+        value +
+        abcString.slice(cursorPosition)
     )
-    textInput.setSelectionRange(abcString.length, abcString.length)
+    setCursorPosition(cursorPosition + value.length)
+  }
+
+  const handleInputChange = (_, value) => {
+    setTextEditor(value === 'text')
   }
 
   return (
     <>
-      <Card elevation={5} className='keyboard'>
+      <div
+        className='horizontal-container'
+        style={{ alignItems: 'center', flexWrap: 'wrap' }}
+      >
+        {/* TODO: the octaves don't work when a duration is applied (which is pretty much always) since it inserts after the number */}
+        {/* <OctaveControls onChange={handleInsert} /> */}
+        <InputControls onChange={handleInputChange} textEditor={textEditor} />
+        <AccidentalControls onChange={handleInsert} />
+        <DurationControls onChange={handleDurationChange} duration={duration} />
+        <BarlineControls onChange={handleInsert} />
+        <CursorControls
+          abcString={abcString}
+          cursorPosition={cursorPosition}
+          setCursorPosition={setCursorPosition}
+          textFieldRef={textFieldRef}
+        />
+        <SaveLoadControls setAbcString={setAbcString} abcString={abcString} />
+      </div>
+      {!textEditor && (
         <NoteControls onChange={handleInsert} duration={duration} />
-      </Card>
-      <Card elevation={5} className='editor-inputs'>
-        <div
-          className='horizontal-container'
-          style={{ alignItems: 'center', flexWrap: 'wrap' }}
-        >
-          {/* TODO: the octaves don't work when a duration is applied (which is pretty much always) since it inserts after the number */}
-          {/* <OctaveControls onChange={handleInsert} /> */}
-          <AccidentalControls onChange={handleInsert} />
-          <DurationControls
-            onChange={handleDurationChange}
-            duration={duration}
-          />
-          <BarlineControls onChange={handleInsert} />
-          <CursorControls
-            abcString={abcString}
-            cursorPosition={cursorPosition}
-            setCursorPosition={setCursorPosition}
-            textFieldRef={textFieldRef}
-          />
-          <ScaleFactorControls setScaleFactor={setScaleFactor} />
-          <SaveLoadControls setAbcString={setAbcString} abcString={abcString} />
-        </div>
-      </Card>
+      )}
     </>
   )
 }
