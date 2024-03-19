@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Card, TextField, Button } from '@mui/material'
-import { VideoPlayer } from './VideoPlayer'
+import { VideoPlayer } from './VideoPlayer/VideoPlayer'
 
 const Player = () => {
   const [id, setId] = useState()

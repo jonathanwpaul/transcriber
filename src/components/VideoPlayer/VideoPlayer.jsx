@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
-import { IconButton, Slider, Tooltip } from '@mui/material'
+import { IconButton, Slider, SvgIcon, TextField, Tooltip } from '@mui/material'
+import { TimeTextInput } from './components'
 import {
   PlayArrow,
   PauseCircle,
@@ -75,6 +76,7 @@ export const VideoPlayer = ({ id, setId }) => {
   }
 
   const handleSliderChange = (_, newValue) => {
+    if (newValue < sectionStart || newValue > sectionEnd) return
     clearInterval(timerRef.current)
     setCurrentTime(newValue)
     playerRef.current.seekTo(newValue)
@@ -167,6 +169,23 @@ export const VideoPlayer = ({ id, setId }) => {
         />
       </div>
       <div className='vertical-container controls' style={{ flex: 3 }}>
+        <div className='horizontal-container'>
+          <TimeTextInput
+            value={sectionStart}
+            onChange={value => setSectionStart(value)}
+            changeAmount={0.5}
+          />
+          <TimeTextInput
+            value={currentTime}
+            onChange={value => playerRef.current.seekTo(value)}
+            changeAmount={0.5}
+          />
+          <TimeTextInput
+            value={sectionEnd}
+            onChange={value => setSectionEnd(value)}
+            changeAmount={0.5}
+          />
+        </div>
         <div>
           {/* the loop slider */}
           <Slider
