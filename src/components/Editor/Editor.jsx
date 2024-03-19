@@ -8,6 +8,7 @@ const Editor = () => {
   const [abcString, setAbcString] = useState('a,1b,1c1d1e1f1g1')
   const [cursorPosition, setCursorPosition] = useState(0)
   const [duration, setDuration] = useState(1 / 4)
+  const [selectedDataIndex, setSelectedDataIndex] = useState()
   const [scaleFactor, setScaleFactor] = useState(1)
   const [textEditor, setTextEditor] = useState(false)
 
@@ -29,10 +30,12 @@ const Editor = () => {
     abcString,
     duration,
     scaleFactor,
+    selectedDataIndex,
     setAbcString,
     setCursorPosition,
     setDuration,
     setScaleFactor,
+    setSelectedDataIndex,
   }
 
   const controlsProps = {

@@ -1,24 +1,45 @@
 import { Card } from '@mui/material'
 import abcjs from 'abcjs'
-import React, { useEffect, useRef, useCallback, forwardRef } from 'react'
+import React, {
+  useEffect,
+  useRef,
+  useCallback,
+  forwardRef,
+  useState,
+} from 'react'
 import { ScaleFactorControls } from './components'
 import { moveNote, tokenize } from '../../../utils'
 
 const MusicRender = ({
-  scaleFactor,
-  setDuration,
   abcString,
+  scaleFactor,
+  selectedDataIndex,
   setAbcString,
   setCursorPosition,
+  setDuration,
   setScaleFactor,
+  setSelectedDataIndex,
 }) => {
   const wrapperRef = useRef()
+  const visualObjRef = useRef()
+
+  console.log(visualObjRef.current)
+  const handleMouseUp = useCallback(
+    e => {
+      console.log('execute custom mouse up')
+      setSelectedDataIndex()
+      setCursorPosition(abcString.length)
+      if (visualObjRef.current) {
+        console.log(visualObjRef.current[0])
+        visualObjRef.current[0].engraver.clearSelection()
+      }
+    },
+    [abcString]
+  )
 
   const handleClick = useCallback(
     (abcelem, tuneNumber, classes, analysis, drag, mouseEvent) => {
-      if (!mouseEvent.isTrusted) {
-        mouseEvent.stopPropagation()
-      }
+      console.log(abcelem)
       const originalText = abcString.substring(
         abcelem.startChar,
         abcelem.endChar
@@ -44,15 +65,30 @@ const MusicRender = ({
             abcString.substring(abcelem.endChar)
         )
       }
-      setDuration(abcelem.abselem.duration)
-      setCursorPosition(abcelem.endChar)
+
+      console.log(selectedDataIndex)
+      console.log(abcelem.abselem.elemset[0].getAttribute('data-index'))
+      if (
+        abcelem
+        // && (!selectedDataIndex ||
+        //   selectedDataIndex !==
+        //     abcelem.abselem.elemset[0].getAttribute('data-index'))
+      ) {
+        mouseEvent.stopPropagation()
+        setDuration(abcelem.abselem.duration)
+        setCursorPosition(abcelem.endChar)
+        setSelectedDataIndex(
+          abcelem.abselem.elemset[0].getAttribute('data-index')
+        )
+      }
     },
-    [abcString, setAbcString, setDuration]
+    [abcString, selectedDataIndex]
   )
 
+  // re-render the music
   useEffect(() => {
     console.log('calling abcjs render effect')
-    abcjs.renderAbc('music-render', abcString, {
+    visualObjRef.current = abcjs.renderAbc('music-render', abcString, {
       clickListener: handleClick,
       scale: scaleFactor,
       wrap: {
@@ -72,10 +108,28 @@ const MusicRender = ({
     })
   }, [abcString, scaleFactor, handleClick])
 
+  // re-select a previously selected element
+  // relies on patch to abcjs package
+  useEffect(() => {
+    console.log('calling reselect effect')
+    const node = document.querySelector(
+      `#music-render [data-index="${selectedDataIndex}"]`
+    )
+    if (!node) return
+    // setSelectedAbcElem()
+    console.log(
+      'reselecting previously selected element: ',
+      node.getAttribute('data-index')
+    )
+    node.dispatchEvent(new Event('mousedown', { bubbles: true }))
+    node.dispatchEvent(new Event('mouseup', { bubbles: true }))
+  }, [selectedDataIndex])
+
   return (
     <Card className='music-render vertical-container'>
       <MusicRenderDiv
         id='music-render'
+        onMouseUp={handleMouseUp}
         ref={wrapperRef}
         style={{ margin: 'auto', minWidth: '100%' }}
       />

@@ -1,7 +1,7 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 
 const BarlineControls = ({ onChange }) => {
-  const barOptions = ['[|', '|:', '|', ':|', '|]']
+  const barOptions = ['|', '||', '[|', '|]', '|:', ':|', '::']
 
   return (
     <ToggleButtonGroup exclusive color='primary' onChange={onChange}>

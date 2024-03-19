@@ -1,4 +1,4 @@
-export const noteRegEx = /([A-Ga-gZz][,']*)/
+export const noteRegEx = /([A-Ga-gZz][,'][]*)/
 
 export function tokenize(str) {
   var arr = str.split(/(!.+?!|".+?")/)
