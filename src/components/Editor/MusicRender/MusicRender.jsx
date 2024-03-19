@@ -52,13 +52,15 @@ const MusicRender = ({
         abcelem.endChar >= 0
       ) {
         var arr = tokenize(originalText)
+        console.log(arr)
+        console.log(drag)
         // arr now contains elements that are either a chord, a decoration, a note name, or anything else. It can be put back to its original string with .join("").
         for (var i = 0; i < arr.length; i++) {
           arr[i] = moveNote(arr[i], drag.step)
         }
         var newText = arr.join('')
 
-        console.log('setting abcstring')
+        console.log('setting abcstring', newText)
         setAbcString(
           abcString.substring(0, abcelem.startChar) +
             newText +

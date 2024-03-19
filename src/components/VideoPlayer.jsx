@@ -6,6 +6,8 @@ import {
   StartOutlined,
   RestartAlt,
   CancelOutlined,
+  SkipPrevious,
+  Flag,
 } from '@mui/icons-material'
 import YouTube from 'react-youtube'
 
@@ -113,6 +115,12 @@ export const VideoPlayer = ({ id, setId }) => {
   const markLoopEnd = () => {
     setSectionEnd(currentTime)
   }
+
+  const restartLoop = () => {
+    setCurrentTime(sectionStart)
+    playerRef.current.seekTo(sectionStart)
+  }
+
   return (
     <div className='horizontal-container' style={{ gap: 50, width: '100%' }}>
       <div className='horizontal-container'>
@@ -155,37 +163,10 @@ export const VideoPlayer = ({ id, setId }) => {
           max={2}
           value={playbackRate}
           valueLabelFormat={val => val + 'x'}
-          // valueLabelDisplay='on'
+          valueLabelDisplay='auto'
         />
       </div>
       <div className='vertical-container controls' style={{ flex: 3 }}>
-        <div className='horizontal-container' style={{ alignItems: 'center' }}>
-          <Tooltip title='Jump to beginning'>
-            <IconButton onClick={restartPlayer} aria-label='previous'>
-              <RestartAlt />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title='Mark loop start'>
-            <IconButton onClick={markLoopStart}>
-              <StartOutlined />
-            </IconButton>
-          </Tooltip>
-          <IconButton
-            onClick={() =>
-              isPlaying
-                ? playerRef.current?.pauseVideo()
-                : playerRef.current?.playVideo()
-            }
-            aria-label='play/pause'
-          >
-            {isPlaying ? <PauseCircle /> : <PlayArrow />}
-          </IconButton>
-          <Tooltip title='Mark loop end'>
-            <IconButton onClick={markLoopEnd}>
-              <StartOutlined sx={{ transform: 'rotate(180deg)' }} />
-            </IconButton>
-          </Tooltip>
-        </div>
         <div>
           {/* the loop slider */}
           <Slider
@@ -246,6 +227,39 @@ export const VideoPlayer = ({ id, setId }) => {
             valueLabelDisplay='auto'
             valueLabelFormat={timestampFormatter}
           />
+        </div>
+        <div className='horizontal-container' style={{ alignItems: 'center' }}>
+          <Tooltip title='Restart player'>
+            <IconButton onClick={restartLoop}>
+              <SkipPrevious />
+            </IconButton>
+          </Tooltip>
+          <IconButton
+            onClick={() =>
+              isPlaying
+                ? playerRef.current?.pauseVideo()
+                : playerRef.current?.playVideo()
+            }
+            aria-label='play/pause'
+          >
+            {isPlaying ? <PauseCircle /> : <PlayArrow />}
+          </IconButton>
+          <Tooltip title='Jump to loop start'>
+            <IconButton onClick={restartLoop}>
+              <RestartAlt />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title='Mark loop start'>
+            <IconButton onClick={markLoopStart}>
+              <Flag sx={{ color: 'green' }} />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title='Mark loop end'>
+            <IconButton onClick={markLoopEnd}>
+              <Flag sx={{ color: 'red' }} />
+            </IconButton>
+          </Tooltip>
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { allPitches, getDurationText } from '../../../utils'
 
 const NoteControls = ({ onChange, duration }) => {
   const notes = allPitches
-    .slice(allPitches.indexOf('B,'), allPitches.indexOf("b'"))
+    .slice(allPitches.indexOf('b,,'), allPitches.indexOf("c''"))
     .map(pitch => ({ note: pitch, white: true }))
 
   const flats = notes.map(noteObj => ({
@@ -22,25 +22,27 @@ const NoteControls = ({ onChange, duration }) => {
   const blackKeyWidthPercent = whiteKeyWidthPercent / 2
 
   return (
-    <ToggleButtonGroup
-      style={{ width: '100%', height: '100%' }}
-      exclusive
-      color='primary'
-      onChange={onChange}
-    >
-      {keyboard.map(({ note, white }) => {
-        const props = {
-          note,
-          key: note,
-          value: note + getDurationText(duration),
-        }
-        return white ? (
-          <WhiteKey width={whiteKeyWidthPercent} {...props} />
-        ) : (
-          <BlackKey width={blackKeyWidthPercent} {...props} />
-        )
-      })}
-    </ToggleButtonGroup>
+    <div className='keyboard'>
+      <ToggleButtonGroup
+        style={{ width: '100%' }}
+        exclusive
+        color='primary'
+        onChange={onChange}
+      >
+        {keyboard.map(({ note, white }) => {
+          const props = {
+            note,
+            key: note,
+            value: note + getDurationText(duration),
+          }
+          return white ? (
+            <WhiteKey width={whiteKeyWidthPercent} {...props} />
+          ) : (
+            <BlackKey width={blackKeyWidthPercent} {...props} />
+          )
+        })}
+      </ToggleButtonGroup>
+    </div>
   )
 }
 
@@ -48,13 +50,14 @@ const WhiteKey = ({ note, width, ...otherProps }) => (
   <ToggleButton
     {...otherProps}
     style={{
+      backgroundColor: note === 'c' ? '#e3eefa' : '#fffffa',
       borderBottomLeftRadius: 5,
       borderBottomRightRadius: 5,
       border: '1px solid black',
       // float: 'left',
       // position: 'relative',
+      padding: 0,
       width: `${width}vw`,
-      backgroundColor: note === 'c' && '#e3eefa',
     }}
   ></ToggleButton>
 )
@@ -73,6 +76,8 @@ const BlackKey = ({ note, width, ...otherProps }) => (
       marginLeft: `${-width / 2}vw`,
       marginRight: `${-width / 2}vw`,
       // position: 'relative',
+      padding: 0,
+
       width: `${width}vw`,
       zIndex: 1,
     }}

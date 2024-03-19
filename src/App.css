@@ -37,40 +37,43 @@ div.editor {
 div.editor-inputs {
   padding: 5px;
   display: flex;
-  flex: 2;
+  flex: 1 0 auto;
   flex-direction: column;
   gap: 10px;
 }
 
-div.keyboard {
+.keyboard {
   display: flex;
   height: 100%;
+  box-sizing: border-box;
   max-height: 400px;
+  min-height: 150px;
+  overflow: hidden;
+  padding: 2px;
+  width: 100%;
 }
 
 div.music-render {
   overflow: auto;
   min-height: 0;
-  flex: 3;
+  flex: 2 0 auto;
   display: flex;
   padding-bottom: 5px;
   padding-top: 5px;
-  /* align-items: center; */
 }
 
+/* VIDEO PLAYER */
 div.player {
-  gap: 10px;
   display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
   justify-content: space-around;
-  /* align-items: center; */
   padding: 30px;
-
-  /* flex: 1; */
 }
 
 div.controls {
   max-width: 60%;
   align-items: stretch;
-  flex: 1;
+  flex: 0;
   justify-content: center;
 }

@@ -1,4 +1,4 @@
-export const noteRegEx = /([A-Ga-gZz][,'][]*)/
+export const noteRegEx = /([A-Ga-gZz][,']*)/
 
 export function tokenize(str) {
   var arr = str.split(/(!.+?!|".+?")/)
@@ -21,11 +21,11 @@ export function sanitize(str) {
 
 // prettier-ignore
 export const allPitches = [
-    'C,,,,', 'D,,,,', 'E,,,,', 'F,,,,', 'G,,,,', 'A,,,,', 'B,,,,',
-    'C,,,', 'D,,,', 'E,,,', 'F,,,', 'G,,,', 'A,,,', 'B,,,',
-    'C,,', 'D,,', 'E,,', 'F,,', 'G,,', 'A,,', 'B,,',
-    'C,', 'D,', 'E,', 'F,', 'G,', 'A,', 'B,',
-    'C', 'D', 'E', 'F', 'G', 'A', 'B',
+    'c,,,,,', 'd,,,,,', 'e,,,,,', 'f,,,,,', 'g,,,,,', 'a,,,,,', 'b,,,,,',
+    'c,,,,', 'd,,,,', 'e,,,,', 'f,,,,', 'g,,,,', 'a,,,,', 'b,,,,',
+    'c,,,', 'd,,,', 'e,,,', 'f,,,', 'g,,,', 'a,,,', 'b,,,',
+    'c,,', 'd,,', 'e,,', 'f,,', 'g,,', 'a,,', 'b,,',
+    'c,', 'd,', 'e,', 'f,', 'g,', 'a,', 'b,',
     'c', 'd', 'e', 'f', 'g', 'a', 'b',
     "c'", "d'", "e'", "f'", "g'", "a'", "b'",
     "c''", "d''", "e''", "f''", "g''", "a''", "b''",
@@ -34,6 +34,11 @@ export const allPitches = [
 ];
 
 export function moveNote(note, step) {
+  if (/[A-G]/.test(note)) {
+    //if the note is an uppercase version, convert to lowercase representation
+    note = note.toLowerCase() + ','
+  }
+
   var x = allPitches.indexOf(note)
   if (x >= 0) return allPitches[x - step]
   return note
