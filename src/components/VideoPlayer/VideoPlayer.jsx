@@ -36,6 +36,7 @@ export const VideoPlayer = ({ id, setId }) => {
   const sectionEndRef = useRef()
   sectionStartRef.current = sectionStart
   sectionEndRef.current = sectionEnd
+
   /**
    * initializes the playerStatus when the youtube api is ready
    * @param {*} e the event from the youtube iframe
@@ -52,6 +53,11 @@ export const VideoPlayer = ({ id, setId }) => {
   }
 
   const timeIncrement = useCallback(() => {
+    console.log({
+      time: playerRef.current.getCurrentTime(),
+      start: sectionStartRef.current,
+      end: sectionEndRef.current,
+    })
     setCurrentTime(playerRef.current?.getCurrentTime())
     if (playerRef.current?.getCurrentTime() > sectionEndRef.current) {
       handleSliderChange(null, sectionStartRef.current)
@@ -76,7 +82,6 @@ export const VideoPlayer = ({ id, setId }) => {
   }
 
   const handleSliderChange = (_, newValue) => {
-    if (newValue < sectionStart || newValue > sectionEnd) return
     clearInterval(timerRef.current)
     setCurrentTime(newValue)
     playerRef.current.seekTo(newValue)
@@ -249,7 +254,7 @@ export const VideoPlayer = ({ id, setId }) => {
         </div>
         <div className='horizontal-container' style={{ alignItems: 'center' }}>
           <Tooltip title='Restart player'>
-            <IconButton onClick={restartLoop}>
+            <IconButton onClick={restartPlayer}>
               <SkipPrevious />
             </IconButton>
           </Tooltip>
