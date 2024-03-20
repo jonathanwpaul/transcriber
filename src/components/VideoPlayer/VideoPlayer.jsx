@@ -92,16 +92,19 @@ export const VideoPlayer = ({ id, setId }) => {
     playerRef.current.setPlaybackRate(newValue)
   }
 
-  const handleIntervalChange = (_, newValue) => {
-    if (newValue[0] > currentTime) {
-      handleSliderChange(null, newValue[0])
+  const handleIntervalChange = (_, newValue, activeThumb) => {
+    const minTime = 1
+    if (activeThumb === 0) {
+      if (newValue[0] > currentTime) {
+        handleSliderChange(null, newValue[0])
+      }
+      setSectionStart(Math.min(newValue[0], sectionEnd - minTime))
+    } else {
+      if (newValue[1] < currentTime) {
+        handleSliderChange(null, newValue[1])
+      }
+      setSectionEnd(Math.max(newValue[1], sectionStart + minTime))
     }
-    setSectionStart(newValue[0])
-
-    if (newValue[1] < currentTime) {
-      handleSliderChange(null, newValue[1])
-    }
-    setSectionEnd(newValue[1])
   }
 
   const preventHorizontalKeyboardNavigation = event => {
@@ -198,6 +201,7 @@ export const VideoPlayer = ({ id, setId }) => {
           {/* the loop slider */}
           <Slider
             color='secondary'
+            disableSwap
             min={0}
             max={duration}
             onChange={handleIntervalChange}
@@ -211,12 +215,12 @@ export const VideoPlayer = ({ id, setId }) => {
               '& .MuiSlider-thumb': {
                 '&[data-index="0"]': {
                   color: 'green',
-                  transform: 'translateX(-50%) translateY(-150%)', // rotate(225deg)',
+                  transform: 'translateX(-100%) translateY(-150%)', // rotate(225deg)',
                 },
 
                 '&[data-index="1"]': {
                   color: 'red',
-                  transform: 'translateX(-50%) translateY(50%)', // rotate(45deg)',
+                  transform: 'translateX(0%) translateY(-150%)', // rotate(45deg)',
                 },
                 /* Border */
                 // borderRadius: '0px 50% 50% 50%',
@@ -226,8 +230,12 @@ export const VideoPlayer = ({ id, setId }) => {
                 width: '2rem',
               },
               '& .MuiSlider-track': {
+                boxSizing: 'border-box',
                 borderRadius: '5px',
-                opacity: 0.1,
+                borderLeft: '5px solid green',
+                borderRight: '5px solid red',
+                color: '#eeeeee95',
+                opacity: 0.8,
                 height: 30,
               },
               '.MuiSlider-rail': {
