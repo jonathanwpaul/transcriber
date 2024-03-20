@@ -182,7 +182,10 @@ export const VideoPlayer = ({ id, setId }) => {
           />
           <TimeTextInput
             value={currentTime}
-            onChange={value => playerRef.current.seekTo(value)}
+            onChange={value => {
+              setCurrentTime(value)
+              playerRef.current.seekTo(value)
+            }}
             changeAmount={0.5}
           />
           <TimeTextInput
@@ -225,7 +228,7 @@ export const VideoPlayer = ({ id, setId }) => {
               '& .MuiSlider-track': {
                 borderRadius: '5px',
                 opacity: 0.1,
-                height: 20,
+                height: 30,
               },
               '.MuiSlider-rail': {
                 height: 0,

@@ -17,7 +17,6 @@ const CursorControls = ({ abcString, cursorPosition, setCursorPosition }) => {
     <ToggleButtonGroup exclusive color='primary'>
       <ToggleButton onClick={handleMoveCursorLeft}>{'<'}</ToggleButton>
       <ToggleButton onClick={handleMoveCursorRight}>{'>'}</ToggleButton>
-
       {/* <ToggleButton>Test</ToggleButton> */}
     </ToggleButtonGroup>
   )
