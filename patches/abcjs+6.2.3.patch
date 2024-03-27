@@ -1,3 +1,21 @@
+diff --git a/node_modules/abcjs/src/write/engraver-controller.js b/node_modules/abcjs/src/write/engraver-controller.js
+index 6e03493..d81d387 100644
+--- a/node_modules/abcjs/src/write/engraver-controller.js
++++ b/node_modules/abcjs/src/write/engraver-controller.js
+@@ -93,6 +93,13 @@ EngraverController.prototype.reset = function () {
+ 		this.renderer.setLineThickness(this.lineThickness)
+ };
+ 
++EngraverController.prototype.clearSelection = function () {
++	for (var i = 0; i < this.selected.length; i++) {
++		this.selected[i].unhighlight(undefined, this.renderer.foregroundColor);
++	}
++	this.selected = [];
++};
++
+ /**
+  * run the engraving process
+  */
 diff --git a/node_modules/abcjs/src/write/interactive/selection.js b/node_modules/abcjs/src/write/interactive/selection.js
 index ee205fb..96e189d 100644
 --- a/node_modules/abcjs/src/write/interactive/selection.js
