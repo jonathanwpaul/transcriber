@@ -1,6 +1,12 @@
+import { SpaceBar } from '@mui/icons-material'
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 
-const CursorControls = ({ abcString, cursorPosition, setCursorPosition }) => {
+const CursorControls = ({
+  abcString,
+  cursorPosition,
+  handleSpaceInput,
+  setCursorPosition,
+}) => {
   const handleMoveCursorLeft = () => {
     const newCursorPosition =
       cursorPosition > 0 ? cursorPosition - 1 : cursorPosition
@@ -15,8 +21,15 @@ const CursorControls = ({ abcString, cursorPosition, setCursorPosition }) => {
 
   return (
     <ToggleButtonGroup exclusive color='primary'>
-      <ToggleButton onClick={handleMoveCursorLeft}>{'<'}</ToggleButton>
-      <ToggleButton onClick={handleMoveCursorRight}>{'>'}</ToggleButton>
+      <ToggleButton disabled onClick={handleMoveCursorLeft}>
+        {'<'}
+      </ToggleButton>
+      <ToggleButton value=' ' onClick={handleSpaceInput}>
+        <SpaceBar />
+      </ToggleButton>
+      <ToggleButton disabled onClick={handleMoveCursorRight}>
+        {'>'}
+      </ToggleButton>
       {/* <ToggleButton>Test</ToggleButton> */}
     </ToggleButtonGroup>
   )

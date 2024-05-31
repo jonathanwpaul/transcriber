@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FolderOpen, Save } from '@mui/icons-material'
 import {
   Card,
@@ -15,8 +15,10 @@ import {
   NoteControls,
   OctaveControls,
   SaveLoadControls,
+  UndoRedoControls,
 } from './components'
 import { updateAbcString, tokenize, noteRegEx, moveNote } from '../../utils'
+import { Preferences } from '@capacitor/preferences'
 
 const Controls = ({
   abcString,
@@ -32,6 +34,8 @@ const Controls = ({
   textEditor,
   textFieldRef,
 }) => {
+  const [undoStack, setUndoStack] = useState()
+
   const handleDurationChange = (_, newValue) => {
     if (newValue === null) return
     setDuration(newValue)
@@ -50,6 +54,16 @@ const Controls = ({
     setTextEditor(value === 'text')
   }
 
+  const getUndoStack = async () => {
+    const { value } = await Preferences.get({ key: 'undoHistory' })
+    const stack = JSON.parse(value) || []
+    setUndoStack(stack)
+  }
+
+  useEffect(() => {
+    getUndoStack()
+  }, [abcString])
+
   return (
     <>
       <div
@@ -65,9 +79,13 @@ const Controls = ({
         <CursorControls
           abcString={abcString}
           cursorPosition={cursorPosition}
+          handleSpaceInput={handleInsert}
           setCursorPosition={setCursorPosition}
           textFieldRef={textFieldRef}
         />
+        {undoStack && undoStack.length > 0 && (
+          <UndoRedoControls undoStack={undoStack} setAbcString={setAbcString} />
+        )}
         <SaveLoadControls setAbcString={setAbcString} abcString={abcString} />
       </div>
       {!textEditor && (

@@ -6,7 +6,8 @@ import {
 } from '@mui/material'
 import { useCallback, useState } from 'react'
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
-import { FolderOpen, Save } from '@mui/icons-material'
+import { Preferences } from '@capacitor/preferences'
+import { FolderOpen, Save, SaveAs } from '@mui/icons-material'
 import { FileDialog } from './FileDialog'
 import { SaveAsDialog } from './SaveAsDialog'
 
@@ -54,17 +55,22 @@ const SaveLoadControls = ({ abcString, setAbcString }) => {
 
   return (
     <>
-      <IconButton onClick={() => setSaveDialogOpen(true)}>
-        <Save />
-      </IconButton>
-      <IconButton
-        onClick={() => {
-          getSaves()
-          setFileDialogOpen(true)
-        }}
-      >
-        <FolderOpen />
-      </IconButton>
+      <ToggleButtonGroup>
+        <ToggleButton disabled onClick={() => setSaveDialogOpen(true)}>
+          <Save />
+        </ToggleButton>
+        <ToggleButton onClick={() => setSaveDialogOpen(true)}>
+          <SaveAs />
+        </ToggleButton>
+        <ToggleButton
+          onClick={() => {
+            getSaves()
+            setFileDialogOpen(true)
+          }}
+        >
+          <FolderOpen />
+        </ToggleButton>
+      </ToggleButtonGroup>
       <FileDialog
         open={fileDialogOpen}
         onClose={file => {
