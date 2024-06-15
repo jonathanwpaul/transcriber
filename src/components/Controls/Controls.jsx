@@ -22,7 +22,6 @@ import { Preferences } from '@capacitor/preferences'
 
 const Controls = ({
   abcString,
-  cursorPosition,
   duration,
   selectedAbcElem,
   setAbcString,
@@ -34,7 +33,7 @@ const Controls = ({
   textEditor,
   textFieldRef,
 }) => {
-  const [undoStack, setUndoStack] = useState()
+  // const [undoStack, setUndoStack] = useState()
 
   const handleDurationChange = (_, newValue) => {
     if (newValue === null) return
@@ -43,26 +42,25 @@ const Controls = ({
 
   const handleInsert = (_, value) => {
     setAbcString(
-      abcString.slice(0, cursorPosition) +
+      abcString.slice(0, selectedAbcElem.endChar) +
         value +
-        abcString.slice(cursorPosition)
+        abcString.slice(selectedAbcElem.endChar)
     )
-    setCursorPosition(cursorPosition + value.length)
   }
 
   const handleInputChange = (_, value) => {
     setTextEditor(value === 'text')
   }
 
-  const getUndoStack = async () => {
-    const { value } = await Preferences.get({ key: 'undoHistory' })
-    const stack = JSON.parse(value) || []
-    setUndoStack(stack)
-  }
+  // const getUndoStack = async () => {
+  //   const { value } = await Preferences.get({ key: 'undoHistory' })
+  //   const stack = JSON.parse(value) || []
+  //   setUndoStack(stack)
+  // }
 
-  useEffect(() => {
-    getUndoStack()
-  }, [abcString])
+  // useEffect(() => {
+  //   getUndoStack()
+  // }, [abcString])
 
   return (
     <>
@@ -70,22 +68,22 @@ const Controls = ({
         className='horizontal-container'
         style={{ alignItems: 'center', flexWrap: 'wrap' }}
       >
+        <InputControls onChange={handleInputChange} textEditor={textEditor} />
         {/* TODO: the octaves don't work when a duration is applied (which is pretty much always) since it inserts after the number */}
         {/* <OctaveControls onChange={handleInsert} /> */}
-        <InputControls onChange={handleInputChange} textEditor={textEditor} />
-        <AccidentalControls onChange={handleInsert} />
         <DurationControls onChange={handleDurationChange} duration={duration} />
+        <AccidentalControls onChange={handleInsert} />
         <BarlineControls onChange={handleInsert} />
-        <CursorControls
+        {/* <CursorControls
           abcString={abcString}
           cursorPosition={cursorPosition}
           handleSpaceInput={handleInsert}
           setCursorPosition={setCursorPosition}
           textFieldRef={textFieldRef}
-        />
-        {undoStack && undoStack.length > 0 && (
+        /> */}
+        {/* {undoStack && undoStack.length > 0 && (
           <UndoRedoControls undoStack={undoStack} setAbcString={setAbcString} />
-        )}
+        )} */}
         <SaveLoadControls setAbcString={setAbcString} abcString={abcString} />
       </div>
       {!textEditor && (

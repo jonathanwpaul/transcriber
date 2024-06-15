@@ -13,22 +13,24 @@ import { moveNote, tokenize } from '../../../utils'
 const MusicRender = ({
   abcString,
   scaleFactor,
-  selectedDataIndex,
+  selectedAbcElem,
   setAbcString,
-  setCursorPosition,
-  setDuration,
   setScaleFactor,
-  setSelectedDataIndex,
+  setSelectedAbcElem,
+  setDuration,
 }) => {
   const wrapperRef = useRef()
   const visualObjRef = useRef()
 
-  console.log(visualObjRef.current)
+  console.log(
+    visualObjRef.current && visualObjRef.current[0].lines[0].staff[0].voices
+  )
+  /**
+   * mouseUp handler, if this handler is reached, we want to clear out the selected element
+   */
   const handleMouseUp = useCallback(
     e => {
-      console.log('execute custom mouse up')
-      setSelectedDataIndex()
-      setCursorPosition(abcString.length)
+      setSelectedAbcElem()
       if (visualObjRef.current) {
         console.log(visualObjRef.current[0])
         visualObjRef.current[0].engraver.clearSelection()
@@ -37,6 +39,9 @@ const MusicRender = ({
     [abcString]
   )
 
+  /**
+   * main click handler for the music renderer. This seems to get executed on mouseup
+   */
   const handleClick = useCallback(
     (abcelem, tuneNumber, classes, analysis, drag, mouseEvent) => {
       console.log(abcelem)
@@ -52,15 +57,12 @@ const MusicRender = ({
         abcelem.endChar >= 0
       ) {
         var arr = tokenize(originalText)
-        console.log(arr)
-        console.log(drag)
         // arr now contains elements that are either a chord, a decoration, a note name, or anything else. It can be put back to its original string with .join("").
         for (var i = 0; i < arr.length; i++) {
           arr[i] = moveNote(arr[i], drag.step)
         }
         var newText = arr.join('')
 
-        console.log('setting abcstring', newText)
         setAbcString(
           abcString.substring(0, abcelem.startChar) +
             newText +
@@ -68,23 +70,18 @@ const MusicRender = ({
         )
       }
 
-      console.log(selectedDataIndex)
-      console.log(abcelem.abselem.elemset[0].getAttribute('data-index'))
       if (
         abcelem
         // && (!selectedDataIndex ||
         //   selectedDataIndex !==
         //     abcelem.abselem.elemset[0].getAttribute('data-index'))
       ) {
-        mouseEvent.stopPropagation()
-        setDuration(abcelem.abselem.duration)
-        setCursorPosition(abcelem.endChar)
-        setSelectedDataIndex(
-          abcelem.abselem.elemset[0].getAttribute('data-index')
-        )
+        mouseEvent.stopPropagation() //this ensures the event does not reach the custom handleMouseUp
+        setSelectedAbcElem(abcelem)
+        setDuration(abcelem.duration)
       }
     },
-    [abcString, selectedDataIndex]
+    [abcString]
   )
 
   // re-render the music
@@ -102,7 +99,7 @@ const MusicRender = ({
         document.querySelector('#music-render')?.getBoundingClientRect().width -
           30 || 100,
       // showDebug: ['box'],
-      dragging: true,
+      // dragging: true,
       selectionColor: 'blue',
       dragColor: 'purple',
       // viewportVertical: true,
@@ -113,6 +110,10 @@ const MusicRender = ({
   // re-select a previously selected element
   // relies on patch to abcjs package
   useEffect(() => {
+    if (!selectedAbcElem) return
+
+    const selectedDataIndex =
+      selectedAbcElem.abselem.elemset[0].getAttribute('data-index')
     console.log('calling reselect effect')
     const node = document.querySelector(
       `#music-render [data-index="${selectedDataIndex}"]`
@@ -125,7 +126,7 @@ const MusicRender = ({
     )
     node.dispatchEvent(new Event('mousedown', { bubbles: true }))
     node.dispatchEvent(new Event('mouseup', { bubbles: true }))
-  }, [selectedDataIndex])
+  })
 
   return (
     <Card className='music-render vertical-container'>

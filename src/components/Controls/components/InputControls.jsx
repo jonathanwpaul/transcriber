@@ -1,5 +1,6 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 
+//toggles between source editor and piano editor
 const ToggleInputControls = ({ onChange, textEditor }) => {
   return (
     <ToggleButtonGroup
