@@ -14,12 +14,18 @@ const Editor = () => {
 
   const textFieldRef = useRef()
 
-  // useEffect(() => {
-  //   const input = textFieldRef.current
-  //   if (input) input.setSelectionRange(cursorPosition, cursorPosition)
-  // }, [textFieldRef, cursorPosition, abcString])
+  useEffect(() => {
+    const input = textFieldRef.current
+    if (input && selectedAbcElem) {
+      input.setSelectionRange(
+        selectedAbcElem.startChar,
+        selectedAbcElem.endChar
+      )
+      input.focus()
 
-  console.log('selected abc elem: ', selectedAbcElem)
+      console.log('moving highlight')
+    }
+  }, [textFieldRef, selectedAbcElem])
 
   const handleStringChange = e => {
     setAbcString(e.target.value)
