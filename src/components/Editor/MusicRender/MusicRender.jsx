@@ -22,9 +22,9 @@ const MusicRender = ({
   const wrapperRef = useRef()
   const visualObjRef = useRef()
 
-  // console.log(
-  //   visualObjRef.current && visualObjRef.current[0].lines[0].staff[0].voices
-  // )
+  const voiceArr =
+    visualObjRef.current && visualObjRef.current[0].lines[0].staff[0].voices
+
   /**
    * mouseUp handler, if this handler is reached, we want to clear out the selected element
    */
@@ -109,6 +109,7 @@ const MusicRender = ({
   useEffect(() => {
     if (!selectedAbcElem) return
 
+    console.log(selectedAbcElem)
     const selectedDataIndex =
       selectedAbcElem.abselem.elemset[0].getAttribute('data-index')
     const node = document.querySelector(

@@ -22,8 +22,6 @@ const Editor = () => {
         selectedAbcElem.endChar
       )
       input.focus()
-
-      console.log('moving highlight')
     }
   }, [textFieldRef, selectedAbcElem])
 
