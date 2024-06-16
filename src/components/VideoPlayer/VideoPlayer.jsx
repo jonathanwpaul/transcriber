@@ -53,11 +53,11 @@ export const VideoPlayer = ({ id, setId }) => {
   }
 
   const timeIncrement = useCallback(() => {
-    console.log({
-      time: playerRef.current.getCurrentTime(),
-      start: sectionStartRef.current,
-      end: sectionEndRef.current,
-    })
+    // console.log({
+    //   time: playerRef.current.getCurrentTime(),
+    //   start: sectionStartRef.current,
+    //   end: sectionEndRef.current,
+    // })
     setCurrentTime(playerRef.current?.getCurrentTime())
     if (playerRef.current?.getCurrentTime() > sectionEndRef.current) {
       handleSliderChange(null, sectionStartRef.current)

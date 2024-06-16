@@ -72,7 +72,8 @@ const Editor = () => {
 
         <TextFieldEditor
           onChange={handleStringChange}
-          disabled={!textEditor}
+          // disabled={!textEditor}
+          selectedAbcElem={selectedAbcElem}
           value={abcString}
           inputRef={textFieldRef}
         />

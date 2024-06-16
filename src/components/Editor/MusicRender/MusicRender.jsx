@@ -22,9 +22,9 @@ const MusicRender = ({
   const wrapperRef = useRef()
   const visualObjRef = useRef()
 
-  console.log(
-    visualObjRef.current && visualObjRef.current[0].lines[0].staff[0].voices
-  )
+  // console.log(
+  //   visualObjRef.current && visualObjRef.current[0].lines[0].staff[0].voices
+  // )
   /**
    * mouseUp handler, if this handler is reached, we want to clear out the selected element
    */
@@ -32,7 +32,6 @@ const MusicRender = ({
     e => {
       setSelectedAbcElem()
       if (visualObjRef.current) {
-        console.log(visualObjRef.current[0])
         visualObjRef.current[0].engraver.clearSelection()
       }
     },
@@ -44,7 +43,6 @@ const MusicRender = ({
    */
   const handleClick = useCallback(
     (abcelem, tuneNumber, classes, analysis, drag, mouseEvent) => {
-      console.log(abcelem)
       const originalText = abcString.substring(
         abcelem.startChar,
         abcelem.endChar
@@ -86,7 +84,6 @@ const MusicRender = ({
 
   // re-render the music
   useEffect(() => {
-    console.log('calling abcjs render effect')
     visualObjRef.current = abcjs.renderAbc('music-render', abcString, {
       clickListener: handleClick,
       scale: scaleFactor,
@@ -114,16 +111,15 @@ const MusicRender = ({
 
     const selectedDataIndex =
       selectedAbcElem.abselem.elemset[0].getAttribute('data-index')
-    console.log('calling reselect effect')
     const node = document.querySelector(
       `#music-render [data-index="${selectedDataIndex}"]`
     )
     if (!node) return
     // setSelectedAbcElem()
-    console.log(
-      'reselecting previously selected element: ',
-      node.getAttribute('data-index')
-    )
+    // console.log(
+    //   'reselecting previously selected element: ',
+    //   node.getAttribute('data-index')
+    // )
     node.dispatchEvent(new Event('mousedown', { bubbles: true }))
     node.dispatchEvent(new Event('mouseup', { bubbles: true }))
   })

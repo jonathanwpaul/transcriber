@@ -41,11 +41,14 @@ const Controls = ({
   }
 
   const handleInsert = (_, value) => {
-    setAbcString(
-      abcString.slice(0, selectedAbcElem.endChar) +
-        value +
-        abcString.slice(selectedAbcElem.endChar)
-    )
+    console.log(selectedAbcElem)
+    selectedAbcElem
+      ? setAbcString(
+          abcString.slice(0, selectedAbcElem.endChar) +
+            value +
+            abcString.slice(selectedAbcElem.endChar)
+        )
+      : setAbcString(abcString + value)
   }
 
   const handleInputChange = (_, value) => {
