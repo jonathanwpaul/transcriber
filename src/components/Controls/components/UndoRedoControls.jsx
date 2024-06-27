@@ -3,13 +3,10 @@ import { useEffect, useState } from 'react'
 import { Preferences } from '@capacitor/preferences'
 
 const UndoRedoControls = ({ undoStack, setAbcString }) => {
-  console.log('undo redo stack', undoStack)
   const [index, setIndex] = useState(-1)
 
   const handler = change => {
     setIndex(index => index + change)
-    console.log(index)
-    console.log(undoStack[index])
     setAbcString(undoStack[index])
   }
 

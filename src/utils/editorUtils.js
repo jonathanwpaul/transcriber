@@ -63,3 +63,7 @@ export function getDurationText(duration) {
   const lookup = durationMapping.filter(e => e.duration === duration)
   return lookup ? lookup[0]?.text : undefined
 }
+
+export function abcStringToArr(abcString) {
+  return [...abcString.matchAll(/{*([_^]*[a-zA-Z],*\d*)}*/gm)]
+}

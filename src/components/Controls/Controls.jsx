@@ -19,36 +19,46 @@ import {
 } from './components'
 import { updateAbcString, tokenize, noteRegEx, moveNote } from '../../utils'
 import { Preferences } from '@capacitor/preferences'
+import SpecialCharacterControls from './components/SpecialCharacterControls'
 
 const Controls = ({
   abcString,
   duration,
   selectedAbcElem,
   setAbcString,
-  setCursorPosition,
   setDuration,
-  setScaleFactor,
-  setSelectedAbcElem,
+  setSelectedIndex,
   setTextEditor,
   textEditor,
   textFieldRef,
+  voiceArr,
 }) => {
   // const [undoStack, setUndoStack] = useState()
 
   const handleDurationChange = (_, newValue) => {
+    console.log('duration: ', newValue)
     if (newValue === null) return
     setDuration(newValue)
   }
 
   const handleInsert = (_, value) => {
-    console.log(selectedAbcElem)
-    selectedAbcElem
-      ? setAbcString(
-          abcString.slice(0, selectedAbcElem.endChar) +
+    console.group('handleInsert')
+    console.log({ value })
+    setAbcString(
+      selectedAbcElem
+        ? abcString.slice(0, selectedAbcElem.endChar) +
             value +
             abcString.slice(selectedAbcElem.endChar)
-        )
-      : setAbcString(abcString + value)
+        : abcString + value
+    )
+
+    console.log({ selectedAbcElem })
+    setSelectedIndex(
+      selectedAbcElem
+        ? selectedAbcElem.abselem.counters.note + 1
+        : voiceArr.length
+    )
+    console.groupEnd('handleInsert')
   }
 
   const handleInputChange = (_, value) => {
@@ -75,7 +85,8 @@ const Controls = ({
         {/* TODO: the octaves don't work when a duration is applied (which is pretty much always) since it inserts after the number */}
         {/* <OctaveControls onChange={handleInsert} /> */}
         <DurationControls onChange={handleDurationChange} duration={duration} />
-        <AccidentalControls onChange={handleInsert} />
+        <SpecialCharacterControls onChange={handleInsert} />
+        {/* <AccidentalControls onChange={handleInsert} /> */}
         <BarlineControls onChange={handleInsert} />
         {/* <CursorControls
           abcString={abcString}

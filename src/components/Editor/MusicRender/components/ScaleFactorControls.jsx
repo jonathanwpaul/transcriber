@@ -5,7 +5,6 @@ const ScaleFactorControls = ({ setScaleFactor }) => {
     <ToggleButtonGroup exclusive color='primary'>
       <ToggleButton
         onClick={(_, newValue) => {
-          console.log(newValue)
           setScaleFactor(scale =>
             scale + newValue > 0 ? scale + newValue : scale
           )

@@ -16,21 +16,19 @@ const MusicRender = ({
   selectedAbcElem,
   setAbcString,
   setScaleFactor,
-  setSelectedAbcElem,
+  setSelectedIndex,
   setDuration,
+  visualObjRef,
 }) => {
   const wrapperRef = useRef()
-  const visualObjRef = useRef()
-
-  const voiceArr =
-    visualObjRef.current && visualObjRef.current[0].lines[0].staff[0].voices
+  console.log('rerender music')
 
   /**
    * mouseUp handler, if this handler is reached, we want to clear out the selected element
    */
   const handleMouseUp = useCallback(
     e => {
-      setSelectedAbcElem()
+      setSelectedIndex(-1)
       if (visualObjRef.current) {
         visualObjRef.current[0].engraver.clearSelection()
       }
@@ -75,7 +73,7 @@ const MusicRender = ({
         //     abcelem.abselem.elemset[0].getAttribute('data-index'))
       ) {
         mouseEvent.stopPropagation() //this ensures the event does not reach the custom handleMouseUp
-        setSelectedAbcElem(abcelem)
+        setSelectedIndex(abcelem.abselem.counters.note)
         setDuration(abcelem.duration)
       }
     },
@@ -102,7 +100,7 @@ const MusicRender = ({
       // viewportVertical: true,
       // viewportHorizontal: true,
     })
-  }, [abcString, scaleFactor, handleClick])
+  })
 
   // re-select a previously selected element
   // relies on patch to abcjs package

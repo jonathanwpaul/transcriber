@@ -4,16 +4,30 @@ import { TextFieldEditor } from './components'
 import { Card, Snackbar, SnackbarContent } from '@mui/material'
 import { Profiler, useCallback, useEffect, useRef, useState } from 'react'
 import { Preferences } from '@capacitor/preferences'
+import { abcStringToArr } from '../../utils'
 
 const Editor = () => {
   const [abcString, setAbcString] = useState('a,1b,1c1d1e1f1g1')
   const [duration, setDuration] = useState(1 / 4)
-  const [selectedAbcElem, setSelectedAbcElem] = useState()
+  const [selectedIndex, setSelectedIndex] = useState()
   const [scaleFactor, setScaleFactor] = useState(1)
   const [textEditor, setTextEditor] = useState(false)
 
-  const textFieldRef = useRef()
+  const arr = abcStringToArr(abcString)
+  console.log({ arr })
 
+  const textFieldRef = useRef()
+  const visualObjRef = useRef()
+
+  const voiceArr =
+    visualObjRef.current && visualObjRef.current[0].lines[0].staff[0].voices[0]
+
+  const selectedAbcElem = voiceArr && voiceArr[selectedIndex]
+  console.log('editor selectedelem:', selectedAbcElem)
+  /**
+   * selects the currently selected note in the text input
+   * TODO: this executes before selected Abc elem is updated
+   */
   useEffect(() => {
     const input = textFieldRef.current
     if (input && selectedAbcElem) {
@@ -23,7 +37,7 @@ const Editor = () => {
       )
       input.focus()
     }
-  }, [textFieldRef, selectedAbcElem])
+  })
 
   const handleStringChange = e => {
     setAbcString(e.target.value)
@@ -37,7 +51,8 @@ const Editor = () => {
     setAbcString,
     setDuration,
     setScaleFactor,
-    setSelectedAbcElem,
+    setSelectedIndex,
+    visualObjRef,
   }
 
   const controlsProps = {
@@ -47,9 +62,11 @@ const Editor = () => {
     setAbcString,
     setDuration,
     setScaleFactor,
+    setSelectedIndex,
     setTextEditor,
     textEditor,
     textFieldRef,
+    voiceArr,
   }
 
   // useEffect(() => {

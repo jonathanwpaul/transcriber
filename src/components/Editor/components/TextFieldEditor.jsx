@@ -6,8 +6,6 @@ const TextFieldEditor = ({
   value,
   ...otherProps
 }) => {
-  console.log(selectedAbcElem)
-
   return (
     <TextField
       fullWidth
