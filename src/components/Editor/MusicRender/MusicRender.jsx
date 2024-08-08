@@ -9,6 +9,7 @@ import React, {
 } from 'react'
 import { ScaleFactorControls } from './components'
 import { moveNote, tokenize } from '../../../utils'
+import { SaveLoadControls } from '../../Controls/components'
 
 const MusicRender = ({
   abcString,
@@ -30,6 +31,7 @@ const MusicRender = ({
     e => {
       setSelectedIndex(-1)
       if (visualObjRef.current) {
+        console.log(visualObjRef.current)
         visualObjRef.current[0].engraver.clearSelection()
       }
     },
@@ -131,8 +133,16 @@ const MusicRender = ({
         ref={wrapperRef}
         style={{ margin: 'auto', minWidth: '100%' }}
       />
-      <div style={{ padding: 5 }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 5,
+          justifyContent: 'space-between',
+          padding: 5,
+        }}
+      >
         <ScaleFactorControls setScaleFactor={setScaleFactor} />
+        <SaveLoadControls setAbcString={setAbcString} abcString={abcString} />
       </div>
     </Card>
   )

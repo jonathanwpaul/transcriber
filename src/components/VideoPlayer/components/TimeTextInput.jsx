@@ -1,9 +1,11 @@
 import { Add, Remove } from '@mui/icons-material'
 import { IconButton, TextField } from '@mui/material'
 
-const TimeTextInput = ({ onChange, value, changeAmount }) => {
+const TimeTextInput = ({ onChange, value, changeAmount, min = 0, max }) => {
   const handleChange = amt => {
-    onChange(value + amt)
+    const newValue = value + amt
+    if ((amt < 0 && newValue >= min) || (amt > 0 && newValue <= max))
+      onChange(newValue)
   }
   return (
     <div className='horizontal-container' style={{ alignItems: 'center' }}>

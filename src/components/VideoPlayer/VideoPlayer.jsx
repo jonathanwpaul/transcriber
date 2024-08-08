@@ -38,12 +38,17 @@ export const VideoPlayer = ({ id, setId }) => {
   sectionEndRef.current = sectionEnd
 
   /**
+   * @param {time}
+   */
+  const round = t => Math.round(t * 10) / 10
+
+  /**
    * initializes the playerStatus when the youtube api is ready
    * @param {*} e the event from the youtube iframe
    */
   const onReady = e => {
     playerRef.current = e.target
-    setCurrentTime(e.target.getCurrentTime())
+    setCurrentTime(round(e.target.getCurrentTime()))
     setDuration(playerRef.current.getDuration())
     setIsPlaying(e.target.getPlayerState() === 1)
     setPlaybackRate(e.target.getPlaybackRate())
@@ -58,7 +63,7 @@ export const VideoPlayer = ({ id, setId }) => {
     //   start: sectionStartRef.current,
     //   end: sectionEndRef.current,
     // })
-    setCurrentTime(playerRef.current?.getCurrentTime())
+    setCurrentTime(round(playerRef.current?.getCurrentTime()))
     if (playerRef.current?.getCurrentTime() > sectionEndRef.current) {
       handleSliderChange(null, sectionStartRef.current)
     }
@@ -83,8 +88,8 @@ export const VideoPlayer = ({ id, setId }) => {
 
   const handleSliderChange = (_, newValue) => {
     clearInterval(timerRef.current)
-    setCurrentTime(newValue)
-    playerRef.current.seekTo(newValue)
+    setCurrentTime(round(newValue))
+    playerRef.current.seekTo(round(newValue))
   }
 
   const handlePlaybackRateChange = (_, newValue) => {
@@ -98,12 +103,12 @@ export const VideoPlayer = ({ id, setId }) => {
       if (newValue[0] > currentTime) {
         handleSliderChange(null, newValue[0])
       }
-      setSectionStart(Math.min(newValue[0], sectionEnd - minTime))
+      setSectionStart(round(Math.min(newValue[0], sectionEnd - minTime)))
     } else {
       if (newValue[1] < currentTime) {
         handleSliderChange(null, newValue[1])
       }
-      setSectionEnd(Math.max(newValue[1], sectionStart + minTime))
+      setSectionEnd(round(Math.max(newValue[1], sectionStart + minTime)))
     }
   }
 
@@ -119,11 +124,11 @@ export const VideoPlayer = ({ id, setId }) => {
   }
 
   const markLoopStart = () => {
-    setSectionStart(currentTime)
+    setSectionStart(round(currentTime))
   }
 
   const markLoopEnd = () => {
-    setSectionEnd(currentTime)
+    setSectionEnd(round(currentTime))
   }
 
   const restartLoop = () => {
@@ -159,21 +164,29 @@ export const VideoPlayer = ({ id, setId }) => {
         />
         <Slider
           defaultValue={playbackRate}
-          orientation='vertical'
+          min={playerRef.current?.getAvailablePlaybackRates()[0]}
+          max={2}
+          marks={[
+            { value: 0.125 },
+            { value: 0.25 },
+            { value: 0.5 },
+            { value: 1 },
+            { value: 1.5 },
+            { value: 2 },
+          ]}
+          onChange={handlePlaybackRateChange}
           onKeyDown={preventHorizontalKeyboardNavigation}
+          orientation='vertical'
           sx={{
             '& input[type="range"]': {
               WebkitAppearance: 'slider-vertical',
             },
           }}
-          onChange={handlePlaybackRateChange}
           size='large'
-          min={playerRef.current?.getAvailablePlaybackRates()[0]}
-          step={0.05}
-          max={2}
+          step={null}
           value={playbackRate}
           valueLabelFormat={val => val + 'x'}
-          valueLabelDisplay='auto'
+          valueLabelDisplay='on'
         />
       </div>
       <div className='vertical-container controls' style={{ flex: 3 }}>
@@ -182,6 +195,8 @@ export const VideoPlayer = ({ id, setId }) => {
             value={sectionStart}
             onChange={value => setSectionStart(value)}
             changeAmount={0.5}
+            min={0}
+            max={duration}
           />
           <TimeTextInput
             value={currentTime}
@@ -190,11 +205,15 @@ export const VideoPlayer = ({ id, setId }) => {
               playerRef.current.seekTo(value)
             }}
             changeAmount={0.5}
+            min={0}
+            max={duration}
           />
           <TimeTextInput
             value={sectionEnd}
             onChange={value => setSectionEnd(value)}
             changeAmount={0.5}
+            min={0}
+            max={duration}
           />
         </div>
         <div>

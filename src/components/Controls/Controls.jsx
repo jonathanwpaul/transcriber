@@ -98,7 +98,6 @@ const Controls = ({
         {/* {undoStack && undoStack.length > 0 && (
           <UndoRedoControls undoStack={undoStack} setAbcString={setAbcString} />
         )} */}
-        <SaveLoadControls setAbcString={setAbcString} abcString={abcString} />
       </div>
       {!textEditor && (
         <NoteControls onChange={handleInsert} duration={duration} />
