@@ -81,7 +81,7 @@ const Controls = ({
         className='horizontal-container'
         style={{ alignItems: 'center', flexWrap: 'wrap' }}
       >
-        <InputControls onChange={handleInputChange} textEditor={textEditor} />
+        {/* <InputControls onChange={handleInputChange} textEditor={textEditor} /> */}
         {/* TODO: the octaves don't work when a duration is applied (which is pretty much always) since it inserts after the number */}
         {/* <OctaveControls onChange={handleInsert} /> */}
         <DurationControls onChange={handleDurationChange} duration={duration} />
