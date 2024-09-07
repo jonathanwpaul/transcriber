@@ -33,13 +33,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3.2.1
         
-      # Invalidate the Gradle cache
-      - name: Clear Gradle Cache
-        run: rm -rf $HOME/.gradle/caches/
         
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
       - name: Build with Gradle
         run: |
           cd android
-          ./gradlew assembleDebug --debug
+          ./gradlew wrapper --gradle-version 7.5
+          ./gradlew assembleDebug
