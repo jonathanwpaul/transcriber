@@ -15,10 +15,9 @@ jobs:
       - name: build env
         env:
           CI: ''
-        run: npm install
-          npx cap add android 2>/dev/null
-          npm run build
-          npx cap sync
+        run: |
+          chmod +x android-build-debug.sh
+          ./android-build-debug.sh
       - name: set up JDK 11
         uses: actions/setup-java@v4
         with:
@@ -27,7 +26,7 @@ jobs:
           cache: gradle
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        run: chmod +x android/gradlew
       - name: Build with Gradle
         run: |
           cd android
