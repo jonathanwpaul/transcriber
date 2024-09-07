@@ -10,6 +10,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # build node files/capacitor
       - name: set up NodeJS
         uses: actions/setup-node@v4.0.3
       - name: build env
@@ -30,7 +32,11 @@ jobs:
       # Set up Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3.2.1
-
+        
+      # Invalidate the Gradle cache
+      - name: Clear Gradle Cache
+        run: rm -rf $HOME/.gradle/caches/
+        
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
       - name: Build with Gradle
