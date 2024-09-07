@@ -9,9 +9,9 @@ import { abcStringToArr } from '../../utils'
 const Editor = () => {
   const [abcString, setAbcString] = useState('a,1b,1c1d1e1f1g1')
   const [duration, setDuration] = useState(1 / 4)
-  const [selectedIndex, setSelectedIndex] = useState()
+  // const [selectedIndex, setSelectedIndex] = useState()
   const [scaleFactor, setScaleFactor] = useState(1)
-  const [textEditor, setTextEditor] = useState(false)
+  const [textEditor, setTextEditor] = useState(true)
 
   const arr = abcStringToArr(abcString)
   console.log({ arr })
@@ -20,53 +20,29 @@ const Editor = () => {
   const visualObjRef = useRef()
 
   const voiceArr =
-    visualObjRef.current && visualObjRef.current[0].lines[0].staff[0].voices[0]
+    visualObjRef.current &&
+    visualObjRef.current[0]?.lines[0]?.staff[0]?.voices[0]
 
-  const selectedAbcElem = voiceArr && voiceArr[selectedIndex]
-  console.log('editor selectedelem:', selectedAbcElem)
-  /**
-   * selects the currently selected note in the text input
-   * TODO: this executes before selected Abc elem is updated
-   */
-  useEffect(() => {
-    const input = textFieldRef.current
-    if (input && selectedAbcElem) {
-      input.setSelectionRange(
-        selectedAbcElem.startChar,
-        selectedAbcElem.endChar
-      )
-      input.focus()
-    }
-  })
+  //TODO: add selecting back in
+  // const selectedAbcElem = voiceArr && voiceArr[selectedIndex]
+  // console.log('editor selectedelem:', selectedAbcElem)
+  // /**
+  //  * selects the currently selected note in the text input
+  //  * TODO: this executes before selected Abc elem is updated
+  //  */
+  // useEffect(() => {
+  //   const input = textFieldRef.current
+  //   if (input && selectedAbcElem) {
+  //     input.setSelectionRange(
+  //       selectedAbcElem.startChar,
+  //       selectedAbcElem.endChar
+  //     )
+  //     input.focus()
+  //   }
+  // }, [selectedIndex])
 
   const handleStringChange = e => {
     setAbcString(e.target.value)
-  }
-
-  const renderProps = {
-    abcString,
-    duration,
-    scaleFactor,
-    selectedAbcElem,
-    setAbcString,
-    setDuration,
-    setScaleFactor,
-    setSelectedIndex,
-    visualObjRef,
-  }
-
-  const controlsProps = {
-    abcString,
-    duration,
-    selectedAbcElem,
-    setAbcString,
-    setDuration,
-    setScaleFactor,
-    setSelectedIndex,
-    setTextEditor,
-    textEditor,
-    textFieldRef,
-    voiceArr,
   }
 
   // useEffect(() => {
@@ -87,15 +63,35 @@ const Editor = () => {
 
   return (
     <div className='editor vertical-container' id='editor'>
-      <MusicRender {...renderProps} />
+      <MusicRender
+        abcString={abcString}
+        duration={duration}
+        scaleFactor={scaleFactor}
+        // selectedAbcElem={selectedAbcElem}
+        setAbcString={setAbcString}
+        setDuration={setDuration}
+        setScaleFactor={setScaleFactor}
+        // setSelectedIndex={setSelectedIndex}
+        visualObjRef={visualObjRef}
+      />
       <Card className='editor-inputs'>
-        <Controls {...controlsProps} />
+        <Controls
+          abcString={abcString}
+          duration={duration}
+          // selectedAbcElem={selectedAbcElem}
+          setAbcString={setAbcString}
+          setDuration={setDuration}
+          setScaleFactor={setScaleFactor}
+          // setSelectedIndex={setSelectedIndex}
+          setTextEditor={setTextEditor}
+          textEditor={textEditor}
+          textFieldRef={textFieldRef}
+          voiceArr={voiceArr}
+        />
 
         <TextFieldEditor
           onChange={handleStringChange}
           // disabled={!textEditor}
-          selectedAbcElem={selectedAbcElem}
-          value={abcString}
           inputRef={textFieldRef}
         />
       </Card>

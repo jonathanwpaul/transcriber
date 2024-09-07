@@ -13,7 +13,6 @@ const TextFieldEditor = ({
       onChange={onChange}
       value={value}
       InputProps={{ style: { height: '100%' } }}
-      maxRows={5}
       {...otherProps}
     />
   )
