@@ -54,7 +54,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.tag.outputs.release_tag }}
-          release_name: Release ${{ github.ref }}
+          release_name: Release ${{ steps.tag.outputs.release_tag }}
           draft: false
           prerelease: false
       - name: Upload Release Asset
@@ -65,4 +65,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./app/build/outputs/apk/debug/app-debug.apk
-          asset_name: licks.apk          
+          asset_name: licks.apk         
+          asset_content_type: application/vnd.android.package-archive
