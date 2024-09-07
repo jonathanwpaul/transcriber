@@ -18,12 +18,18 @@ jobs:
         run: |
           chmod +x android-build-debug.sh
           ./android-build-debug.sh
-      - name: set up JDK 11
+
+      #JDK
+      - name: set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
           cache: gradle
+
+      # Set up Android SDK
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3.2.1
 
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
