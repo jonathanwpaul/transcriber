@@ -9,14 +9,19 @@ import {
   CancelOutlined,
   SkipPrevious,
   Flag,
+  Save,
 } from '@mui/icons-material'
 import YouTube from 'react-youtube'
+import { usePreferenceValue } from '@hooks/usePreferenceValue'
+import { setValue } from '@utils/preference'
 
-export const VideoPlayer = ({ id, setId }) => {
+export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
+
+  //TODO: see if we can use possibleplaybackrates instead
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
   const [sectionStart, setSectionStart] = useState(0)
   const [sectionEnd, setSectionEnd] = useState(0)
@@ -120,7 +125,14 @@ export const VideoPlayer = ({ id, setId }) => {
 
   const handleCloseVideo = () => {
     playerRef.current = null
-    setId(null)
+    setShowVideoPlayer(false)
+  }
+
+  const loops = usePreferenceValue('loops')
+  const saveLoop = () => {
+    const arr = JSON.parse(loops) || []
+    arr.push({ sectionStart, sectionEnd })
+    setValue('loops', arr)
   }
 
   const markLoopStart = () => {
@@ -160,11 +172,12 @@ export const VideoPlayer = ({ id, setId }) => {
           onReady={onReady}
           onPlay={onPlay}
           onPause={onPause}
+          style={{ alignSelf: 'center' }}
           // style={{ position: 'fixed' }}
         />
         <Slider
           defaultValue={playbackRate}
-          min={playerRef.current?.getAvailablePlaybackRates()[0]}
+          // min={playerRef.current?.getAvailablePlaybackRates()[0]}
           max={2}
           marks={[
             { value: 0.125 },
@@ -181,6 +194,7 @@ export const VideoPlayer = ({ id, setId }) => {
             '& input[type="range"]': {
               WebkitAppearance: 'slider-vertical',
             },
+            alignSelf: 'center',
           }}
           size='large'
           step={null}
@@ -283,6 +297,11 @@ export const VideoPlayer = ({ id, setId }) => {
           />
         </div>
         <div className='horizontal-container' style={{ alignItems: 'center' }}>
+          <Tooltip title='Save Loop'>
+            <IconButton onClick={saveLoop}>
+              <Save />
+            </IconButton>
+          </Tooltip>
           <Tooltip title='Restart player'>
             <IconButton onClick={restartPlayer}>
               <SkipPrevious />

@@ -1,12 +1,19 @@
 {
   "compilerOptions": {
-    "jsx": "react",
-    "baseUrl": "src/",
+    "baseUrl": "src",
     "paths": {
-      "@/components/*": ["components/*"],
-      "@/utils/*": ["utils/*"]
+      "@components/*": [
+        "/home/jonathan/transcriber/src/components/*"
+      ],
+      "@utils/*": [
+        "/home/jonathan/transcriber/src/utils/*"
+      ],
+      "@hooks/*": [
+        "/home/jonathan/transcriber/src/hooks/*"
+      ]
     }
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "config", ".vscode"]
+  "include": [
+    "src"
+  ]
 }

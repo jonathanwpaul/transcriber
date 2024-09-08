@@ -1,0 +1,16 @@
+const path = require('path')
+
+const alias = {
+  '@components': path.resolve(__dirname, 'src/components'),
+  '@utils': path.resolve(__dirname, 'src/utils'),
+  '@hooks': path.resolve(__dirname, 'src/hooks'),
+}
+
+module.exports = {
+  webpack: {
+    alias,
+  },
+}
+
+// Export aliases for use in the sync-paths.js script
+module.exports.aliases = alias
