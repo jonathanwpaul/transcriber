@@ -1,6 +1,7 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material'
 import { allPitches, getDurationText } from '../../../utils'
 
+//displays a piano keyset to insert notes
 const NoteControls = ({ onChange, duration }) => {
   const notes = allPitches
     .slice(allPitches.indexOf('b,,'), allPitches.indexOf("c''"))
