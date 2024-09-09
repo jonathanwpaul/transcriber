@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Card, TextField, Button } from '@mui/material'
+import {
+  Card,
+  TextField,
+  Button,
+  ListItem,
+  ListItemButton,
+  List,
+} from '@mui/material'
 import { VideoPlayer } from './VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
 import { getValue, setValue } from '@utils/preference'
@@ -13,12 +20,12 @@ const Player = () => {
     key: 'videos',
   })
 
-  const videos = JSON.parse(videosString) || undefined
+  const videos = JSON.parse(videosString) || {}
   if (loading) return
 
   // if there's a cached entry and not one already selected, use that
-  if (videos?.length > 0 && !showVideoPlayer && !id) {
-    setId(videos[0])
+  if (Object.keys(videos).length > 0 && !showVideoPlayer && !id) {
+    setId(Object.keys(videos)[0])
     setShowVideoPlayer(true)
   }
 
@@ -39,13 +46,11 @@ const Player = () => {
 
   const handleSubmit = () => {
     const id = getId(inputText)
-    if (!id) return //don't add invalid ids
-    let videoArr = videos?.length > 0 ? [id].concat(videos) : [id]
-
-    const uniqueIds = Array.from(new Set(videoArr))
-    setValue('videos', uniqueIds).then(() => {
+    if (!id) return
+    if (!videos[id]) videos[id] = {}
+    setValue('videos', videos).then(() => {
       setId(id)
-      setShowVideoPlayer(true)
+      // setShowVideoPlayer(true)
     })
   }
 
@@ -58,6 +63,9 @@ const Player = () => {
             fullWidth
             helperText={error}
             onChange={handleChange}
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleSubmit()
+            }}
             placeholder='YouTube URL'
             value={inputText}
             variant='outlined'
@@ -74,18 +82,20 @@ const Player = () => {
         </div>
       )}
       {!showVideoPlayer && videos && videos.length > 0 && (
-        <div className='vertical-container'>
-          {videos.map(e => (
-            <Card
-              key={e}
-              onClick={() => {
-                setId(e)
-                setShowVideoPlayer(true)
-              }}
-            >
-              {e}
-            </Card>
-          ))}
+        <div className='vertical-container' style={{ alignSelf: 'center' }}>
+          <List>
+            {Object.keys(videos).map(e => (
+              <ListItemButton
+                key={e}
+                onClick={() => {
+                  setId(e)
+                  setShowVideoPlayer(true)
+                }}
+              >
+                {e}
+              </ListItemButton>
+            ))}
+          </List>
         </div>
       )}
       {showVideoPlayer && (
