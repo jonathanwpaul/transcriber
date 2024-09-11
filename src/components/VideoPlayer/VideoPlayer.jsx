@@ -1,5 +1,14 @@
 import { useState, useRef, useCallback } from 'react'
-import { IconButton, Slider, SvgIcon, TextField, Tooltip } from '@mui/material'
+import {
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  Slider,
+  SvgIcon,
+  TextField,
+  Tooltip,
+} from '@mui/material'
 import { TimeTextInput } from './components'
 import {
   PlayArrow,
@@ -14,6 +23,7 @@ import {
 import YouTube from 'react-youtube'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { setValue } from '@utils/preference'
+import { timestampFormatter } from '@utils/timestampFormatter'
 
 export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [currentTime, setCurrentTime] = useState(0)
@@ -25,15 +35,24 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
   const [sectionStart, setSectionStart] = useState(0)
   const [sectionEnd, setSectionEnd] = useState(0)
+  const {
+    preference: videosString,
+    loading,
+    setValue: setVideos,
+  } = usePreferenceValue({
+    key: 'videos',
+  })
+
+  const videos = JSON.parse(videosString) || {}
 
   const videoOptions = {
-    // width: 320,
-    // height: 195,
     playerVars: {
       controls: 1,
       fs: 1,
     },
   }
+
+  console.log(videos)
 
   const playerRef = useRef()
   const timerRef = useRef()
@@ -128,13 +147,17 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setShowVideoPlayer(false)
   }
 
-  const loops = usePreferenceValue('loops')
   const saveLoop = () => {
-    const arr = JSON.parse(loops) || []
+    const arr = videos[id].loops || []
     arr.push({ sectionStart, sectionEnd })
-    setValue('loops', arr)
+    videos[id].loops = arr
+    setVideos('videos', videos)
   }
 
+  const loadLoop = loop => {
+    setSectionStart(loop['sectionStart'])
+    setSectionEnd(loop['sectionEnd'])
+  }
   const markLoopStart = () => {
     setSectionStart(round(currentTime))
   }
@@ -147,10 +170,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setCurrentTime(sectionStart)
     playerRef.current.seekTo(sectionStart)
   }
+  if (loading) return
 
   return (
-    <div className='horizontal-container' style={{ gap: 50, width: '100%' }}>
-      <div className='horizontal-container'>
+    <div className='vertical-container' style={{ gap: 50, width: '100%' }}>
+      <div className='horizontal-container' style={{ flex: '1 0 1' }}>
         <Tooltip title='Close video'>
           <IconButton
             style={{
@@ -172,9 +196,14 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           onReady={onReady}
           onPlay={onPlay}
           onPause={onPause}
-          style={{ alignSelf: 'center' }}
+          style={{ alignSelf: 'center', width: '100%', height: '100%' }}
           // style={{ position: 'fixed' }}
         />
+      </div>
+      <div
+        className='horizontal-container'
+        style={{ alignContent: 'center', flex: '2 0 2' }}
+      >
         <Slider
           defaultValue={playbackRate}
           // min={playerRef.current?.getAvailablePlaybackRates()[0]}
@@ -200,144 +229,152 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           step={null}
           value={playbackRate}
           valueLabelFormat={val => val + 'x'}
-          valueLabelDisplay='on'
+          valueLabelDisplay='auto'
         />
-      </div>
-      <div className='vertical-container controls' style={{ flex: 3 }}>
-        <div className='horizontal-container'>
-          <TimeTextInput
-            value={sectionStart}
-            onChange={value => setSectionStart(value)}
-            changeAmount={0.5}
-            min={0}
-            max={duration}
-          />
-          <TimeTextInput
-            value={currentTime}
-            onChange={value => {
-              setCurrentTime(value)
-              playerRef.current.seekTo(value)
-            }}
-            changeAmount={0.5}
-            min={0}
-            max={duration}
-          />
-          <TimeTextInput
-            value={sectionEnd}
-            onChange={value => setSectionEnd(value)}
-            changeAmount={0.5}
-            min={0}
-            max={duration}
-          />
-        </div>
-        <div>
-          {/* the loop slider */}
-          <Slider
-            color='secondary'
-            disableSwap
-            min={0}
-            max={duration}
-            onChange={handleIntervalChange}
-            size='large'
-            step={0.1}
-            style={{
-              top: '50%',
-              // position: 'absolute',
-            }}
-            sx={{
-              '& .MuiSlider-thumb': {
-                '&[data-index="0"]': {
-                  color: 'green',
-                  transform: 'translateX(-100%) translateY(-150%)', // rotate(225deg)',
-                },
 
-                '&[data-index="1"]': {
-                  color: 'red',
-                  transform: 'translateX(0%) translateY(-150%)', // rotate(45deg)',
-                },
-                /* Border */
-                // borderRadius: '0px 50% 50% 50%',
-
-                /* Size */
-                height: '2rem',
-                width: '2rem',
-              },
-              '& .MuiSlider-track': {
-                boxSizing: 'border-box',
-                borderRadius: '5px',
-                borderLeft: '5px solid green',
-                borderRight: '5px solid red',
-                color: '#eeeeee95',
-                opacity: 0.8,
-                height: 30,
-              },
-              '.MuiSlider-rail': {
-                height: 0,
-              },
-            }}
-            value={[sectionStart, sectionEnd]}
-            valueLabelDisplay='auto'
-            valueLabelFormat={timestampFormatter}
-          />
-          {/* the playback slider (mirrors video playback slider) */}
-          <Slider
-            min={0}
-            max={duration}
-            onChange={handleSliderChange}
-            size='large'
-            step={0.1}
-            style={
-              {
+        <div className='vertical-container controls' style={{ flex: 1 }}>
+          <div>
+            {/* the loop slider */}
+            <Slider
+              color='secondary'
+              disableSwap
+              min={0}
+              max={duration}
+              onChange={handleIntervalChange}
+              size='large'
+              step={0.1}
+              style={{
+                top: '50%',
                 // position: 'absolute',
-              }
-            }
-            value={currentTime}
-            valueLabelDisplay='auto'
-            valueLabelFormat={timestampFormatter}
-          />
-        </div>
-        <div className='horizontal-container' style={{ alignItems: 'center' }}>
-          <Tooltip title='Save Loop'>
-            <IconButton onClick={saveLoop}>
-              <Save />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title='Restart player'>
-            <IconButton onClick={restartPlayer}>
-              <SkipPrevious />
-            </IconButton>
-          </Tooltip>
-          <IconButton
-            onClick={() =>
-              isPlaying
-                ? playerRef.current?.pauseVideo()
-                : playerRef.current?.playVideo()
-            }
-            aria-label='play/pause'
-          >
-            {isPlaying ? <PauseCircle /> : <PlayArrow />}
-          </IconButton>
-          <Tooltip title='Jump to loop start'>
-            <IconButton onClick={restartLoop}>
-              <RestartAlt />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title='Mark loop start'>
-            <IconButton onClick={markLoopStart}>
-              <Flag sx={{ color: 'green' }} />
-            </IconButton>
-          </Tooltip>
+              }}
+              sx={{
+                '& .MuiSlider-thumb': {
+                  '&[data-index="0"]': {
+                    color: 'green',
+                    transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
+                  },
 
-          <Tooltip title='Mark loop end'>
-            <IconButton onClick={markLoopEnd}>
-              <Flag sx={{ color: 'red' }} />
+                  '&[data-index="1"]': {
+                    color: 'red',
+                    transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
+                  },
+                  /* Border */
+                  // borderRadius: '0px 50% 50% 50%',
+
+                  /* Size */
+                  height: '2rem',
+                  width: '2rem',
+                },
+                '& .MuiSlider-track': {
+                  boxSizing: 'border-box',
+                  borderRadius: '5px',
+                  borderLeft: '5px solid green',
+                  borderRight: '5px solid red',
+                  color: '#eeeeee95',
+                  opacity: 0.8,
+                  height: 30,
+                },
+                '.MuiSlider-rail': {
+                  height: 0,
+                },
+              }}
+              value={[sectionStart, sectionEnd]}
+              valueLabelDisplay='auto'
+              valueLabelFormat={timestampFormatter}
+            />
+            {/* the playback slider (mirrors video playback slider) */}
+            <Slider
+              min={0}
+              max={duration}
+              onChange={handleSliderChange}
+              size='large'
+              step={0.1}
+              value={currentTime}
+              valueLabelDisplay='auto'
+              valueLabelFormat={timestampFormatter}
+            />
+          </div>
+          <div className='horizontal-container'>
+            <Tooltip title='Mark loop start'>
+              <IconButton onClick={markLoopStart}>
+                <Flag sx={{ color: 'green' }} />
+              </IconButton>
+            </Tooltip>
+            <TimeTextInput
+              value={sectionStart}
+              onChange={value => setSectionStart(value)}
+              changeAmount={0.5}
+              min={0}
+              max={duration}
+            />
+            <TimeTextInput
+              value={currentTime}
+              onChange={value => {
+                setCurrentTime(value)
+                playerRef.current.seekTo(value)
+              }}
+              changeAmount={0.5}
+              min={0}
+              max={duration}
+            />
+            <Tooltip title='Mark loop end'>
+              <IconButton onClick={markLoopEnd}>
+                <Flag sx={{ color: 'red' }} />
+              </IconButton>
+            </Tooltip>
+            <TimeTextInput
+              value={sectionEnd}
+              onChange={value => setSectionEnd(value)}
+              changeAmount={0.5}
+              min={0}
+              max={duration}
+            />
+          </div>
+
+          <div
+            className='horizontal-container'
+            style={{ alignItems: 'center', flexWrap: 'wrap' }}
+          >
+            <Tooltip title='Save Loop'>
+              <IconButton onClick={saveLoop}>
+                <Save />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title='Restart player'>
+              <IconButton onClick={restartPlayer}>
+                <SkipPrevious />
+              </IconButton>
+            </Tooltip>
+            <IconButton
+              onClick={() =>
+                isPlaying
+                  ? playerRef.current?.pauseVideo()
+                  : playerRef.current?.playVideo()
+              }
+              aria-label='play/pause'
+            >
+              {isPlaying ? <PauseCircle /> : <PlayArrow />}
             </IconButton>
-          </Tooltip>
+            <Tooltip title='Jump to loop start'>
+              <IconButton onClick={restartLoop}>
+                <RestartAlt />
+              </IconButton>
+            </Tooltip>
+          </div>
+          {videos[id].loops && (
+            <List>
+              {videos[id].loops.map(loop => (
+                <ListItemButton
+                  onClick={() => loadLoop(loop)}
+                  sx={{ border: '1px solid', marginBottom: '0.25px' }}
+                >{`${timestampFormatter(
+                  loop.sectionStart
+                )}-${timestampFormatter(loop.sectionEnd)}`}</ListItemButton>
+              ))}
+            </List>
+          )}
         </div>
       </div>
     </div>
   )
 }
-
-const timestampFormatter = value =>
-  new Date(value * 1000).toISOString().slice(11, 21)

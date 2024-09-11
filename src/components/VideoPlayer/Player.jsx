@@ -6,28 +6,29 @@ import {
   ListItem,
   ListItemButton,
   List,
+  Table,
+  TableRow,
+  TableHead,
+  TableCell,
 } from '@mui/material'
 import { VideoPlayer } from './VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
-import { getValue, setValue } from '@utils/preference'
 
 const Player = () => {
   const [id, setId] = useState()
   const [showVideoPlayer, setShowVideoPlayer] = useState()
   const [inputText, setInputText] = useState()
   const [error, setError] = useState(false)
-  const { preference: videosString, loading } = usePreferenceValue({
+  const {
+    preference: videosString,
+    loading,
+    setValue: setVideos,
+  } = usePreferenceValue({
     key: 'videos',
   })
 
   const videos = JSON.parse(videosString) || {}
   if (loading) return
-
-  // if there's a cached entry and not one already selected, use that
-  if (Object.keys(videos).length > 0 && !showVideoPlayer && !id) {
-    setId(Object.keys(videos)[0])
-    setShowVideoPlayer(true)
-  }
 
   const getId = url => {
     const regExp =
@@ -44,15 +45,31 @@ const Player = () => {
     setError(null)
   }
 
+  const showVideoId = id => {
+    videos[id].last_accessed = new Date()
+    setVideos('videos', videos).then(() => {
+      setId(id)
+      setShowVideoPlayer(true)
+    })
+  }
+
   const handleSubmit = () => {
     const id = getId(inputText)
     if (!id) return
     if (!videos[id]) videos[id] = {}
-    setValue('videos', videos).then(() => {
-      setId(id)
-      // setShowVideoPlayer(true)
-    })
+    showVideoId(id)
   }
+
+  const videoList = Object.keys(videos).sort((a, b) =>
+    videos[a]['last_accessed'] > videos[b]['last_accessed'] ? -1 : 1
+  )
+
+  // if there's a cached entry and not one already selected, use that
+  if (videoList.length > 0 && !showVideoPlayer && !id) {
+    setId(videoList[0])
+    setShowVideoPlayer(true)
+  }
+  console.log(videoList)
 
   return (
     <Card className='player'>
@@ -81,21 +98,26 @@ const Player = () => {
           </Button>
         </div>
       )}
-      {!showVideoPlayer && videos && videos.length > 0 && (
+      {!showVideoPlayer && videos && videoList.length > 0 && (
         <div className='vertical-container' style={{ alignSelf: 'center' }}>
-          <List>
-            {Object.keys(videos).map(e => (
-              <ListItemButton
-                key={e}
-                onClick={() => {
-                  setId(e)
-                  setShowVideoPlayer(true)
-                }}
-              >
-                {e}
-              </ListItemButton>
-            ))}
-          </List>
+          <Table>
+            <TableHead>
+              <TableCell>Previously Viewed</TableCell>
+              <TableCell>Time</TableCell>
+            </TableHead>
+            {videoList.map(e => {
+              return (
+                <TableRow key={e} onClick={() => showVideoId(e)}>
+                  <TableCell>
+                    <Button variant='outlined' color='secondary'>
+                      {e}
+                    </Button>
+                  </TableCell>
+                  <TableCell>{videos[e]['last_accessed']}</TableCell>
+                </TableRow>
+              )
+            })}
+          </Table>
         </div>
       )}
       {showVideoPlayer && (

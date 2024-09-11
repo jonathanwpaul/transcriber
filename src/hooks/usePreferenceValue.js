@@ -7,6 +7,19 @@ export const usePreferenceValue = ({ key }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const setValue = async (key, val) => {
+    const value = JSON.stringify(val)
+    await Preferences.set({
+      key,
+      value,
+    })
+    setPreference(value)
+  }
+
+  const removeKey = async key => {
+    await Preferences.remove({ key })
+  }
+
   useEffect(() => {
     const fetchValue = async () => {
       console.log('refreshing value')
@@ -22,5 +35,5 @@ export const usePreferenceValue = ({ key }) => {
     fetchValue()
   })
 
-  return { preference, loading, error }
+  return { preference, loading, error, setValue }
 }
