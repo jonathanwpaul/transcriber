@@ -2,18 +2,14 @@ import { useState, useRef, useCallback } from 'react'
 import {
   IconButton,
   List,
-  ListItem,
   ListItemButton,
   Slider,
-  SvgIcon,
-  TextField,
   Tooltip,
 } from '@mui/material'
 import { TimeTextInput } from './components'
 import {
   PlayArrow,
   PauseCircle,
-  StartOutlined,
   RestartAlt,
   CancelOutlined,
   SkipPrevious,
@@ -22,7 +18,6 @@ import {
 } from '@mui/icons-material'
 import YouTube from 'react-youtube'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
-import { setValue } from '@utils/preference'
 import { timestampFormatter } from '@utils/timestampFormatter'
 
 export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
