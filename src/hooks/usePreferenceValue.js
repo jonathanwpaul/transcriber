@@ -1,4 +1,3 @@
-import { getValue } from '@utils/preference'
 import { Preferences } from '@capacitor/preferences'
 import { useEffect, useRef, useState } from 'react'
 
@@ -36,4 +35,15 @@ export const usePreferenceValue = ({ key }) => {
   })
 
   return { preference, loading, error, setValue }
+}
+
+const getValue = async key => {
+  const { value } = await Preferences.get({ key })
+
+  // try {
+  //   return JSON.parse(value)
+  // } catch (ex) {
+  //   console.log(ex)
+  // }
+  return value
 }
