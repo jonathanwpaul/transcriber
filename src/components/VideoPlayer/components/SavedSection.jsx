@@ -1,13 +1,17 @@
-import { Card } from '@mui/material'
+import { Delete } from '@mui/icons-material'
+import { Card, IconButton, ListItemButton } from '@mui/material'
+import { timestampFormatter } from 'utils/timestampFormatter'
 
-const SavedSection = ({ onClick, startTime, endTime, isSelected }) => {
-  const handleClick = onClick
+const SavedSection = ({ onClick, onDelete, startTime, endTime, isSelected }) => {
   return (
-    <div className='horizontal-container' style={{ alignItems: 'center' }}>
-      <Card className='horizontal-container' onClick={handleClick}>
-        <p>{`${startTime}-${endTime}`}</p>
-      </Card>
-    </div>
+    <Card>
+      <ListItemButton
+        className='horizontal-container' onClick={onClick}>
+        <p>{`${timestampFormatter(startTime)} - ${timestampFormatter(endTime)}`}</p>
+        <IconButton ><Delete onClick={onDelete} /></IconButton>
+      </ListItemButton>
+
+    </Card>
   )
 }
 export default SavedSection

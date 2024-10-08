@@ -2,7 +2,6 @@ import { useState, useRef, useCallback } from 'react'
 import {
   IconButton,
   List,
-  ListItemButton,
   Slider,
   Tooltip,
 } from '@mui/material'
@@ -19,6 +18,7 @@ import {
 import YouTube from 'react-youtube'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter } from '@utils/timestampFormatter'
+import SavedSection from './components/SavedSection'
 
 export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [currentTime, setCurrentTime] = useState(0)
@@ -145,6 +145,15 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const saveLoop = () => {
     const arr = videos[id].loops || []
     arr.push({ sectionStart, sectionEnd })
+    Object.values()
+    videos[id].loops = Array.from(new Set(arr))
+    setVideos('videos', videos)
+  }
+
+  const deleteLoop = (loop) => {
+    const arr = videos[id].loops || []
+    const idx = arr.indexOf(loop)
+    arr.splice(idx, 1)
     videos[id].loops = arr
     setVideos('videos', videos)
   }
@@ -359,12 +368,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           {videos[id].loops && (
             <List>
               {videos[id].loops.map(loop => (
-                <ListItemButton
+                <SavedSection
                   onClick={() => loadLoop(loop)}
-                  sx={{ border: '1px solid', marginBottom: '0.25px' }}
-                >{`${timestampFormatter(
-                  loop.sectionStart
-                )}-${timestampFormatter(loop.sectionEnd)}`}</ListItemButton>
+                  onDelete={() => deleteLoop(loop)}
+                  startTime={loop.sectionStart}
+                  endTime={loop.sectionEnd}
+                />
               ))}
             </List>
           )}
