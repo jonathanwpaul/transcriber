@@ -179,7 +179,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
 
   return (
     <div className='vertical-container' style={{ gap: 50, width: '100%' }}>
-      <div className='horizontal-container' style={{ flex: '1 0 1' }}>
+      <div className='horizontal-container' style={{ flex: '1 0 auto' }}>
         <Tooltip title='Close video'>
           <IconButton
             style={{
@@ -205,10 +205,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
         // style={{ position: 'fixed' }}
         />
       </div>
-      <div
-        className='horizontal-container'
-        style={{ alignContent: 'center', flex: '2 0 2' }}
-      >
+
+      <div className='vertical-container controls' style={{ flex: 1 }}>
         <Slider
           defaultValue={playbackRate}
           // min={playerRef.current?.getAvailablePlaybackRates()[0]}
@@ -223,162 +221,158 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           ]}
           onChange={handlePlaybackRateChange}
           onKeyDown={preventHorizontalKeyboardNavigation}
-          orientation='vertical'
-          sx={{
-            '& input[type="range"]': {
-              WebkitAppearance: 'slider-vertical',
-            },
-            alignSelf: 'center',
-          }}
+          // sx={{
+          //   '& input[type="range"]': {
+          //     WebkitAppearance: 'slider-vertical',
+          //   },
+          //   alignSelf: 'center',
+          // }}
           size='large'
           step={null}
           value={playbackRate}
           valueLabelFormat={val => val + 'x'}
           valueLabelDisplay='auto'
         />
-
-        <div className='vertical-container controls' style={{ flex: 1 }}>
-          <div>
-            {/* the loop slider */}
-            <Slider
-              color='secondary'
-              disableSwap
-              min={0}
-              max={duration}
-              onChange={handleIntervalChange}
-              size='large'
-              step={0.1}
-              style={{
-                top: '50%',
-                // position: 'absolute',
-              }}
-              sx={{
-                '& .MuiSlider-thumb': {
-                  '&[data-index="0"]': {
-                    color: 'green',
-                    transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
-                  },
-
-                  '&[data-index="1"]': {
-                    color: 'red',
-                    transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
-                  },
-                  /* Border */
-                  // borderRadius: '0px 50% 50% 50%',
-
-                  /* Size */
-                  height: '2rem',
-                  width: '2rem',
+        <div>
+          {/* the loop slider */}
+          <Slider
+            color='secondary'
+            disableSwap
+            min={0}
+            max={duration}
+            onChange={handleIntervalChange}
+            size='large'
+            step={0.1}
+            style={{
+              top: '50%',
+              // position: 'absolute',
+            }}
+            sx={{
+              '& .MuiSlider-thumb': {
+                '&[data-index="0"]': {
+                  color: 'green',
+                  transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
                 },
-                '& .MuiSlider-track': {
-                  boxSizing: 'border-box',
-                  borderRadius: '5px',
-                  borderLeft: '5px solid green',
-                  borderRight: '5px solid red',
-                  color: '#eeeeee95',
-                  opacity: 0.8,
-                  height: 30,
-                },
-                '.MuiSlider-rail': {
-                  height: 0,
-                },
-              }}
-              value={[sectionStart, sectionEnd]}
-              valueLabelDisplay='auto'
-              valueLabelFormat={timestampFormatter}
-            />
-            {/* the playback slider (mirrors video playback slider) */}
-            <Slider
-              min={0}
-              max={duration}
-              onChange={handleSliderChange}
-              size='large'
-              step={0.1}
-              value={currentTime}
-              valueLabelDisplay='auto'
-              valueLabelFormat={timestampFormatter}
-            />
-          </div>
-          <div className='horizontal-container'>
-            <Tooltip title='Mark loop start'>
-              <IconButton onClick={markLoopStart}>
-                <Flag sx={{ color: 'green' }} />
-              </IconButton>
-            </Tooltip>
-            <TimeTextInput
-              value={sectionStart}
-              onChange={value => setSectionStart(value)}
-              changeAmount={0.5}
-              min={0}
-              max={duration}
-            />
-            <TimeTextInput
-              value={currentTime}
-              onChange={value => {
-                setCurrentTime(value)
-                playerRef.current.seekTo(value)
-              }}
-              changeAmount={0.5}
-              min={0}
-              max={duration}
-            />
-            <Tooltip title='Mark loop end'>
-              <IconButton onClick={markLoopEnd}>
-                <Flag sx={{ color: 'red' }} />
-              </IconButton>
-            </Tooltip>
-            <TimeTextInput
-              value={sectionEnd}
-              onChange={value => setSectionEnd(value)}
-              changeAmount={0.5}
-              min={0}
-              max={duration}
-            />
-          </div>
 
-          <div
-            className='horizontal-container'
-            style={{ alignItems: 'center', flexWrap: 'wrap' }}
-          >
-            <Tooltip title='Save Loop'>
-              <IconButton onClick={saveLoop}>
-                <Save />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='Restart player'>
-              <IconButton onClick={restartPlayer}>
-                <SkipPrevious />
-              </IconButton>
-            </Tooltip>
-            <IconButton
-              onClick={() =>
-                isPlaying
-                  ? playerRef.current?.pauseVideo()
-                  : playerRef.current?.playVideo()
-              }
-              aria-label='play/pause'
-            >
-              {isPlaying ? <PauseCircle /> : <PlayArrow />}
-            </IconButton>
-            <Tooltip title='Jump to loop start'>
-              <IconButton onClick={restartLoop}>
-                <RestartAlt />
-              </IconButton>
-            </Tooltip>
-          </div>
-          {videos[id].loops && (
-            <List>
-              {videos[id].loops.map(loop => (
-                <SavedSection
-                  onClick={() => loadLoop(loop)}
-                  onDelete={() => deleteLoop(loop)}
-                  startTime={loop.sectionStart}
-                  endTime={loop.sectionEnd}
-                />
-              ))}
-            </List>
-          )}
+                '&[data-index="1"]': {
+                  color: 'red',
+                  transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
+                },
+                /* Border */
+                // borderRadius: '0px 50% 50% 50%',
+
+                /* Size */
+                height: '2rem',
+                width: '2rem',
+              },
+              '& .MuiSlider-track': {
+                boxSizing: 'border-box',
+                borderRadius: '5px',
+                borderLeft: '5px solid green',
+                borderRight: '5px solid red',
+                color: '#eeeeee95',
+                opacity: 0.8,
+                height: 30,
+              },
+              '.MuiSlider-rail': {
+                height: 0,
+              },
+            }}
+            value={[sectionStart, sectionEnd]}
+            valueLabelDisplay='auto'
+            valueLabelFormat={timestampFormatter}
+          />
+          {/* the playback slider (mirrors video playback slider) */}
+          <Slider
+            min={0}
+            max={duration}
+            onChange={handleSliderChange}
+            size='large'
+            step={0.1}
+            value={currentTime}
+            valueLabelDisplay='auto'
+            valueLabelFormat={timestampFormatter}
+          />
         </div>
+        <div className='horizontal-container'>
+          <Tooltip title='Mark loop start'>
+            <IconButton onClick={markLoopStart}>
+              <Flag sx={{ color: 'green' }} />
+            </IconButton>
+          </Tooltip>
+          <TimeTextInput
+            value={sectionStart}
+            onChange={value => setSectionStart(value)}
+            changeAmount={0.5}
+            min={0}
+            max={duration}
+          />
+          <TimeTextInput
+            value={currentTime}
+            onChange={value => {
+              setCurrentTime(value)
+              playerRef.current.seekTo(value)
+            }}
+            changeAmount={0.5}
+            min={0}
+            max={duration}
+          />
+          <Tooltip title='Mark loop end'>
+            <IconButton onClick={markLoopEnd}>
+              <Flag sx={{ color: 'red' }} />
+            </IconButton>
+          </Tooltip>
+          <TimeTextInput
+            value={sectionEnd}
+            onChange={value => setSectionEnd(value)}
+            changeAmount={0.5}
+            min={0}
+            max={duration}
+          />
+        </div>
+
+        <div
+          className='horizontal-container'
+          style={{ alignItems: 'center', flexWrap: 'wrap' }}
+        >
+          <Tooltip title='Save Loop'>
+            <IconButton onClick={saveLoop}>
+              <Save />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title='Restart player'>
+            <IconButton onClick={restartPlayer}>
+              <SkipPrevious />
+            </IconButton>
+          </Tooltip>
+          <IconButton
+            onClick={() =>
+              isPlaying
+                ? playerRef.current?.pauseVideo()
+                : playerRef.current?.playVideo()
+            }
+            aria-label='play/pause'
+          >
+            {isPlaying ? <PauseCircle /> : <PlayArrow />}
+          </IconButton>
+          <Tooltip title='Jump to loop start'>
+            <IconButton onClick={restartLoop}>
+              <RestartAlt />
+            </IconButton>
+          </Tooltip>
+        </div>
+        {videos[id].loops && (
+          <List>
+            {videos[id].loops.map(loop => (
+              <SavedSection
+                onClick={() => loadLoop(loop)}
+                onDelete={() => deleteLoop(loop)}
+                startTime={loop.sectionStart}
+                endTime={loop.sectionEnd}
+              />
+            ))}
+          </List>
+        )}
       </div>
     </div>
   )
