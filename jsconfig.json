@@ -3,13 +3,13 @@
     "baseUrl": "src",
     "paths": {
       "@components/*": [
-        "/home/jonathan/transcriber/src/components/*"
+        "components/*"
       ],
       "@utils/*": [
-        "/home/jonathan/transcriber/src/utils/*"
+        "utils/*"
       ],
       "@hooks/*": [
-        "/home/jonathan/transcriber/src/hooks/*"
+        "hooks/*"
       ]
     }
   },

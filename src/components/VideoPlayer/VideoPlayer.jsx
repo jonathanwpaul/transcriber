@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { useState, useRef, useCallback } from 'react'
 import {
   IconButton,
@@ -144,9 +145,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
 
   const saveLoop = () => {
     const arr = videos[id].loops || []
+    arr.map(e => [e.sectionStart, e.sectionEnd])
     arr.push({ sectionStart, sectionEnd })
-    Object.values()
-    videos[id].loops = Array.from(new Set(arr))
+    videos[id].loops = Array.from(_.uniqWith(arr, _.isEqual))
     setVideos('videos', videos)
   }
 
@@ -201,7 +202,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           onPlay={onPlay}
           onPause={onPause}
           style={{ alignSelf: 'center', width: '100%', height: '100%' }}
-          // style={{ position: 'fixed' }}
+        // style={{ position: 'fixed' }}
         />
       </div>
       <div
