@@ -362,8 +362,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           </Tooltip>
         </div>
         {videos[id].loops && (
-          <List>
-            {videos[id].loops.map(loop => (
+          <List style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            {videos[id].loops.sort((a, b) => a.sectionStart - b.sectionStart).map(loop => (
               <SavedSection
                 onClick={() => loadLoop(loop)}
                 onDelete={() => deleteLoop(loop)}
