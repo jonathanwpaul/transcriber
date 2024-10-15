@@ -162,6 +162,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const loadLoop = loop => {
     setSectionStart(loop['sectionStart'])
     setSectionEnd(loop['sectionEnd'])
+    setCurrentTime(loop['sectionStart'])
+    playerRef.current.seekTo(loop['sectionStart'])
+    playerRef.current.playVideo()
   }
   const markLoopStart = () => {
     setSectionStart(round(currentTime))
@@ -179,7 +182,31 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
 
   return (
     <div className='vertical-container' style={{ gap: 50, width: '100%' }}>
-      <div className='horizontal-container' style={{ flex: '1 0 auto' }}>
+      <div className='horizontal-container' style={{ flex: '0 0 30%', justifyContent: 'space-between' }}>
+        <Tooltip title='Restart player'>
+          <IconButton onClick={restartPlayer}>
+            <SkipPrevious />
+          </IconButton>
+        </Tooltip>
+        <IconButton
+          aria-label='play/pause'
+          onClick={() =>
+            isPlaying
+              ? playerRef.current?.pauseVideo()
+              : playerRef.current?.playVideo()
+          }
+          size='large'
+        >
+          {isPlaying ? <PauseCircle /> : <PlayArrow />}
+        </IconButton><YouTube
+          opts={videoOptions}
+          videoId={id}
+          onReady={onReady}
+          onPlay={onPlay}
+          onPause={onPause}
+          style={{ alignSelf: 'stretch', aspectRatio: '16/9' }}
+        // style={{ position: 'fixed' }}
+        />
         <Tooltip title='Close video'>
           <IconButton
             style={{
@@ -195,18 +222,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             <CancelOutlined />
           </IconButton>
         </Tooltip>
-        <YouTube
-          opts={videoOptions}
-          videoId={id}
-          onReady={onReady}
-          onPlay={onPlay}
-          onPause={onPause}
-          style={{ alignSelf: 'center', width: '100%', height: '100%' }}
-        // style={{ position: 'fixed' }}
-        />
       </div>
 
-      <div className='vertical-container controls' style={{ flex: 1 }}>
+      <div className='vertical-container controls' style={{ flex: '1 0 50%', height: '50vh' }}>
         <Slider
           defaultValue={playbackRate}
           // min={playerRef.current?.getAvailablePlaybackRates()[0]}
@@ -295,11 +313,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           />
         </div>
         <div className='horizontal-container'>
-          <Tooltip title='Mark loop start'>
-            <IconButton onClick={markLoopStart}>
-              <Flag sx={{ color: 'green' }} />
-            </IconButton>
-          </Tooltip>
           <TimeTextInput
             value={sectionStart}
             onChange={value => setSectionStart(value)}
@@ -317,11 +330,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             min={0}
             max={duration}
           />
-          <Tooltip title='Mark loop end'>
-            <IconButton onClick={markLoopEnd}>
-              <Flag sx={{ color: 'red' }} />
-            </IconButton>
-          </Tooltip>
           <TimeTextInput
             value={sectionEnd}
             onChange={value => setSectionEnd(value)}
@@ -335,26 +343,23 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           className='horizontal-container'
           style={{ alignItems: 'center', flexWrap: 'wrap' }}
         >
+          <Tooltip title='Mark loop start'>
+            <IconButton onClick={markLoopStart}>
+              <Flag sx={{ color: 'green' }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title='Mark loop end'>
+            <IconButton onClick={markLoopEnd}>
+              <Flag sx={{ color: 'red' }} />
+            </IconButton>
+          </Tooltip>
+
           <Tooltip title='Save Loop'>
             <IconButton onClick={saveLoop}>
               <Save />
             </IconButton>
           </Tooltip>
-          <Tooltip title='Restart player'>
-            <IconButton onClick={restartPlayer}>
-              <SkipPrevious />
-            </IconButton>
-          </Tooltip>
-          <IconButton
-            onClick={() =>
-              isPlaying
-                ? playerRef.current?.pauseVideo()
-                : playerRef.current?.playVideo()
-            }
-            aria-label='play/pause'
-          >
-            {isPlaying ? <PauseCircle /> : <PlayArrow />}
-          </IconButton>
+
           <Tooltip title='Jump to loop start'>
             <IconButton onClick={restartLoop}>
               <RestartAlt />
@@ -362,7 +367,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           </Tooltip>
         </div>
         {videos[id].loops && (
-          <List style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <List style={{ display: 'flex', flexDirection: 'column', gap: '5px', overflow: 'auto' }}>
             {videos[id].loops.sort((a, b) => a.sectionStart - b.sectionStart).map(loop => (
               <SavedSection
                 onClick={() => loadLoop(loop)}

@@ -65,7 +65,7 @@ div.music-render {
 /* VIDEO PLAYER */
 div.player {
   display: flex;
-  flex: 1 0 auto;
+  height: 100%;
   gap: 10px;
   justify-content: space-around;
   padding: 30px;
@@ -74,5 +74,4 @@ div.player {
 div.controls {
   align-items: stretch;
   flex: 0;
-  justify-content: center;
 }
