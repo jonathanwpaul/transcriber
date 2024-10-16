@@ -15,11 +15,13 @@ import {
   SkipPrevious,
   Flag,
   Save,
+  Code,
 } from '@mui/icons-material'
 import YouTube from 'react-youtube'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter } from '@utils/timestampFormatter'
 import SavedSection from './components/SavedSection'
+import { Dialog } from './components/Dialog'
 
 export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [currentTime, setCurrentTime] = useState(0)
@@ -31,13 +33,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
   const [sectionStart, setSectionStart] = useState(0)
   const [sectionEnd, setSectionEnd] = useState(0)
+  const [showJSON, setShowJSON] = useState(false)
   const {
-    preference: videosString,
-    loading,
-    setValue: setVideos,
-  } = usePreferenceValue({
-    key: 'videos',
-  })
+    preference: videosString, loading, setValue: setVideos, } = usePreferenceValue({
+      key: 'videos',
+    })
 
   const videos = JSON.parse(videosString) || {}
 
@@ -365,6 +365,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
               <RestartAlt />
             </IconButton>
           </Tooltip>
+          <Tooltip title='Show JSON'>
+            <IconButton onClick={() => setShowJSON(true)}>
+              <Code />
+            </IconButton>
+          </Tooltip>
         </div>
         {videos[id].loops && (
           <List style={{ display: 'flex', flexDirection: 'column', gap: '5px', overflow: 'auto' }}>
@@ -378,6 +383,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             ))}
           </List>
         )}
+        <Dialog
+          open={showJSON}
+          onClose={() => setShowJSON(false)}
+        >
+          <div>{JSON.stringify(videos[id], null, 4)}</div>
+        </Dialog>
       </div>
     </div>
   )
