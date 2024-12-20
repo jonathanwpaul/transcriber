@@ -1,29 +1,27 @@
 import _ from 'lodash'
 import { useState, useRef, useCallback } from 'react'
-import {
-  IconButton,
-  List,
-  Slider,
-  Tooltip,
-} from '@mui/material'
+import { Card, IconButton, List, Slider, Tooltip } from '@mui/material'
 import { TimeTextInput } from './components'
 import {
-  PlayArrow,
   PauseCircle,
   RestartAlt,
-  CancelOutlined,
   SkipPrevious,
   Flag,
   Save,
   Code,
+  Close,
+  PlayCircle,
 } from '@mui/icons-material'
 import YouTube from 'react-youtube'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter } from '@utils/timestampFormatter'
 import SavedSection from './components/SavedSection'
 import { Dialog } from './components/Dialog'
+import { useTheme } from '@mui/material'
 
 export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
+  const theme = useTheme()
+  console.log(theme)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -35,9 +33,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [sectionEnd, setSectionEnd] = useState(0)
   const [showJSON, setShowJSON] = useState(false)
   const {
-    preference: videosString, loading, setValue: setVideos, } = usePreferenceValue({
-      key: 'videos',
-    })
+    preference: videosString,
+    loading,
+    setValue: setVideos,
+  } = usePreferenceValue({
+    key: 'videos',
+  })
 
   const videos = JSON.parse(videosString) || {}
 
@@ -68,6 +69,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
    */
   const onReady = e => {
     playerRef.current = e.target
+    videos[id].title = playerRef.current.getVideoData().title
+    setVideos('videos', videos)
     setCurrentTime(round(e.target.getCurrentTime()))
     setDuration(playerRef.current.getDuration())
     setIsPlaying(e.target.getPlayerState() === 1)
@@ -151,7 +154,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setVideos('videos', videos)
   }
 
-  const deleteLoop = (loop) => {
+  const deleteLoop = loop => {
     const arr = videos[id].loops || []
     const idx = arr.indexOf(loop)
     arr.splice(idx, 1)
@@ -181,76 +184,137 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   if (loading) return
 
   return (
-    <div className='vertical-container' style={{ gap: 50, width: '100%' }}>
-      <div className='horizontal-container' style={{ flex: '0 0 30%', justifyContent: 'space-between' }}>
-        <Tooltip title='Restart player'>
-          <IconButton onClick={restartPlayer}>
-            <SkipPrevious />
-          </IconButton>
-        </Tooltip>
-        <IconButton
-          aria-label='play/pause'
-          onClick={() =>
-            isPlaying
-              ? playerRef.current?.pauseVideo()
-              : playerRef.current?.playVideo()
-          }
-          size='large'
-        >
-          {isPlaying ? <PauseCircle /> : <PlayArrow />}
-        </IconButton><YouTube
-          opts={videoOptions}
-          videoId={id}
-          onReady={onReady}
-          onPlay={onPlay}
-          onPause={onPause}
-          style={{ alignSelf: 'stretch', aspectRatio: '16/9' }}
-        // style={{ position: 'fixed' }}
-        />
+    <div
+      className='vertical-container'
+      style={{ gap: 50, width: '100%', height: '100%' }}
+    >
+      <div
+        className='horizontal-container'
+        style={{
+          flex: '0 0 30%',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          position: 'relative',
+        }}
+      >
         <Tooltip title='Close video'>
           <IconButton
             style={{
               alignSelf: 'flex-start',
               backgroundColor: 'red',
+              boxShadow: '2px 2px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
               color: 'white',
-              // position: 'relative',
+              position: 'absolute',
               padding: 5,
-              // left: '-5',
+              left: -15,
+              top: -15,
             }}
             onClick={handleCloseVideo}
           >
-            <CancelOutlined />
+            <Close />
           </IconButton>
         </Tooltip>
+
+        <YouTube
+          opts={videoOptions}
+          videoId={id}
+          onReady={onReady}
+          onPlay={onPlay}
+          onPause={onPause}
+          style={{ aspectRatio: '16/9' }}
+          // style={{ position: 'fixed' }}
+        />
+
+        <div
+          className='horizontal-container'
+          style={{ alignItems: 'center', flex: '1 0 auto' }}
+        >
+          <Tooltip title='Restart player'>
+            <IconButton onClick={restartPlayer}>
+              <SkipPrevious />
+            </IconButton>
+          </Tooltip>
+          <IconButton
+            aria-label='play/pause'
+            onClick={() =>
+              isPlaying
+                ? playerRef.current?.pauseVideo()
+                : playerRef.current?.playVideo()
+            }
+            sx={{
+              fontSize: '5rem',
+            }}
+          >
+            {isPlaying ? (
+              <PauseCircle
+                sx={{ color: theme.palette.primary.main, fontSize: 'inherit' }}
+              />
+            ) : (
+              <PlayCircle
+                sx={{ color: theme.palette.primary.main, fontSize: 'inherit' }}
+              />
+            )}
+          </IconButton>
+          <Slider
+            defaultValue={playbackRate}
+            // min={playerRef.current?.getAvailablePlaybackRates()[0]}
+            max={2}
+            marks={[
+              { value: 0.125 },
+              { value: 0.25 },
+              { value: 0.5 },
+              { value: 1 },
+              { value: 1.5 },
+              { value: 2 },
+            ]}
+            onChange={handlePlaybackRateChange}
+            onKeyDown={preventHorizontalKeyboardNavigation}
+            orientation='vertical'
+            sx={{
+              alignSelf: 'center',
+            }}
+            size='large'
+            step={null}
+            value={playbackRate}
+            valueLabelFormat={val => val + 'x'}
+            valueLabelDisplay='auto'
+          />
+          <div className='vertical-container' style={{ alignItems: 'center' }}>
+            <Tooltip title='Mark loop start'>
+              <IconButton onClick={markLoopStart}>
+                <Flag sx={{ color: 'green' }} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title='Mark loop end'>
+              <IconButton onClick={markLoopEnd}>
+                <Flag sx={{ color: 'red' }} />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title='Save Loop'>
+              <IconButton onClick={saveLoop}>
+                <Save />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title='Jump to loop start'>
+              <IconButton onClick={restartLoop}>
+                <RestartAlt />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title='Show JSON'>
+              <IconButton onClick={() => setShowJSON(true)}>
+                <Code />
+              </IconButton>
+            </Tooltip>
+          </div>
+        </div>
       </div>
 
-      <div className='vertical-container controls' style={{ flex: '1 0 50%', height: '50vh' }}>
-        <Slider
-          defaultValue={playbackRate}
-          // min={playerRef.current?.getAvailablePlaybackRates()[0]}
-          max={2}
-          marks={[
-            { value: 0.125 },
-            { value: 0.25 },
-            { value: 0.5 },
-            { value: 1 },
-            { value: 1.5 },
-            { value: 2 },
-          ]}
-          onChange={handlePlaybackRateChange}
-          onKeyDown={preventHorizontalKeyboardNavigation}
-          // sx={{
-          //   '& input[type="range"]': {
-          //     WebkitAppearance: 'slider-vertical',
-          //   },
-          //   alignSelf: 'center',
-          // }}
-          size='large'
-          step={null}
-          value={playbackRate}
-          valueLabelFormat={val => val + 'x'}
-          valueLabelDisplay='auto'
-        />
+      <div
+        className='vertical-container controls'
+        style={{ flex: '1 0 50%', height: '50vh', gap: '30px' }}
+      >
         <div>
           {/* the loop slider */}
           <Slider
@@ -312,11 +376,16 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             valueLabelFormat={timestampFormatter}
           />
         </div>
-        <div className='horizontal-container'>
+
+        <div
+          className='horizontal-container'
+          style={{ flexWrap: 'wrap', width: '100%' }}
+        >
           <TimeTextInput
             value={sectionStart}
             onChange={value => setSectionStart(value)}
             changeAmount={0.5}
+            helperText='start'
             min={0}
             max={duration}
           />
@@ -326,6 +395,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
               setCurrentTime(value)
               playerRef.current.seekTo(value)
             }}
+            helperText='current'
             changeAmount={0.5}
             min={0}
             max={duration}
@@ -334,60 +404,46 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             value={sectionEnd}
             onChange={value => setSectionEnd(value)}
             changeAmount={0.5}
+            helperText='end'
             min={0}
             max={duration}
           />
         </div>
 
-        <div
-          className='horizontal-container'
-          style={{ alignItems: 'center', flexWrap: 'wrap' }}
-        >
-          <Tooltip title='Mark loop start'>
-            <IconButton onClick={markLoopStart}>
-              <Flag sx={{ color: 'green' }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title='Mark loop end'>
-            <IconButton onClick={markLoopEnd}>
-              <Flag sx={{ color: 'red' }} />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title='Save Loop'>
-            <IconButton onClick={saveLoop}>
-              <Save />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title='Jump to loop start'>
-            <IconButton onClick={restartLoop}>
-              <RestartAlt />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title='Show JSON'>
-            <IconButton onClick={() => setShowJSON(true)}>
-              <Code />
-            </IconButton>
-          </Tooltip>
-        </div>
         {videos[id].loops && (
-          <List style={{ display: 'flex', flexDirection: 'column', gap: '5px', overflow: 'auto' }}>
-            {videos[id].loops.sort((a, b) => a.sectionStart - b.sectionStart).map(loop => (
-              <SavedSection
-                onClick={() => loadLoop(loop)}
-                onDelete={() => deleteLoop(loop)}
-                startTime={loop.sectionStart}
-                endTime={loop.sectionEnd}
-              />
-            ))}
-          </List>
+          <Card
+            style={{
+              background: theme.palette.grey[200],
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '5px',
+              overflow: 'auto',
+              height: '100%',
+
+              boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
+              borderRadius: '8px', // Optional, for rounded corners
+              padding: '16px', // Padding for inner spacing
+            }}
+            elevation
+          >
+            <List style={{ padding: 0 }}>
+              {videos[id].loops
+                .sort((a, b) => a.sectionStart - b.sectionStart)
+                .map(loop => (
+                  <SavedSection
+                    onClick={() => loadLoop(loop)}
+                    onDelete={() => deleteLoop(loop)}
+                    startTime={loop.sectionStart}
+                    endTime={loop.sectionEnd}
+                  />
+                ))}
+            </List>
+          </Card>
         )}
-        <Dialog
-          open={showJSON}
-          onClose={() => setShowJSON(false)}
-        >
-          <div>{JSON.stringify(videos[id], null, 4)}</div>
+        <Dialog open={showJSON} onClose={() => setShowJSON(false)}>
+          <div contentEditable='true'>
+            {JSON.stringify(videos[id], null, 4)}
+          </div>
         </Dialog>
       </div>
     </div>

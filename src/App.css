@@ -6,8 +6,10 @@
   box-sizing: border-box;
   align-items: stretch;
   overflow: auto;
-  padding: 20px;
+  padding: 10px;
   gap: 10px;
+  max-width: 1500px;
+  justify-self: center;
 }
 
 iframe {
@@ -65,6 +67,7 @@ div.music-render {
 /* VIDEO PLAYER */
 div.player {
   display: flex;
+  flex-direction: column;
   height: 100%;
   gap: 10px;
   justify-content: space-around;

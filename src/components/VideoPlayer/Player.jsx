@@ -7,6 +7,7 @@ import {
   TableRow,
   TableHead,
   TableCell,
+  Link,
 } from '@mui/material'
 import { VideoPlayer } from './VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
@@ -57,6 +58,8 @@ const Player = () => {
     showVideoId(id)
   }
 
+  const formatTimeString = (timeString) => new Date(timeString).toLocaleString()
+
   const videoList = Object.keys(videos).sort((a, b) =>
     videos[a]['last_accessed'] > videos[b]['last_accessed'] ? -1 : 1
   )
@@ -66,7 +69,6 @@ const Player = () => {
     setId(videoList[0])
     setShowVideoPlayer(true)
   }
-  console.log(videoList)
 
   return (
     <Card className='player'>
@@ -96,21 +98,29 @@ const Player = () => {
         </div>
       )}
       {!showVideoPlayer && videos && videoList.length > 0 && (
-        <div className='vertical-container' style={{ alignSelf: 'center' }}>
+        <div className='vertical-container' style={{ alignSelf: 'center', width: '100%' }}>
           <Table>
             <TableHead>
               <TableCell>Previously Viewed</TableCell>
-              <TableCell>Time</TableCell>
+              <TableCell></TableCell>
             </TableHead>
             {videoList.map(e => {
               return (
-                <TableRow key={e} onClick={() => showVideoId(e)}>
+                <TableRow key={e} >
                   <TableCell>
-                    <Button variant='outlined' color='secondary'>
-                      {e}
+                    <Button onClick={() => showVideoId(e)} sx={{
+                      justifyContent: 'start',
+                      overflow:'hidden',
+                      textOverflow: 'ellipsis',
+                      textTransform: 'none',
+                      whiteSpace: 'nowrap',
+                      maxWidth:'500px',
+                    }}
+                      variant='text' color='secondary'>
+                      {videos[e].title ?? e}
                     </Button>
                   </TableCell>
-                  <TableCell>{videos[e]['last_accessed']}</TableCell>
+                  <TableCell>{formatTimeString(videos[e]['last_accessed'])}</TableCell>
                 </TableRow>
               )
             })}
