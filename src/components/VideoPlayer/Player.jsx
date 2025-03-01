@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import {
-  Card,
   TextField,
   Button,
   Table,
   TableRow,
   TableHead,
   TableCell,
-  Link,
 } from '@mui/material'
 import { VideoPlayer } from './VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
@@ -58,7 +56,7 @@ const Player = () => {
     showVideoId(id)
   }
 
-  const formatTimeString = (timeString) => new Date(timeString).toLocaleString()
+  const formatTimeString = timeString => new Date(timeString).toLocaleString()
 
   const videoList = Object.keys(videos).sort((a, b) =>
     videos[a]['last_accessed'] > videos[b]['last_accessed'] ? -1 : 1
@@ -71,7 +69,7 @@ const Player = () => {
   }
 
   return (
-    <Card className='player'>
+    <div className='player'>
       {!showVideoPlayer && (
         <div className='horizontal-container' style={{ alignSelf: 'center' }}>
           <TextField
@@ -87,7 +85,6 @@ const Player = () => {
             variant='outlined'
           ></TextField>
           <Button
-            className='button'
             disabled={!inputText}
             onClick={handleSubmit}
             sx={{ textTransform: 'none' }}
@@ -98,7 +95,10 @@ const Player = () => {
         </div>
       )}
       {!showVideoPlayer && videos && videoList.length > 0 && (
-        <div className='vertical-container' style={{ alignSelf: 'center', width: '100%' }}>
+        <div
+          className='vertical-container'
+          style={{ alignSelf: 'center', width: '100%' }}
+        >
           <Table>
             <TableHead>
               <TableCell>Previously Viewed</TableCell>
@@ -106,21 +106,27 @@ const Player = () => {
             </TableHead>
             {videoList.map(e => {
               return (
-                <TableRow key={e} >
+                <TableRow key={e}>
                   <TableCell>
-                    <Button onClick={() => showVideoId(e)} sx={{
-                      justifyContent: 'start',
-                      overflow:'hidden',
-                      textOverflow: 'ellipsis',
-                      textTransform: 'none',
-                      whiteSpace: 'nowrap',
-                      maxWidth:'500px',
-                    }}
-                      variant='text' color='secondary'>
+                    <Button
+                      onClick={() => showVideoId(e)}
+                      sx={{
+                        justifyContent: 'start',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        textTransform: 'none',
+                        whiteSpace: 'nowrap',
+                        maxWidth: '500px',
+                      }}
+                      variant='text'
+                      color='secondary'
+                    >
                       {videos[e].title ?? e}
                     </Button>
                   </TableCell>
-                  <TableCell>{formatTimeString(videos[e]['last_accessed'])}</TableCell>
+                  <TableCell>
+                    {formatTimeString(videos[e]['last_accessed'])}
+                  </TableCell>
                 </TableRow>
               )
             })}
@@ -130,7 +136,7 @@ const Player = () => {
       {showVideoPlayer && (
         <VideoPlayer id={id} setShowVideoPlayer={setShowVideoPlayer} />
       )}
-    </Card>
+    </div>
   )
 }
 
