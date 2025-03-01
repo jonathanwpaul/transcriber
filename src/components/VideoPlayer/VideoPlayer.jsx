@@ -221,13 +221,17 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           onReady={onReady}
           onPlay={onPlay}
           onPause={onPause}
-          style={{ aspectRatio: '16/9' }}
+          style={{ aspectRatio: '16/9', flex: '1 0 auto' }}
           // style={{ position: 'fixed' }}
         />
 
         <div
           className='horizontal-container'
-          style={{ alignItems: 'center', flex: '1 0 auto' }}
+          style={{
+            alignItems: 'center',
+            flex: '1 0 auto',
+            justifyContent: 'space-around',
+          }}
         >
           <Tooltip title='Restart player'>
             <IconButton onClick={restartPlayer}>
@@ -435,6 +439,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
                     onDelete={() => deleteLoop(loop)}
                     startTime={loop.sectionStart}
                     endTime={loop.sectionEnd}
+                    onTitleChange={title => {
+                      loop.title = title
+                      setVideos('videos', videos)
+                    }}
+                    title={loop.title}
                   />
                 ))}
             </List>
