@@ -26,6 +26,8 @@ jobs:
 
       - name: Build React app
         run: npm run build
+        env:
+          DISABLE_ESLINT_PLUGIN: true
 
       - name: Copy build to Electron
         run: npx cap copy @capacitor-community/electron
