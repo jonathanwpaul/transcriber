@@ -21,11 +21,16 @@ const SavedSection = ({
   }
 
   return (
-    <Card style={{ flexShrink: 0, height: '50px', margin: '5px' }}>
+    <Card style={{ flex: 1, height: '50px', margin: '5px' }}>
       <ListItemButton
         className='horizontal-container'
         onClick={onClick}
-        style={{ height: '100%', justifyContent: 'space-between' }}
+        style={{
+          height: '100%',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+        }}
+        selected={isSelected}
       >
         <p>{`${timestampFormatter(startTime)} - ${timestampFormatter(
           endTime

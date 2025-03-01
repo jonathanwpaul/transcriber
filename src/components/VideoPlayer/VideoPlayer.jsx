@@ -221,9 +221,41 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           onReady={onReady}
           onPlay={onPlay}
           onPause={onPause}
-          style={{ aspectRatio: '16/9', flex: '1 0 auto' }}
+          style={{ aspectRatio: '16/9' }}
           // style={{ position: 'fixed' }}
         />
+        <div
+          className='vertical-container'
+          // style={{ flexWrap: 'wrap', width: '100%' }}
+        >
+          <TimeTextInput
+            value={sectionStart}
+            onChange={value => setSectionStart(value)}
+            changeAmount={0.5}
+            helperText='start'
+            min={0}
+            max={duration}
+          />
+          <TimeTextInput
+            value={currentTime}
+            onChange={value => {
+              setCurrentTime(value)
+              playerRef.current.seekTo(value)
+            }}
+            helperText='current'
+            changeAmount={0.5}
+            min={0}
+            max={duration}
+          />
+          <TimeTextInput
+            value={sectionEnd}
+            onChange={value => setSectionEnd(value)}
+            changeAmount={0.5}
+            helperText='end'
+            min={0}
+            max={duration}
+          />
+        </div>
 
         <div
           className='horizontal-container'
@@ -381,39 +413,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           />
         </div>
 
-        <div
-          className='horizontal-container'
-          style={{ flexWrap: 'wrap', width: '100%' }}
-        >
-          <TimeTextInput
-            value={sectionStart}
-            onChange={value => setSectionStart(value)}
-            changeAmount={0.5}
-            helperText='start'
-            min={0}
-            max={duration}
-          />
-          <TimeTextInput
-            value={currentTime}
-            onChange={value => {
-              setCurrentTime(value)
-              playerRef.current.seekTo(value)
-            }}
-            helperText='current'
-            changeAmount={0.5}
-            min={0}
-            max={duration}
-          />
-          <TimeTextInput
-            value={sectionEnd}
-            onChange={value => setSectionEnd(value)}
-            changeAmount={0.5}
-            helperText='end'
-            min={0}
-            max={duration}
-          />
-        </div>
-
         {videos[id].loops && (
           <Card
             style={{
@@ -430,7 +429,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             }}
             elevation
           >
-            <List style={{ padding: 0 }}>
+            <List
+              style={{ display: 'flex', flexDirection: 'column', padding: 0 }}
+            >
               {videos[id].loops
                 .sort((a, b) => a.sectionStart - b.sectionStart)
                 .map(loop => (
@@ -444,6 +445,10 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
                       setVideos('videos', videos)
                     }}
                     title={loop.title}
+                    isSelected={
+                      loop.sectionStart === sectionStart &&
+                      loop.sectionEnd === sectionEnd
+                    }
                   />
                 ))}
             </List>
