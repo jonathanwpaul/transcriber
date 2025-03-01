@@ -6,9 +6,14 @@ import {
   TableRow,
   TableHead,
   TableCell,
+  Dialog,
+  Card,
+  Tooltip,
+  IconButton,
 } from '@mui/material'
 import { VideoPlayer } from './VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
+import { Code } from '@mui/icons-material'
 
 const Player = () => {
   const [id, setId] = useState()
@@ -22,6 +27,8 @@ const Player = () => {
   } = usePreferenceValue({
     key: 'videos',
   })
+
+  const [showJSON, setShowJSON] = useState(false)
 
   const videos = JSON.parse(videosString) || {}
   if (loading) return
@@ -70,6 +77,19 @@ const Player = () => {
 
   return (
     <div className='player'>
+      <Dialog
+        open={showJSON}
+        onClose={() => setShowJSON(false)}
+        fullWidth
+        maxWidth='md'
+      >
+        <TextField
+          multiline
+          fullWidth
+          value={JSON.stringify(videos, null, 4)}
+        />
+      </Dialog>
+
       {!showVideoPlayer && (
         <div className='horizontal-container' style={{ alignSelf: 'center' }}>
           <TextField
@@ -99,6 +119,12 @@ const Player = () => {
           className='vertical-container'
           style={{ alignSelf: 'center', width: '100%' }}
         >
+          <Tooltip title='Show JSON' style={{ alignSelf: 'flex-end' }}>
+            <IconButton onClick={() => setShowJSON(true)}>
+              <Code />
+            </IconButton>
+          </Tooltip>
+
           <Table>
             <TableHead>
               <TableCell>Previously Viewed</TableCell>

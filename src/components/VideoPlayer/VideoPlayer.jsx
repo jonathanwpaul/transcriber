@@ -42,7 +42,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
   const [sectionStart, setSectionStart] = useState(0)
   const [sectionEnd, setSectionEnd] = useState(0)
-  const [showJSON, setShowJSON] = useState(false)
   const {
     preference: videosString,
     loading,
@@ -383,6 +382,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             </Tooltip>
           </div>
         </div>
+
         <div
           className='horizontal-container'
           style={{
@@ -409,11 +409,17 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           >
             {isPlaying ? (
               <PauseCircle
-                sx={{ color: theme.palette.primary.main, fontSize: 'inherit' }}
+                sx={{
+                  color: theme.palette.primary.main,
+                  fontSize: 'inherit',
+                }}
               />
             ) : (
               <PlayCircle
-                sx={{ color: theme.palette.primary.main, fontSize: 'inherit' }}
+                sx={{
+                  color: theme.palette.primary.main,
+                  fontSize: 'inherit',
+                }}
               />
             )}
           </IconButton>
@@ -464,15 +470,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
                 <RestartAlt />
               </IconButton>
             </Tooltip>
-            <Tooltip title='Show JSON'>
-              <IconButton onClick={() => setShowJSON(true)}>
-                <Code />
-              </IconButton>
-            </Tooltip>
           </div>
         </div>
       </div>
-
       <div
         className='vertical-container controls'
         style={{ flex: '1 0 50%', height: '50vh', gap: '30px' }}
@@ -556,7 +556,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           >
             {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
               <List
-                style={{ display: 'flex', flexDirection: 'column', padding: 0 }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: 0,
+                }}
               >
                 {Object.values(videos[id].loops)
                   .sort((a, b) => a.sectionStart - b.sectionStart)
@@ -567,11 +571,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             )}
           </Card>
         }
-        <Dialog open={showJSON} onClose={() => setShowJSON(false)}>
-          <div contentEditable='true'>
-            {JSON.stringify(videos[id], null, 4)}
-          </div>
-        </Dialog>
         <Snackbar
           open={toastOpen}
           autoHideDuration={5000}
