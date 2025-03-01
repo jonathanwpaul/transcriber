@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@capacitor-community/electron": "^5.0.1",
     "@capacitor/android": "^5.7.0",
     "@capacitor/core": "^5.7.2",
     "@capacitor/filesystem": "^5.2.1",
@@ -15,6 +16,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "abcjs": "^6.2.3",
+    "electron": "^34.3.0",
     "lodash": "^4.17.21",
     "patch-package": "^8.0.0",
     "react": "^18.2.0",

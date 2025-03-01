@@ -1,0 +1,45 @@
+name: Build Electron App
+
+on:
+  push:
+    branches:
+      - simplified
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build React app
+        run: npm run build
+
+      - name: Copy build to Electron
+        run: npx cap copy @capacitor-community/electron
+
+      - name: Install Electron packages
+        run: npm install
+        working-directory: electron
+
+      - name: Build Electron app
+        run: npm run electron:make
+        working-directory: electron
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: electron-app-${{ matrix.os }}
+          path: electron/dist_electron/
