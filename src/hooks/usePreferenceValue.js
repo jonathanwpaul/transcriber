@@ -21,7 +21,6 @@ export const usePreferenceValue = ({ key }) => {
 
   useEffect(() => {
     const fetchValue = async () => {
-      console.log('refreshing value')
       try {
         const value = await getValue(key)
         setPreference(value)
@@ -40,10 +39,5 @@ export const usePreferenceValue = ({ key }) => {
 const getValue = async key => {
   const { value } = await Preferences.get({ key })
 
-  // try {
-  //   return JSON.parse(value)
-  // } catch (ex) {
-  //   console.log(ex)
-  // }
   return value
 }

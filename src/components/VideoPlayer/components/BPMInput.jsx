@@ -1,9 +1,13 @@
 import React, { useState, useRef } from 'react'
 import { IconButton, TextField, Tooltip } from '@mui/material'
-import { Add, Remove } from '@mui/icons-material'
 import { ReactComponent as MetronomeIcon } from '../../../assets/metronome.svg' // Import the metronome SVG
 
-const BPMInput = ({ value, onChange }) => {
+const BPMInput = ({
+  value,
+  onChange,
+  beatsPerMeasure,
+  onBeatsPerMeasureChange,
+}) => {
   const [bpm, setBpm] = useState(value)
   const [lastTap, setLastTap] = useState(null)
   const [tapIntervals, setTapIntervals] = useState([])
@@ -11,7 +15,7 @@ const BPMInput = ({ value, onChange }) => {
 
   const handleTap = () => {
     const now = Date.now()
-    if (lastTap) {
+    if (lastTap && lastTap > now - 10000) {
       const interval = now - lastTap
       setTapIntervals([...tapIntervals, interval])
       const averageInterval =
@@ -19,27 +23,24 @@ const BPMInput = ({ value, onChange }) => {
       const newBpm = Math.round(60000 / averageInterval)
       setBpm(newBpm)
       onChange(newBpm)
+    } else {
+      setTapIntervals([])
     }
     setLastTap(now)
   }
 
-  const handleIncrement = () => {
-    const newBpm = bpm + 1
-    setBpm(newBpm)
-    onChange(newBpm)
-  }
-
-  const handleDecrement = () => {
-    const newBpm = bpm - 1
-    setBpm(newBpm)
-    onChange(newBpm)
-  }
-
-  const handleChange = e => {
+  const handleBpmChange = e => {
     const newBpm = parseInt(e.target.value, 10)
     if (!isNaN(newBpm)) {
       setBpm(newBpm)
       onChange(newBpm)
+    }
+  }
+
+  const handleBeatsPerMeasureChange = e => {
+    const newBeatsPerMeasure = parseInt(e.target.value, 10)
+    if (!isNaN(newBeatsPerMeasure)) {
+      onBeatsPerMeasureChange(newBeatsPerMeasure)
     }
   }
 
@@ -51,26 +52,24 @@ const BPMInput = ({ value, onChange }) => {
       >
         <Tooltip title='Tap to set BPM'>
           <IconButton onClick={handleTap}>
-            <MetronomeIcon height={25} width={25} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title='Increase BPM'>
-          <IconButton onClick={handleIncrement}>
-            <Add />
+            <MetronomeIcon height={50} width={50} />
           </IconButton>
         </Tooltip>
         <TextField
           type='number'
+          label='beats/min'
           value={bpm}
-          onChange={handleChange}
+          onChange={handleBpmChange}
           inputRef={inputRef}
-          style={{ width: 80 }}
+          style={{ width: 120 }}
         />
-        <Tooltip title='Decrease BPM'>
-          <IconButton onClick={handleDecrement}>
-            <Remove />
-          </IconButton>
-        </Tooltip>
+        <TextField
+          type='number'
+          label='beats/measure'
+          value={beatsPerMeasure}
+          onChange={handleBeatsPerMeasureChange}
+          style={{ width: 120, marginTop: '10px' }}
+        />
       </div>
     </div>
   )

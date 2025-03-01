@@ -1,6 +1,13 @@
 import _ from 'lodash'
 import { useState, useRef, useCallback } from 'react'
-import { Card, IconButton, List, Slider, Tooltip } from '@mui/material'
+import {
+  Card,
+  IconButton,
+  List,
+  Slider,
+  TextField,
+  Tooltip,
+} from '@mui/material'
 import { TimeTextInput } from './components'
 import {
   PauseCircle,
@@ -11,6 +18,7 @@ import {
   Code,
   Close,
   PlayCircle,
+  SkipNext,
 } from '@mui/icons-material'
 import YouTube from 'react-youtube'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
@@ -22,7 +30,6 @@ import BPMInput from './components/BPMInput' // Import the BPMInput component
 
 export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const theme = useTheme()
-  console.log(theme)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -41,8 +48,19 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     key: 'videos',
   })
 
+  const {
+    preference: appSettingsString,
+    loading: appSettingsLoading,
+    setValue: setAppSettings,
+  } = usePreferenceValue({
+    key: 'appSettings',
+  })
+
+  const appSettings = JSON.parse(appSettingsString) || {}
+  const measures = appSettings['measures']
   const videos = JSON.parse(videosString) || {}
-  const [bpm, setBpm] = useState(videos[id]?.bpm) // Add state for BPM
+
+  const { beatsPerMeasure, bpm } = videos[id] || {}
 
   const videoOptions = {
     playerVars: {
@@ -50,8 +68,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
       fs: 1,
     },
   }
-
-  console.log(videos)
 
   const playerRef = useRef()
   const timerRef = useRef()
@@ -80,15 +96,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setPossiblePlaybackRates(e.target.getAvailablePlaybackRates())
     setSectionStart(0)
     setSectionEnd(e.target.getDuration())
-    setBpm(videos[id]?.bpm) // Initialize BPM state
   }
 
   const timeIncrement = useCallback(() => {
-    // console.log({
-    //   time: playerRef.current.getCurrentTime(),
-    //   start: sectionStartRef.current,
-    //   end: sectionEndRef.current,
-    // })
     setCurrentTime(round(playerRef.current?.getCurrentTime()))
     if (playerRef.current?.getCurrentTime() > sectionEndRef.current) {
       handleSliderChange(null, sectionStartRef.current)
@@ -186,12 +196,20 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   }
 
   const handleBpmChange = newBpm => {
-    setBpm(newBpm)
     videos[id].bpm = newBpm
     setVideos('videos', videos)
   }
 
-  if (loading) return
+  const handleBeatsPerMeasureChange = newBeatsPerMeasure => {
+    videos[id].beatsPerMeasure = newBeatsPerMeasure
+    setVideos('videos', videos)
+  }
+
+  const handleMeasuresChange = newMeasures => {
+    setAppSettings('appSettings', { ...appSettings, measures: newMeasures })
+  }
+
+  if (loading || appSettingsLoading) return
 
   return (
     <div
@@ -269,7 +287,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           />
         </div>
 
-        <BPMInput value={bpm} onChange={handleBpmChange} />
         <div
           className='horizontal-container'
           style={{
@@ -329,6 +346,53 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             valueLabelDisplay='auto'
           />
 
+          <BPMInput
+            value={bpm}
+            onChange={handleBpmChange}
+            beatsPerMeasure={beatsPerMeasure}
+            onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
+          />
+          <div className='vertical-container' style={{ alignItems: 'center' }}>
+            <Tooltip title={`Previous ${measures} measures`}>
+              <IconButton
+                onClick={() => {
+                  const newStart = Math.round(
+                    sectionStart -
+                      (measures * beatsPerMeasure) /*beats*/ /
+                        (bpm /*beats/min*/ / 60) /*min/sec*/,
+                    1
+                  )
+                  setSectionEnd(sectionStart)
+                  setSectionStart(newStart)
+                }}
+              >
+                <SkipPrevious />
+              </IconButton>
+            </Tooltip>
+            <TextField
+              type='number'
+              label='measures'
+              value={measures} // Add measures input
+              onChange={e => handleMeasuresChange(parseInt(e.target.value, 10))}
+              style={{ width: 120, marginTop: '10px' }}
+            />
+            <Tooltip title={`Next ${measures} measures`}>
+              <IconButton
+                onClick={() => {
+                  const newEnd = Math.round(
+                    sectionEnd +
+                      (measures * beatsPerMeasure) /*beats*/ /
+                        (bpm /*beats/min*/ / 60) /*min/sec*/,
+                    1
+                  )
+                  setSectionStart(sectionEnd)
+                  setSectionEnd(newEnd)
+                }}
+              >
+                <SkipNext />
+              </IconButton>
+            </Tooltip>
+          </div>
           <div className='vertical-container' style={{ alignItems: 'center' }}>
             <Tooltip title='Mark loop start'>
               <IconButton onClick={markLoopStart}>
@@ -441,7 +505,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
               borderRadius: '8px', // Optional, for rounded corners
               padding: '16px', // Padding for inner spacing
             }}
-            elevation
           >
             {videos[id].loops && videos[id].loops.length > 0 ? (
               <List

@@ -36,14 +36,11 @@ const Controls = ({
   // const [undoStack, setUndoStack] = useState()
 
   const handleDurationChange = (_, newValue) => {
-    console.log('duration: ', newValue)
     if (newValue === null) return
     setDuration(newValue)
   }
 
   const handleInsert = (_, value) => {
-    console.group('handleInsert')
-    console.log({ value })
     setAbcString(
       selectedAbcElem
         ? abcString.slice(0, selectedAbcElem.endChar) +
@@ -52,13 +49,11 @@ const Controls = ({
         : abcString + value
     )
 
-    console.log({ selectedAbcElem })
     setSelectedIndex(
       selectedAbcElem
         ? selectedAbcElem.abselem.counters.note + 1
         : voiceArr.length
     )
-    console.groupEnd('handleInsert')
   }
 
   const handleInputChange = (_, value) => {
