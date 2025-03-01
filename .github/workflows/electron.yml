@@ -45,3 +45,4 @@ jobs:
         with:
           name: electron-app-${{ matrix.os }}
           path: dist/
+        working-directory: electron
