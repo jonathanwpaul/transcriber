@@ -7,6 +7,7 @@ import {
   Slider,
   TextField,
   Tooltip,
+  Snackbar,
 } from '@mui/material'
 import { TimeTextInput } from './components'
 import {
@@ -34,6 +35,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
+  const [toastOpen, setToastOpen] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
 
   //TODO: see if we can use possibleplaybackrates instead
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
@@ -159,19 +162,31 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setShowVideoPlayer(false)
   }
 
+  const showToast = message => {
+    setToastMessage(message)
+    setToastOpen(true)
+  }
+
+  const handleCloseToast = () => {
+    setToastOpen(false)
+  }
+
   const saveLoop = () => {
-    const arr = videos[id].loops || []
-    arr.map(e => [e.sectionStart, e.sectionEnd])
-    arr.push({ sectionStart, sectionEnd })
-    videos[id].loops = Array.from(_.uniqWith(arr, _.isEqual))
+    const key = `${sectionStart}-${sectionEnd}`
+    videos[id].loops = videos[id].loops || {}
+    videos[id].loops[key] = {
+      ...(videos[id].loops[key] || {}), //for any other fields we want to save with loops
+      sectionStart,
+      sectionEnd,
+    }
     setVideos('videos', videos)
   }
 
   const deleteLoop = loop => {
-    const arr = videos[id].loops || []
-    const idx = arr.indexOf(loop)
-    arr.splice(idx, 1)
-    videos[id].loops = arr
+    videos[id].loops = _.omit(
+      videos[id].loops,
+      `${loop.sectionStart}-${loop.sectionEnd}`
+    )
     setVideos('videos', videos)
   }
 
@@ -180,6 +195,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setSectionEnd(loop['sectionEnd'])
     setCurrentTime(loop['sectionStart'])
     playerRef.current.seekTo(loop['sectionStart'])
+
+    //TODO: make appsetting for playing on load of loop
     playerRef.current.playVideo()
   }
   const markLoopStart = () => {
@@ -194,6 +211,25 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setCurrentTime(sectionStart)
     playerRef.current.seekTo(sectionStart)
   }
+
+  const renderLoop = (loop, i) => (
+    <div className='vertical-container' key={`loop-${i}`} style={{ gap: 10 }}>
+      <SavedSection
+        endTime={loop.sectionEnd}
+        isSelected={
+          loop.sectionStart === sectionStart && loop.sectionEnd === sectionEnd
+        }
+        onClick={() => loadLoop(loop)}
+        onDelete={() => deleteLoop(loop)}
+        onTitleChange={title => {
+          loop.title = title
+          setVideos('videos', videos)
+        }}
+        startTime={loop.sectionStart}
+        title={loop.title}
+      />
+    </div>
+  )
 
   const handleBpmChange = newBpm => {
     videos[id].bpm = newBpm
@@ -286,7 +322,67 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             max={duration}
           />
         </div>
-
+        <div className='horizontal-container' style={{ alignItems: 'center' }}>
+          <BPMInput
+            value={bpm}
+            onChange={handleBpmChange}
+            beatsPerMeasure={beatsPerMeasure}
+            onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
+          />
+          <div className='vertical-container' style={{ alignItems: 'center' }}>
+            <Tooltip title={`Previous ${measures} measures`}>
+              <IconButton
+                onClick={() => {
+                  if (!bpm || !beatsPerMeasure) {
+                    showToast(
+                      'provide both BPM and beats/measure to use this function'
+                    )
+                    return
+                  }
+                  const newStart = Math.round(
+                    sectionStart -
+                      (measures * beatsPerMeasure) /*beats*/ /
+                        (bpm /*beats/min*/ / 60) /*min/sec*/,
+                    1
+                  )
+                  setSectionEnd(sectionStart)
+                  setSectionStart(newStart)
+                }}
+              >
+                <SkipPrevious />
+              </IconButton>
+            </Tooltip>
+            <TextField
+              type='number'
+              label='measures'
+              value={measures} // Add measures input
+              onChange={e => handleMeasuresChange(parseInt(e.target.value, 10))}
+              style={{ width: 120, marginTop: '10px' }}
+            />
+            <Tooltip title={`Next ${measures} measures`}>
+              <IconButton
+                onClick={() => {
+                  if (!bpm || !beatsPerMeasure) {
+                    showToast(
+                      'provide both BPM and beats/measure to use this function'
+                    )
+                    return
+                  }
+                  const newEnd = Math.round(
+                    sectionEnd +
+                      (measures * beatsPerMeasure) /*beats*/ /
+                        (bpm /*beats/min*/ / 60) /*min/sec*/,
+                    1
+                  )
+                  setSectionStart(sectionEnd)
+                  setSectionEnd(newEnd)
+                }}
+              >
+                <SkipNext />
+              </IconButton>
+            </Tooltip>
+          </div>
+        </div>
         <div
           className='horizontal-container'
           style={{
@@ -323,7 +419,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           </IconButton>
           <Slider
             defaultValue={playbackRate}
-            // min={playerRef.current?.getAvailablePlaybackRates()[0]}
             max={2}
             marks={[
               { value: 0.125 },
@@ -346,53 +441,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             valueLabelDisplay='auto'
           />
 
-          <BPMInput
-            value={bpm}
-            onChange={handleBpmChange}
-            beatsPerMeasure={beatsPerMeasure}
-            onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
-          />
-          <div className='vertical-container' style={{ alignItems: 'center' }}>
-            <Tooltip title={`Previous ${measures} measures`}>
-              <IconButton
-                onClick={() => {
-                  const newStart = Math.round(
-                    sectionStart -
-                      (measures * beatsPerMeasure) /*beats*/ /
-                        (bpm /*beats/min*/ / 60) /*min/sec*/,
-                    1
-                  )
-                  setSectionEnd(sectionStart)
-                  setSectionStart(newStart)
-                }}
-              >
-                <SkipPrevious />
-              </IconButton>
-            </Tooltip>
-            <TextField
-              type='number'
-              label='measures'
-              value={measures} // Add measures input
-              onChange={e => handleMeasuresChange(parseInt(e.target.value, 10))}
-              style={{ width: 120, marginTop: '10px' }}
-            />
-            <Tooltip title={`Next ${measures} measures`}>
-              <IconButton
-                onClick={() => {
-                  const newEnd = Math.round(
-                    sectionEnd +
-                      (measures * beatsPerMeasure) /*beats*/ /
-                        (bpm /*beats/min*/ / 60) /*min/sec*/,
-                    1
-                  )
-                  setSectionStart(sectionEnd)
-                  setSectionEnd(newEnd)
-                }}
-              >
-                <SkipNext />
-              </IconButton>
-            </Tooltip>
-          </div>
           <div className='vertical-container' style={{ alignItems: 'center' }}>
             <Tooltip title='Mark loop start'>
               <IconButton onClick={markLoopStart}>
@@ -506,29 +554,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
               padding: '16px', // Padding for inner spacing
             }}
           >
-            {videos[id].loops && videos[id].loops.length > 0 ? (
+            {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
               <List
                 style={{ display: 'flex', flexDirection: 'column', padding: 0 }}
               >
-                {videos[id].loops
+                {Object.values(videos[id].loops)
                   .sort((a, b) => a.sectionStart - b.sectionStart)
-                  .map(loop => (
-                    <SavedSection
-                      onClick={() => loadLoop(loop)}
-                      onDelete={() => deleteLoop(loop)}
-                      startTime={loop.sectionStart}
-                      endTime={loop.sectionEnd}
-                      onTitleChange={title => {
-                        loop.title = title
-                        setVideos('videos', videos)
-                      }}
-                      title={loop.title}
-                      isSelected={
-                        loop.sectionStart === sectionStart &&
-                        loop.sectionEnd === sectionEnd
-                      }
-                    />
-                  ))}
+                  .map((loop, i) => renderLoop(loop, i))}
               </List>
             ) : (
               <p>Save a loop to see it here</p>
@@ -540,6 +572,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             {JSON.stringify(videos[id], null, 4)}
           </div>
         </Dialog>
+        <Snackbar
+          open={toastOpen}
+          autoHideDuration={5000}
+          onClose={handleCloseToast}
+          message={toastMessage}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        />
       </div>
     </div>
   )
