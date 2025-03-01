@@ -42,7 +42,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
   const [sectionStart, setSectionStart] = useState(0)
   const [sectionEnd, setSectionEnd] = useState(0)
-  const [showJSON, setShowJSON] = useState(false)
   const {
     preference: videosString,
     loading,
@@ -382,203 +381,207 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
               </IconButton>
             </Tooltip>
           </div>
-        </div>
-        <div
-          className='horizontal-container'
-          style={{
-            alignItems: 'center',
-            flex: '1 0 auto',
-            justifyContent: 'space-around',
-          }}
-        >
-          <Tooltip title='Restart player'>
-            <IconButton onClick={restartPlayer}>
-              <SkipPrevious />
+
+          <div
+            className='horizontal-container'
+            style={{
+              alignItems: 'center',
+              flex: '1 0 auto',
+              justifyContent: 'space-around',
+            }}
+          >
+            <Tooltip title='Restart player'>
+              <IconButton onClick={restartPlayer}>
+                <SkipPrevious />
+              </IconButton>
+            </Tooltip>
+            <IconButton
+              aria-label='play/pause'
+              onClick={() =>
+                isPlaying
+                  ? playerRef.current?.pauseVideo()
+                  : playerRef.current?.playVideo()
+              }
+              sx={{
+                fontSize: '5rem',
+              }}
+            >
+              {isPlaying ? (
+                <PauseCircle
+                  sx={{
+                    color: theme.palette.primary.main,
+                    fontSize: 'inherit',
+                  }}
+                />
+              ) : (
+                <PlayCircle
+                  sx={{
+                    color: theme.palette.primary.main,
+                    fontSize: 'inherit',
+                  }}
+                />
+              )}
             </IconButton>
-          </Tooltip>
-          <IconButton
-            aria-label='play/pause'
-            onClick={() =>
-              isPlaying
-                ? playerRef.current?.pauseVideo()
-                : playerRef.current?.playVideo()
-            }
-            sx={{
-              fontSize: '5rem',
-            }}
-          >
-            {isPlaying ? (
-              <PauseCircle
-                sx={{ color: theme.palette.primary.main, fontSize: 'inherit' }}
-              />
-            ) : (
-              <PlayCircle
-                sx={{ color: theme.palette.primary.main, fontSize: 'inherit' }}
-              />
-            )}
-          </IconButton>
-          <Slider
-            defaultValue={playbackRate}
-            max={2}
-            marks={[
-              { value: 0.125 },
-              { value: 0.25 },
-              { value: 0.5 },
-              { value: 1 },
-              { value: 1.5 },
-              { value: 2 },
-            ]}
-            onChange={handlePlaybackRateChange}
-            onKeyDown={preventHorizontalKeyboardNavigation}
-            orientation='vertical'
-            sx={{
-              alignSelf: 'center',
-            }}
-            size='large'
-            step={null}
-            value={playbackRate}
-            valueLabelFormat={val => val + 'x'}
-            valueLabelDisplay='auto'
-          />
+            <Slider
+              defaultValue={playbackRate}
+              max={2}
+              marks={[
+                { value: 0.125 },
+                { value: 0.25 },
+                { value: 0.5 },
+                { value: 1 },
+                { value: 1.5 },
+                { value: 2 },
+              ]}
+              onChange={handlePlaybackRateChange}
+              onKeyDown={preventHorizontalKeyboardNavigation}
+              orientation='vertical'
+              sx={{
+                alignSelf: 'center',
+              }}
+              size='large'
+              step={null}
+              value={playbackRate}
+              valueLabelFormat={val => val + 'x'}
+              valueLabelDisplay='auto'
+            />
 
-          <div className='vertical-container' style={{ alignItems: 'center' }}>
-            <Tooltip title='Mark loop start'>
-              <IconButton onClick={markLoopStart}>
-                <Flag sx={{ color: 'green' }} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='Mark loop end'>
-              <IconButton onClick={markLoopEnd}>
-                <Flag sx={{ color: 'red' }} />
-              </IconButton>
-            </Tooltip>
+            <div
+              className='vertical-container'
+              style={{ alignItems: 'center' }}
+            >
+              <Tooltip title='Mark loop start'>
+                <IconButton onClick={markLoopStart}>
+                  <Flag sx={{ color: 'green' }} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title='Mark loop end'>
+                <IconButton onClick={markLoopEnd}>
+                  <Flag sx={{ color: 'red' }} />
+                </IconButton>
+              </Tooltip>
 
-            <Tooltip title='Save Loop'>
-              <IconButton onClick={saveLoop}>
-                <Save />
-              </IconButton>
-            </Tooltip>
+              <Tooltip title='Save Loop'>
+                <IconButton onClick={saveLoop}>
+                  <Save />
+                </IconButton>
+              </Tooltip>
 
-            <Tooltip title='Jump to loop start'>
-              <IconButton onClick={restartLoop}>
-                <RestartAlt />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='Show JSON'>
-              <IconButton onClick={() => setShowJSON(true)}>
-                <Code />
-              </IconButton>
-            </Tooltip>
+              <Tooltip title='Jump to loop start'>
+                <IconButton onClick={restartLoop}>
+                  <RestartAlt />
+                </IconButton>
+              </Tooltip>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div
-        className='vertical-container controls'
-        style={{ flex: '1 0 50%', height: '50vh', gap: '30px' }}
-      >
-        <div>
-          {/* the loop slider */}
-          <Slider
-            color='secondary'
-            disableSwap
-            min={0}
-            max={duration}
-            onChange={handleIntervalChange}
-            size='large'
-            step={0.1}
-            style={{
-              top: '50%',
-              // position: 'absolute',
-            }}
-            sx={{
-              '& .MuiSlider-thumb': {
-                '&[data-index="0"]': {
-                  color: 'green',
-                  transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
+        <div
+          className='vertical-container controls'
+          style={{ flex: '1 0 50%', height: '50vh', gap: '30px' }}
+        >
+          <div>
+            {/* the loop slider */}
+            <Slider
+              color='secondary'
+              disableSwap
+              min={0}
+              max={duration}
+              onChange={handleIntervalChange}
+              size='large'
+              step={0.1}
+              style={{
+                top: '50%',
+                // position: 'absolute',
+              }}
+              sx={{
+                '& .MuiSlider-thumb': {
+                  '&[data-index="0"]': {
+                    color: 'green',
+                    transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
+                  },
+
+                  '&[data-index="1"]': {
+                    color: 'red',
+                    transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
+                  },
+                  /* Border */
+                  // borderRadius: '0px 50% 50% 50%',
+
+                  /* Size */
+                  height: '2rem',
+                  width: '2rem',
                 },
-
-                '&[data-index="1"]': {
-                  color: 'red',
-                  transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
+                '& .MuiSlider-track': {
+                  boxSizing: 'border-box',
+                  borderRadius: '5px',
+                  borderLeft: '5px solid green',
+                  borderRight: '5px solid red',
+                  color: '#eeeeee95',
+                  opacity: 0.8,
+                  height: 30,
                 },
-                /* Border */
-                // borderRadius: '0px 50% 50% 50%',
+                '.MuiSlider-rail': {
+                  height: 0,
+                },
+              }}
+              value={[sectionStart, sectionEnd]}
+              valueLabelDisplay='auto'
+              valueLabelFormat={timestampFormatter}
+            />
+            {/* the playback slider (mirrors video playback slider) */}
+            <Slider
+              min={0}
+              max={duration}
+              onChange={handleSliderChange}
+              size='large'
+              step={0.1}
+              value={currentTime}
+              valueLabelDisplay='auto'
+              valueLabelFormat={timestampFormatter}
+            />
+          </div>
 
-                /* Size */
-                height: '2rem',
-                width: '2rem',
-              },
-              '& .MuiSlider-track': {
-                boxSizing: 'border-box',
-                borderRadius: '5px',
-                borderLeft: '5px solid green',
-                borderRight: '5px solid red',
-                color: '#eeeeee95',
-                opacity: 0.8,
-                height: 30,
-              },
-              '.MuiSlider-rail': {
-                height: 0,
-              },
-            }}
-            value={[sectionStart, sectionEnd]}
-            valueLabelDisplay='auto'
-            valueLabelFormat={timestampFormatter}
-          />
-          {/* the playback slider (mirrors video playback slider) */}
-          <Slider
-            min={0}
-            max={duration}
-            onChange={handleSliderChange}
-            size='large'
-            step={0.1}
-            value={currentTime}
-            valueLabelDisplay='auto'
-            valueLabelFormat={timestampFormatter}
+          {
+            <Card
+              style={{
+                background: theme.palette.grey[200],
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '5px',
+                overflow: 'auto',
+                height: '100%',
+
+                boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
+                borderRadius: '8px', // Optional, for rounded corners
+                padding: '16px', // Padding for inner spacing
+              }}
+            >
+              {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
+                <List
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: 0,
+                  }}
+                >
+                  {Object.values(videos[id].loops)
+                    .sort((a, b) => a.sectionStart - b.sectionStart)
+                    .map((loop, i) => renderLoop(loop, i))}
+                </List>
+              ) : (
+                <p>Save a loop to see it here</p>
+              )}
+            </Card>
+          }
+          <Snackbar
+            open={toastOpen}
+            autoHideDuration={5000}
+            onClose={handleCloseToast}
+            message={toastMessage}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
           />
         </div>
-
-        {
-          <Card
-            style={{
-              background: theme.palette.grey[200],
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '5px',
-              overflow: 'auto',
-              height: '100%',
-
-              boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
-              borderRadius: '8px', // Optional, for rounded corners
-              padding: '16px', // Padding for inner spacing
-            }}
-          >
-            {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
-              <List
-                style={{ display: 'flex', flexDirection: 'column', padding: 0 }}
-              >
-                {Object.values(videos[id].loops)
-                  .sort((a, b) => a.sectionStart - b.sectionStart)
-                  .map((loop, i) => renderLoop(loop, i))}
-              </List>
-            ) : (
-              <p>Save a loop to see it here</p>
-            )}
-          </Card>
-        }
-        <Dialog open={showJSON} onClose={() => setShowJSON(false)}>
-          <div contentEditable='true'>
-            {JSON.stringify(videos[id], null, 4)}
-          </div>
-        </Dialog>
-        <Snackbar
-          open={toastOpen}
-          autoHideDuration={5000}
-          onClose={handleCloseToast}
-          message={toastMessage}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        />
       </div>
     </div>
   )
