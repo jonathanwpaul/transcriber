@@ -18,6 +18,7 @@ import { timestampFormatter } from '@utils/timestampFormatter'
 import SavedSection from './components/SavedSection'
 import { Dialog } from './components/Dialog'
 import { useTheme } from '@mui/material'
+import BPMInput from './components/BPMInput' // Import the BPMInput component
 
 export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   const theme = useTheme()
@@ -41,6 +42,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
   })
 
   const videos = JSON.parse(videosString) || {}
+  const [bpm, setBpm] = useState(videos[id]?.bpm) // Add state for BPM
 
   const videoOptions = {
     playerVars: {
@@ -78,6 +80,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setPossiblePlaybackRates(e.target.getAvailablePlaybackRates())
     setSectionStart(0)
     setSectionEnd(e.target.getDuration())
+    setBpm(videos[id]?.bpm) // Initialize BPM state
   }
 
   const timeIncrement = useCallback(() => {
@@ -181,6 +184,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setCurrentTime(sectionStart)
     playerRef.current.seekTo(sectionStart)
   }
+
+  const handleBpmChange = newBpm => {
+    setBpm(newBpm)
+    videos[id].bpm = newBpm
+    setVideos('videos', videos)
+  }
+
   if (loading) return
 
   return (
@@ -222,17 +232,19 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           onPlay={onPlay}
           onPause={onPause}
           style={{ aspectRatio: '16/9' }}
-          // style={{ position: 'fixed' }}
         />
         <div
           className='vertical-container'
-          // style={{ flexWrap: 'wrap', width: '100%' }}
+          style={{
+            justifyContent: 'space-around',
+            padding: '0 20px',
+          }}
         >
           <TimeTextInput
             value={sectionStart}
             onChange={value => setSectionStart(value)}
             changeAmount={0.5}
-            helperText='start'
+            label='start'
             min={0}
             max={duration}
           />
@@ -242,7 +254,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
               setCurrentTime(value)
               playerRef.current.seekTo(value)
             }}
-            helperText='current'
+            label='current'
             changeAmount={0.5}
             min={0}
             max={duration}
@@ -251,12 +263,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             value={sectionEnd}
             onChange={value => setSectionEnd(value)}
             changeAmount={0.5}
-            helperText='end'
+            label='end'
             min={0}
             max={duration}
           />
         </div>
 
+        <BPMInput value={bpm} onChange={handleBpmChange} />
         <div
           className='horizontal-container'
           style={{
@@ -315,6 +328,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             valueLabelFormat={val => val + 'x'}
             valueLabelDisplay='auto'
           />
+
           <div className='vertical-container' style={{ alignItems: 'center' }}>
             <Tooltip title='Mark loop start'>
               <IconButton onClick={markLoopStart}>
@@ -413,7 +427,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
           />
         </div>
 
-        {videos[id].loops && (
+        {
           <Card
             style={{
               background: theme.palette.grey[200],
@@ -429,31 +443,35 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             }}
             elevation
           >
-            <List
-              style={{ display: 'flex', flexDirection: 'column', padding: 0 }}
-            >
-              {videos[id].loops
-                .sort((a, b) => a.sectionStart - b.sectionStart)
-                .map(loop => (
-                  <SavedSection
-                    onClick={() => loadLoop(loop)}
-                    onDelete={() => deleteLoop(loop)}
-                    startTime={loop.sectionStart}
-                    endTime={loop.sectionEnd}
-                    onTitleChange={title => {
-                      loop.title = title
-                      setVideos('videos', videos)
-                    }}
-                    title={loop.title}
-                    isSelected={
-                      loop.sectionStart === sectionStart &&
-                      loop.sectionEnd === sectionEnd
-                    }
-                  />
-                ))}
-            </List>
+            {videos[id].loops && videos[id].loops.length > 0 ? (
+              <List
+                style={{ display: 'flex', flexDirection: 'column', padding: 0 }}
+              >
+                {videos[id].loops
+                  .sort((a, b) => a.sectionStart - b.sectionStart)
+                  .map(loop => (
+                    <SavedSection
+                      onClick={() => loadLoop(loop)}
+                      onDelete={() => deleteLoop(loop)}
+                      startTime={loop.sectionStart}
+                      endTime={loop.sectionEnd}
+                      onTitleChange={title => {
+                        loop.title = title
+                        setVideos('videos', videos)
+                      }}
+                      title={loop.title}
+                      isSelected={
+                        loop.sectionStart === sectionStart &&
+                        loop.sectionEnd === sectionEnd
+                      }
+                    />
+                  ))}
+              </List>
+            ) : (
+              <p>Save a loop to see it here</p>
+            )}
           </Card>
-        )}
+        }
         <Dialog open={showJSON} onClose={() => setShowJSON(false)}>
           <div contentEditable='true'>
             {JSON.stringify(videos[id], null, 4)}
