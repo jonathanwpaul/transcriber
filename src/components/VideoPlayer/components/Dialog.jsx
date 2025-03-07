@@ -1,22 +1,9 @@
-import {
-    DialogTitle,
-    List,
-    ListItem,
-    ListItemButton,
-    Dialog as MuiDialog,
-    Typography,
-} from '@mui/material'
+import { Dialog as MuiDialog } from '@mui/material'
 
-export const Dialog = ({
-    open,
-    onClose,
-    children,
-    otherProps
-}) => {
-
-    return (
-        <MuiDialog onClose={onClose} open={open} {...otherProps}>
-            {children}
-        </MuiDialog>
-    )
+export const Dialog = ({ open, onClose, children, otherProps }) => {
+  return (
+    <MuiDialog onClose={onClose} open={open} {...otherProps}>
+      {children}
+    </MuiDialog>
+  )
 }

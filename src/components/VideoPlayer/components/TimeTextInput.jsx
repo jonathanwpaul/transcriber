@@ -15,6 +15,8 @@ const TimeTextInput = props => {
       style={{
         alignItems: 'center',
         justifyContent: 'center',
+        minWidth: 150,
+        width: 200,
       }}
     >
       <TextField

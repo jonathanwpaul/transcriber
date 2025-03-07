@@ -7,7 +7,6 @@ import {
   Slider,
   TextField,
   Tooltip,
-  Snackbar,
 } from '@mui/material'
 import { TimeTextInput } from './components'
 import {
@@ -16,7 +15,6 @@ import {
   SkipPrevious,
   Flag,
   Save,
-  Code,
   Close,
   PlayCircle,
   SkipNext,
@@ -25,18 +23,15 @@ import YouTube from 'react-youtube'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter } from '@utils/timestampFormatter'
 import SavedSection from './components/SavedSection'
-import { Dialog } from './components/Dialog'
 import { useTheme } from '@mui/material'
 import BPMInput from './components/BPMInput' // Import the BPMInput component
 
-export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
+export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
   const theme = useTheme()
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
-  const [toastOpen, setToastOpen] = useState(false)
-  const [toastMessage, setToastMessage] = useState('')
 
   //TODO: see if we can use possibleplaybackrates instead
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
@@ -161,15 +156,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
     setShowVideoPlayer(false)
   }
 
-  const showToast = message => {
-    setToastMessage(message)
-    setToastOpen(true)
-  }
-
-  const handleCloseToast = () => {
-    setToastOpen(false)
-  }
-
   const saveLoop = () => {
     const key = `${sectionStart}-${sectionEnd}`
     videos[id].loops = videos[id].loops || {}
@@ -252,6 +238,44 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
       style={{ gap: 50, width: '100%', height: '100%' }}
     >
       <div
+        className='vertical-container controls'
+        style={{ flex: '1 0 50%', height: '50vh', gap: '30px' }}
+      >
+        {
+          <Card
+            style={{
+              background: theme.palette.grey[200],
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '5px',
+              overflow: 'auto',
+              height: '100%',
+
+              boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
+              borderRadius: '8px', // Optional, for rounded corners
+              padding: '16px', // Padding for inner spacing
+            }}
+          >
+            {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
+              <List
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: 0,
+                }}
+              >
+                {Object.values(videos[id].loops)
+                  .sort((a, b) => a.sectionStart - b.sectionStart)
+                  .map((loop, i) => renderLoop(loop, i))}
+              </List>
+            ) : (
+              <p>Save a loop to see it here</p>
+            )}
+          </Card>
+        }
+      </div>
+
+      <div
         className='horizontal-container'
         style={{
           flex: '0 0 30%',
@@ -277,58 +301,71 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             <Close />
           </IconButton>
         </Tooltip>
-
-        <YouTube
-          opts={videoOptions}
-          videoId={id}
-          onReady={onReady}
-          onPlay={onPlay}
-          onPause={onPause}
-          style={{ aspectRatio: '16/9' }}
-        />
-        <div
+        <Card
+          className='horizontal-container'
+          style={{ flexWrap: 'wrap', padding: 20 }}
+        >
+          <YouTube
+            opts={videoOptions}
+            videoId={id}
+            onReady={onReady}
+            onPlay={onPlay}
+            onPause={onPause}
+            style={{ aspectRatio: '16/9' }}
+          />
+          <div
+            className='vertical-container'
+            style={{
+              justifyContent: 'space-around',
+            }}
+          >
+            <TimeTextInput
+              value={sectionStart}
+              onChange={value => setSectionStart(value)}
+              changeAmount={0.5}
+              label='start'
+              min={0}
+              max={duration}
+            />
+            <TimeTextInput
+              value={currentTime}
+              onChange={value => {
+                setCurrentTime(value)
+                playerRef.current.seekTo(value)
+              }}
+              label='current'
+              changeAmount={0.5}
+              min={0}
+              max={duration}
+            />
+            <TimeTextInput
+              value={sectionEnd}
+              onChange={value => setSectionEnd(value)}
+              changeAmount={0.5}
+              label='end'
+              min={0}
+              max={duration}
+            />
+          </div>
+        </Card>
+        <Card
           className='vertical-container'
           style={{
-            justifyContent: 'space-around',
-            padding: '0 20px',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
           }}
         >
-          <TimeTextInput
-            value={sectionStart}
-            onChange={value => setSectionStart(value)}
-            changeAmount={0.5}
-            label='start'
-            min={0}
-            max={duration}
-          />
-          <TimeTextInput
-            value={currentTime}
-            onChange={value => {
-              setCurrentTime(value)
-              playerRef.current.seekTo(value)
-            }}
-            label='current'
-            changeAmount={0.5}
-            min={0}
-            max={duration}
-          />
-          <TimeTextInput
-            value={sectionEnd}
-            onChange={value => setSectionEnd(value)}
-            changeAmount={0.5}
-            label='end'
-            min={0}
-            max={duration}
-          />
-        </div>
-        <div className='horizontal-container' style={{ alignItems: 'center' }}>
           <BPMInput
             value={bpm}
             onChange={handleBpmChange}
-            beatsPerMeasure={beatsPerMeasure}
+            beatsPerMeasure={beatsPerMeasure || 4}
             onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
           />
-          <div className='vertical-container' style={{ alignItems: 'center' }}>
+          <div
+            className='horizontal-container'
+            style={{ alignItems: 'center' }}
+          >
             <Tooltip title={`Previous ${measures} measures`}>
               <IconButton
                 onClick={() => {
@@ -381,14 +418,16 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
               </IconButton>
             </Tooltip>
           </div>
-        </div>
+        </Card>
 
-        <div
+        <Card
           className='horizontal-container'
           style={{
             alignItems: 'center',
-            flex: '1 0 auto',
+            // flex: '1 0 auto',
+            flexWrap: 'wrap',
             justifyContent: 'space-around',
+            padding: 20,
           }}
         >
           <Tooltip title='Restart player'>
@@ -446,7 +485,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
             valueLabelFormat={val => val + 'x'}
             valueLabelDisplay='auto'
           />
-
           <div className='vertical-container' style={{ alignItems: 'center' }}>
             <Tooltip title='Mark loop start'>
               <IconButton onClick={markLoopStart}>
@@ -471,112 +509,68 @@ export const VideoPlayer = ({ id, setShowVideoPlayer }) => {
               </IconButton>
             </Tooltip>
           </div>
-        </div>
+        </Card>
       </div>
-      <div
-        className='vertical-container controls'
-        style={{ flex: '1 0 50%', height: '50vh', gap: '30px' }}
-      >
-        <div>
-          {/* the loop slider */}
-          <Slider
-            color='secondary'
-            disableSwap
-            min={0}
-            max={duration}
-            onChange={handleIntervalChange}
-            size='large'
-            step={0.1}
-            style={{
-              top: '50%',
-              // position: 'absolute',
-            }}
-            sx={{
-              '& .MuiSlider-thumb': {
-                '&[data-index="0"]': {
-                  color: 'green',
-                  transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
-                },
 
-                '&[data-index="1"]': {
-                  color: 'red',
-                  transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
-                },
-                /* Border */
-                // borderRadius: '0px 50% 50% 50%',
-
-                /* Size */
-                height: '2rem',
-                width: '2rem',
+      {/* the loop slider */}
+      <div>
+        <Slider
+          color='secondary'
+          disableSwap
+          min={0}
+          max={duration}
+          onChange={handleIntervalChange}
+          size='large'
+          step={0.1}
+          style={{
+            top: '50%',
+            // position: 'absolute',
+          }}
+          sx={{
+            '& .MuiSlider-thumb': {
+              '&[data-index="0"]': {
+                color: 'green',
+                transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
               },
-              '& .MuiSlider-track': {
-                boxSizing: 'border-box',
-                borderRadius: '5px',
-                borderLeft: '5px solid green',
-                borderRight: '5px solid red',
-                color: '#eeeeee95',
-                opacity: 0.8,
-                height: 30,
-              },
-              '.MuiSlider-rail': {
-                height: 0,
-              },
-            }}
-            value={[sectionStart, sectionEnd]}
-            valueLabelDisplay='auto'
-            valueLabelFormat={timestampFormatter}
-          />
-          {/* the playback slider (mirrors video playback slider) */}
-          <Slider
-            min={0}
-            max={duration}
-            onChange={handleSliderChange}
-            size='large'
-            step={0.1}
-            value={currentTime}
-            valueLabelDisplay='auto'
-            valueLabelFormat={timestampFormatter}
-          />
-        </div>
 
-        {
-          <Card
-            style={{
-              background: theme.palette.grey[200],
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '5px',
-              overflow: 'auto',
-              height: '100%',
+              '&[data-index="1"]': {
+                color: 'red',
+                transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
+              },
+              /* Border */
+              // borderRadius: '0px 50% 50% 50%',
 
-              boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
-              borderRadius: '8px', // Optional, for rounded corners
-              padding: '16px', // Padding for inner spacing
-            }}
-          >
-            {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
-              <List
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  padding: 0,
-                }}
-              >
-                {Object.values(videos[id].loops)
-                  .sort((a, b) => a.sectionStart - b.sectionStart)
-                  .map((loop, i) => renderLoop(loop, i))}
-              </List>
-            ) : (
-              <p>Save a loop to see it here</p>
-            )}
-          </Card>
-        }
-        <Snackbar
-          open={toastOpen}
-          autoHideDuration={5000}
-          onClose={handleCloseToast}
-          message={toastMessage}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+              /* Size */
+              height: '2rem',
+              width: '2rem',
+            },
+            '& .MuiSlider-track': {
+              boxSizing: 'border-box',
+              borderRadius: '5px',
+              borderLeft: '5px solid green',
+              borderRight: '5px solid red',
+              color: '#eeeeee95',
+              opacity: 0.8,
+              height: 30,
+            },
+            '.MuiSlider-rail': {
+              height: 0,
+            },
+          }}
+          value={[sectionStart, sectionEnd]}
+          valueLabelDisplay='auto'
+          valueLabelFormat={timestampFormatter}
+        />
+        {/* the playback slider (mirrors video playback slider) */}
+        <Slider
+          min={0}
+          max={duration}
+          onChange={handleSliderChange}
+          size='large'
+          step={0.1}
+          value={currentTime}
+          valueLabelDisplay='auto'
+          valueLabelFormat={timestampFormatter}
         />
       </div>
     </div>

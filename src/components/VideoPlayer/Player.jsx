@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   TextField,
   Button,
@@ -15,7 +15,7 @@ import { VideoPlayer } from './VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
 import { Code } from '@mui/icons-material'
 
-const Player = () => {
+const Player = ({ showToast }) => {
   const [id, setId] = useState()
   const [showVideoPlayer, setShowVideoPlayer] = useState()
   const [inputText, setInputText] = useState()
@@ -27,10 +27,15 @@ const Player = () => {
   } = usePreferenceValue({
     key: 'videos',
   })
-
-  const [showJSON, setShowJSON] = useState(false)
-
   const videos = JSON.parse(videosString) || {}
+  const [showJSON, setShowJSON] = useState(false)
+  const [JSONText, setJSONText] = useState(videosString)
+  const JSONInputRef = useRef()
+
+  useEffect(() => {
+    setJSONText(JSON.stringify(videos, null, 2))
+  }, [videosString])
+
   if (loading) return
 
   const getId = url => {
@@ -70,10 +75,10 @@ const Player = () => {
   )
 
   // if there's a cached entry and not one already selected, use that
-  if (videoList.length > 0 && !showVideoPlayer && !id) {
-    setId(videoList[0])
-    setShowVideoPlayer(true)
-  }
+  // if (videoList.length > 0 && !showVideoPlayer && !id) {
+  //   setId(videoList[0])
+  //   setShowVideoPlayer(true)
+  // }
 
   return (
     <div className='player'>
@@ -83,11 +88,39 @@ const Player = () => {
         fullWidth
         maxWidth='md'
       >
-        <TextField
-          multiline
-          fullWidth
-          value={JSON.stringify(videos, null, 4)}
-        />
+        <Card
+          style={{
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+          }}
+        >
+          <TextField
+            multiline
+            fullWidth
+            value={JSONText}
+            onChange={e => {
+              setJSONText(e.target.value)
+            }}
+            ref={JSONInputRef}
+          />
+          <Button
+            className='button'
+            onClick={() => {
+              if (!JSON.parse(JSONText)) {
+                showToast('Invalid JSON')
+              } else {
+                setVideos('videos', JSON.parse(JSONText))
+                setShowJSON(false)
+              }
+            }}
+            variant='contained'
+            style={{ alignSelf: 'flex-end', textTransform: 'none' }}
+          >
+            Update
+          </Button>
+        </Card>
       </Dialog>
 
       {!showVideoPlayer && (
@@ -103,7 +136,7 @@ const Player = () => {
             placeholder='YouTube URL'
             value={inputText}
             variant='outlined'
-          ></TextField>
+          />
           <Button
             disabled={!inputText}
             onClick={handleSubmit}

@@ -1,5 +1,5 @@
 import { Preferences } from '@capacitor/preferences'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export const usePreferenceValue = ({ key }) => {
   const [preference, setPreference] = useState(null)
@@ -15,9 +15,9 @@ export const usePreferenceValue = ({ key }) => {
     setPreference(value)
   }
 
-  const removeKey = async key => {
-    await Preferences.remove({ key })
-  }
+  // const removeKey = async key => {
+  //   await Preferences.remove({ key })
+  // }
 
   useEffect(() => {
     const fetchValue = async () => {

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { IconButton, TextField, Tooltip } from '@mui/material'
 import { ReactComponent as MetronomeIcon } from '../../../assets/metronome.svg' // Import the metronome SVG
 
@@ -12,6 +12,13 @@ const BPMInput = ({
   const [lastTap, setLastTap] = useState(null)
   const [tapIntervals, setTapIntervals] = useState([])
   const inputRef = useRef()
+
+  useEffect(() => {
+    setBpm(value)
+    if (inputRef.current) {
+      inputRef.current.value = value
+    }
+  }, [value])
 
   const handleTap = () => {
     const now = Date.now()
@@ -45,32 +52,30 @@ const BPMInput = ({
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <div
-        className='vertical-container'
-        style={{ flexDirection: 'column', flex: 1, alignItems: 'center' }}
-      >
-        <Tooltip title='Tap to set BPM'>
-          <IconButton onClick={handleTap}>
-            <MetronomeIcon height={50} width={50} />
-          </IconButton>
-        </Tooltip>
-        <TextField
-          type='number'
-          label='beats/min'
-          value={bpm}
-          onChange={handleBpmChange}
-          inputRef={inputRef}
-          style={{ width: 120 }}
-        />
-        <TextField
-          type='number'
-          label='beats/measure'
-          value={beatsPerMeasure}
-          onChange={handleBeatsPerMeasureChange}
-          style={{ width: 120, marginTop: '10px' }}
-        />
-      </div>
+    <div
+      className='horizontal-container'
+      style={{ alignItems: 'center', flexWrap: 'wrap' }}
+    >
+      <Tooltip title='Tap to set BPM'>
+        <IconButton onClick={handleTap}>
+          <MetronomeIcon height={50} width={50} />
+        </IconButton>
+      </Tooltip>
+      <TextField
+        type='number'
+        label='beats/min'
+        value={bpm}
+        onChange={handleBpmChange}
+        inputRef={inputRef}
+        style={{ width: 120 }}
+      />
+      <TextField
+        type='number'
+        label='beats/measure'
+        value={beatsPerMeasure}
+        onChange={handleBeatsPerMeasureChange}
+        style={{ width: 120 }}
+      />
     </div>
   )
 }
