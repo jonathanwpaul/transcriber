@@ -3,8 +3,7 @@ import { videoSources } from '@utils/constants'
 import { round } from '@utils/video'
 import { useRef } from 'react'
 
-export const VideoSource = ({
-  currentTime,
+export const YouTubeSource = ({
   onPlay,
   onPause,
   id,
@@ -44,8 +43,6 @@ export const VideoSource = ({
     setSectionEnd(e.target.getDuration())
   }
 
-  playerRef.current.seekTo(currentTime)
-
   const audioRef = useRef()
 
   if (audioRef.current) {
@@ -65,11 +62,11 @@ export const VideoSource = ({
           style={{ aspectRatio: '16/9' }}
         />
       )}
-      {/* {type === videoSources.FILE && (
+      {type === videoSources.FILE && (
         <audio ref={audioRef} controls>
           <source src={id} />
         </audio>
-      )} */}
+      )}
     </>
   )
 }

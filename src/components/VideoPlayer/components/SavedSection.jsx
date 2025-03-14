@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Delete } from '@mui/icons-material'
 import { Card, IconButton, ListItemButton, TextField } from '@mui/material'
-import { timestampFormatter } from '@utils/timestampFormatter'
+import { timestampFormatter } from '@utils/video'
 
 const SavedSection = ({
   onClick,

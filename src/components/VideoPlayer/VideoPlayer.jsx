@@ -19,24 +19,24 @@ import {
   PlayCircle,
   SkipNext,
 } from '@mui/icons-material'
-import YouTube from 'react-youtube'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
-import { timestampFormatter } from '@utils/timestampFormatter'
+import { timestampFormatter, round } from '@utils/video'
 import SavedSection from './components/SavedSection'
 import { useTheme } from '@mui/material'
 import BPMInput from './components/BPMInput' // Import the BPMInput component
+import { VideoSource } from './components/VideoSource'
 
-export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
+export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   const theme = useTheme()
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
-
   //TODO: see if we can use possibleplaybackrates instead
   const [possiblePlaybackRates, setPossiblePlaybackRates] = useState([])
   const [sectionStart, setSectionStart] = useState(0)
   const [sectionEnd, setSectionEnd] = useState(0)
+
   const {
     preference: videosString,
     loading,
@@ -59,41 +59,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
 
   const { beatsPerMeasure, bpm } = videos[id] || {}
 
-  const videoOptions = {
-    playerVars: {
-      controls: 1,
-      fs: 1,
-    },
-  }
-
   const playerRef = useRef()
   const timerRef = useRef()
   const sectionStartRef = useRef()
   const sectionEndRef = useRef()
   sectionStartRef.current = sectionStart
   sectionEndRef.current = sectionEnd
-
-  /**
-   * @param {time}
-   */
-  const round = t => Math.round(t * 10) / 10
-
-  /**
-   * initializes the playerStatus when the youtube api is ready
-   * @param {*} e the event from the youtube iframe
-   */
-  const onReady = e => {
-    playerRef.current = e.target
-    videos[id].title = playerRef.current.getVideoData().title
-    setVideos('videos', videos)
-    setCurrentTime(round(e.target.getCurrentTime()))
-    setDuration(playerRef.current.getDuration())
-    setIsPlaying(e.target.getPlayerState() === 1)
-    setPlaybackRate(e.target.getPlaybackRate())
-    setPossiblePlaybackRates(e.target.getAvailablePlaybackRates())
-    setSectionStart(0)
-    setSectionEnd(e.target.getDuration())
-  }
 
   const timeIncrement = useCallback(() => {
     setCurrentTime(round(playerRef.current?.getCurrentTime()))
@@ -102,7 +73,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
     }
   }, [])
 
-  const onPlay = e => {
+  const handlePlay = e => {
     setIsPlaying(true)
     timerRef.current = setInterval(
       timeIncrement,
@@ -110,19 +81,21 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
     )
   }
 
-  const onPause = () => {
+  const handlePause = () => {
     clearInterval(timerRef.current)
     setIsPlaying(false)
   }
 
+  /**
+   * moves the slider to the start
+   */
   const restartPlayer = () => {
-    handleSliderChange(null, 0)
+    handleSeek(null, 0)
   }
 
-  const handleSliderChange = (_, newValue) => {
+  const handleSeek = (_, newValue) => {
     clearInterval(timerRef.current)
     setCurrentTime(round(newValue))
-    playerRef.current.seekTo(round(newValue))
   }
 
   const handlePlaybackRateChange = (_, newValue) => {
@@ -134,12 +107,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
     const minTime = 1
     if (activeThumb === 0) {
       if (newValue[0] > currentTime) {
-        handleSliderChange(null, newValue[0])
+        handleSeek(null, newValue[0])
       }
       setSectionStart(round(Math.min(newValue[0], sectionEnd - minTime)))
     } else {
       if (newValue[1] < currentTime) {
-        handleSliderChange(null, newValue[1])
+        handleSeek(null, newValue[1])
       }
       setSectionEnd(round(Math.max(newValue[1], sectionStart + minTime)))
     }
@@ -305,13 +278,21 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
           className='horizontal-container'
           style={{ flexWrap: 'wrap', padding: 20 }}
         >
-          <YouTube
-            opts={videoOptions}
-            videoId={id}
-            onReady={onReady}
-            onPlay={onPlay}
-            onPause={onPause}
+          <VideoSource
+            onSeek={handleSeek}
             style={{ aspectRatio: '16/9' }}
+            id={id}
+            playerRef={playerRef}
+            setVideos={setVideos}
+            setCurrentTime={setCurrentTime}
+            setDuration={setDuration}
+            setIsPlaying={setIsPlaying}
+            setPlaybackRate={setPlaybackRate}
+            setPossiblePlaybackRates={setPossiblePlaybackRates}
+            setSectionStart={setSectionStart}
+            setSectionEnd={setSectionEnd}
+            timerRef={timerRef}
+            videos={videos}
           />
           <div
             className='vertical-container'
@@ -378,8 +359,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
                   const newStart = Math.round(
                     sectionStart -
                       (measures * beatsPerMeasure) /*beats*/ /
-                        (bpm /*beats/min*/ / 60) /*min/sec*/,
-                    1
+                        (bpm /*beats/min*/ / 60) /*min/sec*/
                   )
                   setSectionEnd(sectionStart)
                   setSectionStart(newStart)
@@ -407,8 +387,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
                   const newEnd = Math.round(
                     sectionEnd +
                       (measures * beatsPerMeasure) /*beats*/ /
-                        (bpm /*beats/min*/ / 60) /*min/sec*/,
-                    1
+                        (bpm /*beats/min*/ / 60) /*min/sec*/
                   )
                   setSectionStart(sectionEnd)
                   setSectionEnd(newEnd)
@@ -437,11 +416,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
           </Tooltip>
           <IconButton
             aria-label='play/pause'
-            onClick={() =>
-              isPlaying
-                ? playerRef.current?.pauseVideo()
-                : playerRef.current?.playVideo()
-            }
+            onClick={isPlaying ? handlePause : handlePlay}
             sx={{
               fontSize: '5rem',
             }}
@@ -565,7 +540,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast }) => {
         <Slider
           min={0}
           max={duration}
-          onChange={handleSliderChange}
+          onChange={handleSeek}
           size='large'
           step={0.1}
           value={currentTime}

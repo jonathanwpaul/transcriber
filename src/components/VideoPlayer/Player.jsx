@@ -13,13 +13,15 @@ import {
 } from '@mui/material'
 import { VideoPlayer } from './VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
-import { Code } from '@mui/icons-material'
+import { videoSources } from 'utils/constants'
+import { Code, UploadFile } from '@mui/icons-material'
 
 const Player = ({ showToast }) => {
   const [id, setId] = useState()
   const [showVideoPlayer, setShowVideoPlayer] = useState()
   const [inputText, setInputText] = useState()
   const [error, setError] = useState(false)
+  const [file, setFile] = useState(null)
   const {
     preference: videosString,
     loading,
@@ -31,6 +33,12 @@ const Player = ({ showToast }) => {
   const [showJSON, setShowJSON] = useState(false)
   const [JSONText, setJSONText] = useState(videosString)
   const JSONInputRef = useRef()
+
+  // useEffect(() => {
+  //   if (id) {
+
+  //   }
+  // }, [id])
 
   useEffect(() => {
     setJSONText(JSON.stringify(videos, null, 2))
@@ -53,6 +61,28 @@ const Player = ({ showToast }) => {
     setError(null)
   }
 
+  const handleFileChange = e => {
+    const file = e.target.files[0]
+
+    if (file) {
+      setFile(file)
+      const id = URL.createObjectURL(file)
+      if (!videos[id]) videos[id] = { type: videoSources.FILE }
+      showVideoId(id)
+    }
+  }
+
+  const handleFileDrop = e => {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (file) {
+      setFile(file)
+      const id = URL.createObjectURL(file)
+      if (!videos[id]) videos[id] = { type: videoSources.FILE }
+      showVideoId(id)
+    }
+  }
+
   const showVideoId = id => {
     videos[id].last_accessed = new Date()
     setVideos('videos', videos).then(() => {
@@ -64,7 +94,7 @@ const Player = ({ showToast }) => {
   const handleSubmit = () => {
     const id = getId(inputText)
     if (!id) return
-    if (!videos[id]) videos[id] = {}
+    if (!videos[id]) videos[id] = { type: videoSources.YOUTUBE }
     showVideoId(id)
   }
 
@@ -145,6 +175,20 @@ const Player = ({ showToast }) => {
           >
             Go
           </Button>
+          <input
+            accept='video/*, audio/*'
+            id='file-input'
+            type='file'
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          <label htmlFor='file-input'>
+            <Tooltip title='Upload video file'>
+              <IconButton component='span'>
+                <UploadFile />
+              </IconButton>
+            </Tooltip>
+          </label>
         </div>
       )}
       {!showVideoPlayer && videos && videoList.length > 0 && (

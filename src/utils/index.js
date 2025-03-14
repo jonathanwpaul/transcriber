@@ -1,1 +1,1 @@
-export * from './editorUtils'
+export * from './video.js'
