@@ -2,8 +2,7 @@ name: Build Electron App
 
 on:
   push:
-    branches:
-      - simplified
+    branches: ['master']
 
 jobs:
   build:
