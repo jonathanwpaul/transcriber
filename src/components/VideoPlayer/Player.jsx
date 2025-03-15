@@ -34,12 +34,6 @@ const Player = ({ showToast }) => {
   const [JSONText, setJSONText] = useState(videosString)
   const JSONInputRef = useRef()
 
-  // useEffect(() => {
-  //   if (id) {
-
-  //   }
-  // }, [id])
-
   useEffect(() => {
     setJSONText(JSON.stringify(videos, null, 2))
   }, [videosString])
@@ -129,6 +123,7 @@ const Player = ({ showToast }) => {
           <TextField
             multiline
             fullWidth
+            maxRows={20}
             value={JSONText}
             onChange={e => {
               setJSONText(e.target.value)
