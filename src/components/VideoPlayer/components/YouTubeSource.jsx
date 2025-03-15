@@ -1,22 +1,20 @@
 import YouTube from 'react-youtube'
 import { videoSources } from '@utils/constants'
 import { round } from '@utils/video'
-import { useRef } from 'react'
 
 export const YouTubeSource = ({
-  onPlay,
-  onPause,
   id,
+  onPause,
+  onPlay,
   playerRef,
-  setVideos,
   setCurrentTime,
   setDuration,
   setIsPlaying,
   setPlaybackRate,
   setPossiblePlaybackRates,
-  setSectionStart,
   setSectionEnd,
-  timerRef,
+  setSectionStart,
+  setVideos,
   videos,
 }) => {
   const videoOptions = {
@@ -26,6 +24,7 @@ export const YouTubeSource = ({
     },
   }
   const type = videos[id].type || videoSources.FILE
+
   /**
    * initializes the playerStatus when the youtube api is ready
    * @param {*} e the event from the youtube iframe
@@ -41,13 +40,14 @@ export const YouTubeSource = ({
     setPossiblePlaybackRates(e.target.getAvailablePlaybackRates())
     setSectionStart(0)
     setSectionEnd(e.target.getDuration())
-  }
 
-  const audioRef = useRef()
+    playerRef.current.play = () => {
+      playerRef.current.playVideo()
+    }
 
-  if (audioRef.current) {
-    audioRef.current.onplay = onPlay
-    audioRef.current.onpause = onPause
+    playerRef.current.pause = () => {
+      playerRef.current.pauseVideo()
+    }
   }
 
   return (
@@ -61,11 +61,6 @@ export const YouTubeSource = ({
           onPause={onPause}
           style={{ aspectRatio: '16/9' }}
         />
-      )}
-      {type === videoSources.FILE && (
-        <audio ref={audioRef} controls>
-          <source src={id} />
-        </audio>
       )}
     </>
   )

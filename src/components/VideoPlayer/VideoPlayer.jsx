@@ -24,7 +24,7 @@ import { timestampFormatter, round } from '@utils/video'
 import SavedSection from './components/SavedSection'
 import { useTheme } from '@mui/material'
 import BPMInput from './components/BPMInput' // Import the BPMInput component
-import { VideoSource } from './components/VideoSource'
+import { YouTubeSource } from './components/YouTubeSource'
 
 export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   const theme = useTheme()
@@ -66,10 +66,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   sectionStartRef.current = sectionStart
   sectionEndRef.current = sectionEnd
 
+  //TODO: disable controls while waiting
+  const controlsDisabled = !!playerRef.current
+
   const timeIncrement = useCallback(() => {
     setCurrentTime(round(playerRef.current?.getCurrentTime()))
     if (playerRef.current?.getCurrentTime() > sectionEndRef.current) {
-      handleSliderChange(null, sectionStartRef.current)
+      handleSeek(null, sectionStartRef.current)
     }
   }, [])
 
@@ -79,11 +82,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
       timeIncrement,
       100 //every 0.1s
     )
+    playerRef.current.play()
   }
 
   const handlePause = () => {
     clearInterval(timerRef.current)
     setIsPlaying(false)
+    playerRef.current.pause()
   }
 
   /**
@@ -96,6 +101,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   const handleSeek = (_, newValue) => {
     clearInterval(timerRef.current)
     setCurrentTime(round(newValue))
+    playerRef.current.seekTo(round(newValue))
   }
 
   const handlePlaybackRateChange = (_, newValue) => {
@@ -218,14 +224,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           <Card
             style={{
               background: theme.palette.grey[200],
+              borderRadius: '8px', // Optional, for rounded corners
+              boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
               display: 'flex',
               flexDirection: 'column',
               gap: '5px',
-              overflow: 'auto',
               height: '100%',
-
-              boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
-              borderRadius: '8px', // Optional, for rounded corners
+              overflow: 'auto',
               padding: '16px', // Padding for inner spacing
             }}
           >
@@ -259,17 +264,18 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
       >
         <Tooltip title='Close video'>
           <IconButton
+            disabled={controlsDisabled}
+            onClick={handleCloseVideo}
             style={{
               alignSelf: 'flex-start',
               backgroundColor: 'red',
               boxShadow: '2px 2px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
               color: 'white',
-              position: 'absolute',
-              padding: 5,
               left: -15,
+              padding: 5,
+              position: 'absolute',
               top: -15,
             }}
-            onClick={handleCloseVideo}
           >
             <Close />
           </IconButton>
@@ -278,20 +284,19 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           className='horizontal-container'
           style={{ flexWrap: 'wrap', padding: 20 }}
         >
-          <VideoSource
-            onSeek={handleSeek}
-            style={{ aspectRatio: '16/9' }}
+          <YouTubeSource
             id={id}
+            onPause={handlePause}
+            onPlay={handlePlay}
             playerRef={playerRef}
-            setVideos={setVideos}
             setCurrentTime={setCurrentTime}
             setDuration={setDuration}
             setIsPlaying={setIsPlaying}
             setPlaybackRate={setPlaybackRate}
             setPossiblePlaybackRates={setPossiblePlaybackRates}
-            setSectionStart={setSectionStart}
             setSectionEnd={setSectionEnd}
-            timerRef={timerRef}
+            setSectionStart={setSectionStart}
+            setVideos={setVideos}
             videos={videos}
           />
           <div
@@ -301,15 +306,17 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
             }}
           >
             <TimeTextInput
-              value={sectionStart}
               onChange={value => setSectionStart(value)}
               changeAmount={0.5}
+              disabled={controlsDisabled}
               label='start'
               min={0}
               max={duration}
+              value={sectionStart}
             />
             <TimeTextInput
               value={currentTime}
+              disabled={controlsDisabled}
               onChange={value => {
                 setCurrentTime(value)
                 playerRef.current.seekTo(value)
@@ -321,6 +328,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
             />
             <TimeTextInput
               value={sectionEnd}
+              disabled={controlsDisabled}
               onChange={value => setSectionEnd(value)}
               changeAmount={0.5}
               label='end'
