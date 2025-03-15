@@ -67,7 +67,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   sectionEndRef.current = sectionEnd
 
   //TODO: disable controls while waiting
-  const controlsDisabled = !!playerRef.current
+  const controlsDisabled = playerRef.current === null
 
   const timeIncrement = useCallback(() => {
     setCurrentTime(round(playerRef.current?.getCurrentTime()))
@@ -135,14 +135,48 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     setShowVideoPlayer(false)
   }
 
+  const calculatePath = (loops, loop, path = '') => {
+    // if (!loops || Object.keys(loops).length === 0) {
+    //   return path + `${loop.sectionStart}-${loop.sectionEnd}`
+    // }
+    const getLoopDistance = k =>
+      loop.sectionStart -
+      loops[k].sectionStart +
+      loops[k].sectionEnd -
+      loop.sectionEnd
+    const parentKeys = Object.keys(loops)
+      .filter(
+        k =>
+          loops[k].sectionStart <= loop.sectionStart &&
+          loops[k].sectionEnd >= loop.sectionEnd
+      )
+      .sort((a, b) => getLoopDistance(a) - getLoopDistance(b))
+
+    if (parentKeys.length === 0) {
+      return path + `${loop.sectionStart}-${loop.sectionEnd}`
+    }
+    return calculatePath(
+      loops[parentKeys[0]]?.children || {},
+      loop,
+      path + parentKeys[0] + '/children/'
+    )
+  }
+
   const saveLoop = () => {
     const key = `${sectionStart}-${sectionEnd}`
     videos[id].loops = videos[id].loops || {}
-    videos[id].loops[key] = {
+
+    //find the path that this loop belongs into (nesting)
+    const path = calculatePath(videos[id].loops, {
+      sectionStart,
+      sectionEnd,
+    })
+
+    _.set(videos[id].loops, path.split('/'), {
       ...(videos[id].loops[key] || {}), //for any other fields we want to save with loops
       sectionStart,
       sectionEnd,
-    }
+    })
     setVideos('videos', videos)
   }
 
@@ -176,24 +210,32 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     playerRef.current.seekTo(sectionStart)
   }
 
-  const renderLoop = (loop, i) => (
-    <div className='vertical-container' key={`loop-${i}`} style={{ gap: 10 }}>
-      <SavedSection
-        endTime={loop.sectionEnd}
-        isSelected={
-          loop.sectionStart === sectionStart && loop.sectionEnd === sectionEnd
-        }
-        onClick={() => loadLoop(loop)}
-        onDelete={() => deleteLoop(loop)}
-        onTitleChange={title => {
-          loop.title = title
-          setVideos('videos', videos)
-        }}
-        startTime={loop.sectionStart}
-        title={loop.title}
-      />
-    </div>
-  )
+  const renderLoop = (loop, i) => {
+    return (
+      <div className='vertical-container' key={`loop-${i}`} style={{ gap: 10 }}>
+        <SavedSection
+          endTime={loop.sectionEnd}
+          isSelected={
+            loop.sectionStart === sectionStart && loop.sectionEnd === sectionEnd
+          }
+          onClick={() => loadLoop(loop)}
+          onDelete={() => deleteLoop(loop)}
+          onTitleChange={title => {
+            loop.title = title
+            setVideos('videos', videos)
+          }}
+          startTime={loop.sectionStart}
+          title={loop.title}
+        />
+        <div style={{ paddingLeft: 20 }}>
+          {loop.children &&
+            Object.values(loop.children).map((child, j) =>
+              renderLoop(child, `${i}-${j}`)
+            )}
+        </div>
+      </div>
+    )
+  }
 
   const handleBpmChange = newBpm => {
     videos[id].bpm = newBpm
