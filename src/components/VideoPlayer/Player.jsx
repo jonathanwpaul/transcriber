@@ -10,11 +10,15 @@ import {
   Card,
   Tooltip,
   IconButton,
+  Divider,
+  Typography,
 } from '@mui/material'
 import { VideoPlayer } from './VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
 import { videoSources } from 'utils/constants'
 import { Code, UploadFile } from '@mui/icons-material'
+
+import { Filesystem, Directory } from '@capacitor/filesystem'
 
 const Player = ({ showToast }) => {
   const [id, setId] = useState()
@@ -55,14 +59,34 @@ const Player = ({ showToast }) => {
     setError(null)
   }
 
-  const handleFileChange = e => {
+  const handleFileChange = async e => {
     const file = e.target.files[0]
 
     if (file) {
-      setFile(file)
-      const id = URL.createObjectURL(file)
-      if (!videos[id]) videos[id] = { type: videoSources.FILE }
-      showVideoId(id)
+      try {
+        // Get the file path
+        const filePath = file.path || file.name
+
+        // Read the file content using Capacitor's Filesystem API
+        const fileData = await Filesystem.readFile({
+          path: filePath,
+          directory: Directory.Documents, // Adjust the directory as needed
+        })
+
+        // Use the file path as the ID
+        const id = filePath
+
+        // Add the file to the videos object
+        if (!videos[id]) {
+          videos[id] = { type: videoSources.FILE, content: fileData.data }
+        }
+
+        // Show the video
+        showVideoId(id)
+      } catch (error) {
+        console.error('Error reading file:', error)
+        showToast('Failed to load the file. Please try again.')
+      }
     }
   }
 
@@ -149,7 +173,7 @@ const Player = ({ showToast }) => {
       </Dialog>
 
       {!showVideoPlayer && (
-        <div className='horizontal-container' style={{ alignSelf: 'center' }}>
+        <div className='horizontal-container' style={{ gap: 30 }}>
           <TextField
             error={error}
             fullWidth
@@ -170,6 +194,10 @@ const Player = ({ showToast }) => {
           >
             Go
           </Button>
+          <Divider
+            orientation='vertical'
+            sx={{ backgroundColor: 'secondary.main' }}
+          />
           <input
             accept='video/*, audio/*'
             id='file-input'
@@ -184,6 +212,7 @@ const Player = ({ showToast }) => {
               </IconButton>
             </Tooltip>
           </label>
+          <Typography variant='body2'>Upload or drop a file here</Typography>
         </div>
       )}
       {!showVideoPlayer && videos && videoList.length > 0 && (
