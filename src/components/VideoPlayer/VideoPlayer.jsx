@@ -54,7 +54,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   })
 
   const appSettings = JSON.parse(appSettingsString) || {}
-  const measures = appSettings['measures']
+  const measures = appSettings['measures'] || 4
   const videos = JSON.parse(videosString) || {}
 
   const { beatsPerMeasure, bpm } = videos[id] || {}
@@ -135,10 +135,10 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     setShowVideoPlayer(false)
   }
 
+  /**
+   * this calculates the path of a given loop using the start and end times. 
+   */
   const calculatePath = (loops, loop, path = '') => {
-    // if (!loops || Object.keys(loops).length === 0) {
-    //   return path + `${loop.sectionStart}-${loop.sectionEnd}`
-    // }
     const getLoopDistance = k =>
       loop.sectionStart -
       loops[k].sectionStart +
@@ -421,7 +421,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
             <TextField
               type='number'
               label='measures'
-              value={measures} // Add measures input
+              value={measures || 4} // Add measures input
               onChange={e => handleMeasuresChange(parseInt(e.target.value, 10))}
               style={{ width: 120, marginTop: '10px' }}
             />
