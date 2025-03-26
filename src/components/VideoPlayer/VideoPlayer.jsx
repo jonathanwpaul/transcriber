@@ -25,6 +25,7 @@ import SavedSection from './components/SavedSection'
 import { useTheme } from '@mui/material'
 import BPMInput from './components/BPMInput' // Import the BPMInput component
 import { YouTubeSource } from './components/YouTubeSource'
+import { Header } from './components/Header'
 
 export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   const theme = useTheme()
@@ -53,8 +54,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     key: 'appSettings',
   })
 
-  const appSettings = JSON.parse(appSettingsString) || {}
-  const measures = appSettings['measures'] || 4
+  const appSettings = JSON.parse(appSettingsString) || { measures: 4, useSelectedAsParent: true }
+  const measures = appSettings['measures']
   const videos = JSON.parse(videosString) || {}
 
   const { beatsPerMeasure, bpm } = videos[id] || {}
@@ -258,6 +259,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
       className='vertical-container'
       style={{ gap: 50, width: '100%', height: '100%' }}
     >
+    <Header title={videos[id].title || id}/>
       <div
         className='vertical-container controls'
         style={{ flex: '1 0 50%', height: '50vh', gap: '30px' }}
@@ -421,7 +423,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
             <TextField
               type='number'
               label='measures'
-              value={measures || 4} // Add measures input
+              value={measures} // Add measures input
               onChange={e => handleMeasuresChange(parseInt(e.target.value, 10))}
               style={{ width: 120, marginTop: '10px' }}
             />
