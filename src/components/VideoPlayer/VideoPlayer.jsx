@@ -25,8 +25,8 @@ import SavedSection from './components/SavedSection'
 import { useTheme } from '@mui/material'
 import BPMInput from './components/BPMInput' // Import the BPMInput component
 import { YouTubeSource } from './components/YouTubeSource'
-import { Header } from './components/Header'
 import Draggable from 'react-draggable'
+import { Bar } from './components/Bar'
 
 export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   const theme = useTheme()
@@ -263,7 +263,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
       className='vertical-container'
       style={{ gap: 50, width: '100%', height: '100%' }}
     >
-      <Header title={videos[id].title || id} />
       <div
         className='vertical-container controls'
         style={{ flex: '1 0 50%', height: '50vh', gap: '30px' }}
@@ -556,66 +555,16 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
       </div>
 
       {/* the loop slider */}
-      <div>
-        <Slider
-          color='secondary'
-          disableSwap
-          min={0}
-          max={duration}
-          onChange={handleIntervalChange}
-          size='large'
-          step={0.1}
-          style={{
-            top: '50%',
-            // position: 'absolute',
-          }}
-          sx={{
-            '& .MuiSlider-thumb': {
-              '&[data-index="0"]': {
-                color: 'green',
-                transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
-              },
-
-              '&[data-index="1"]': {
-                color: 'red',
-                transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
-              },
-              /* Border */
-              // borderRadius: '0px 50% 50% 50%',
-
-              /* Size */
-              height: '2rem',
-              width: '2rem',
-            },
-            '& .MuiSlider-track': {
-              boxSizing: 'border-box',
-              borderRadius: '5px',
-              borderLeft: '5px solid green',
-              borderRight: '5px solid red',
-              color: '#eeeeee95',
-              opacity: 0.8,
-              height: 30,
-            },
-            '.MuiSlider-rail': {
-              height: 0,
-            },
-          }}
-          value={[sectionStart, sectionEnd]}
-          valueLabelDisplay='auto'
-          valueLabelFormat={timestampFormatter}
-        />
-        {/* the playback slider (mirrors video playback slider) */}
-        <Slider
-          min={0}
-          max={duration}
-          onChange={handleSeek}
-          size='large'
-          step={0.1}
-          value={currentTime}
-          valueLabelDisplay='auto'
-          valueLabelFormat={timestampFormatter}
-        />
-      </div>
+      <Bar
+        title={videos[id].title}
+        currentTime={currentTime}
+        duration={duration}
+        handleSeek={handleSeek}
+        handleIntervalChange={handleIntervalChange}
+        sectionStart={sectionStart}
+        sectionEnd={sectionEnd}
+        timestampFormatter={timestampFormatter}
+      />
     </div>
   )
 }

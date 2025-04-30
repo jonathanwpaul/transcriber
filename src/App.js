@@ -1,28 +1,32 @@
 import { useState } from 'react'
 import './App.css'
 import { Player } from './components'
-import { Snackbar } from '@mui/material'
+import { Snackbar, ThemeProvider, CssBaseline } from '@mui/material'
+import { theme } from './theme'
 
 function App() {
   const [toastMessage, setToastMessage] = useState()
   const [toastOpen, setToastOpen] = useState(false)
   return (
-    <div className='App'>
-      <Snackbar
-        open={toastOpen}
-        color={'primary'}
-        autoHideDuration={5000}
-        message={toastMessage}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <div className='App'>
+        <Snackbar
+          open={toastOpen}
+          color='primary'
+          autoHideDuration={5000}
+          message={toastMessage}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        />
 
-      <Player
-        showToast={message => {
-          setToastMessage(message)
-          setToastOpen(true)
-        }}
-      />
-    </div>
+        <Player
+          showToast={message => {
+            setToastMessage(message)
+            setToastOpen(true)
+          }}
+        />
+      </div>
+    </ThemeProvider>
   )
 }
 
