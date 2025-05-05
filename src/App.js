@@ -14,11 +14,10 @@ function App() {
         <Snackbar
           open={toastOpen}
           color='primary'
-          autoHideDuration={5000}
+          autoHideDuration={2000}
           message={toastMessage}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         />
-
         <Player
           showToast={message => {
             setToastMessage(message)
