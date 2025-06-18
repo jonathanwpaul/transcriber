@@ -264,12 +264,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     >
       <div
         className='vertical-container controls'
-        style={{ flex: '1 0 50%', height: '50vh', gap: '30px' }}
+        style={{ flex: '1 0 50%', height: '50vh', gap: '30px', padding: '20px' }}
       >
         {
           <Card
             style={{
-              background: theme.palette.grey[200],
+              background: theme.palette.grey[1000],
               borderRadius: '8px', // Optional, for rounded corners
               boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
               display: 'flex',
@@ -305,6 +305,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           flex: '0 0 30%',
           flexWrap: 'wrap',
           justifyContent: 'space-between',
+          padding: 20,
           position: 'relative',
         }}
       >
@@ -317,10 +318,10 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
               backgroundColor: 'red',
               boxShadow: '2px 2px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
               color: 'white',
-              left: -15,
+              left: 5,
               padding: 5,
               position: 'absolute',
-              top: -15,
+              top: 5,
             }}
           >
             <Close />
@@ -413,8 +414,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                   }
                   const newStart = Math.round(
                     sectionStart -
-                      (measures * beatsPerMeasure) /*beats*/ /
-                        (bpm /*beats/min*/ / 60) /*min/sec*/,
+                    (measures * beatsPerMeasure) /*beats*/ /
+                    (bpm /*beats/min*/ / 60) /*min/sec*/,
                   )
                   setSectionEnd(sectionStart)
                   setSectionStart(newStart)
@@ -441,8 +442,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                   }
                   const newEnd = Math.round(
                     sectionEnd +
-                      (measures * beatsPerMeasure) /*beats*/ /
-                        (bpm /*beats/min*/ / 60) /*min/sec*/,
+                    (measures * beatsPerMeasure) /*beats*/ /
+                    (bpm /*beats/min*/ / 60) /*min/sec*/,
                   )
                   setSectionStart(sectionEnd)
                   setSectionEnd(newEnd)

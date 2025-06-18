@@ -19,6 +19,7 @@ const SavedSection = ({
   onTitleChange,
 }) => {
   const [currentTitle, setCurrentTitle] = useState(title || '')
+  const theme = useTheme()
 
   const handleTitleChange = e => {
     const newTitle = e.target.value
@@ -35,6 +36,18 @@ const SavedSection = ({
           height: '100%',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
+        }}
+        sx={{
+          '&.Mui-selected': {
+            backgroundColor: theme.palette.grey[900],
+            // color: theme.palette.background.paper,
+            '&:hover': {
+              backgroundColor: theme.palette.grey[900],
+            }
+          },
+          '&:hover': {
+            backgroundColor: theme.palette.grey[900],
+          }
         }}
         selected={isSelected}
       >
