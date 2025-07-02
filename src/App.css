@@ -11,6 +11,14 @@
   justify-self: center;
 }
 
+@font-face {
+  font-family: 'Metrophobic';
+  src: url('./assets/fonts/Metrophobic-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 iframe {
   border: none;
   border-radius: 5px;

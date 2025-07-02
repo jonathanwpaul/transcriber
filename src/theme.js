@@ -64,7 +64,7 @@ export const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: 'Roboto, sans-serif',
+    fontFamily: 'Metrophobic, sans-serif',
     h1: {
       fontWeight: 700,
     },
