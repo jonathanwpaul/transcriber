@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { IconButton, TextField, Tooltip } from '@mui/material'
-import { ReactComponent as MetronomeIcon } from '../../../assets/metronome.svg' // Import the metronome SVG
+import { ReactComponent as MetronomeIcon } from '../../../assets/icons/metronome.svg' // Import the metronome SVG
 
 const BPMInput = ({
   value,
