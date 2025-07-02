@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import { Player } from './components'
+import { Home } from './components/Home'
 import { Snackbar, ThemeProvider, CssBaseline } from '@mui/material'
 import { theme } from './theme'
 
@@ -18,7 +18,7 @@ function App() {
           message={toastMessage}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         />
-        <Player
+        <Home
           showToast={message => {
             setToastMessage(message)
             setToastOpen(true)

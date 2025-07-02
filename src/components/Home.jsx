@@ -12,15 +12,18 @@ import {
   IconButton,
   Divider,
   Typography,
+  Stack,
+  Box,
 } from '@mui/material'
-import { VideoPlayer } from './VideoPlayer'
+import { VideoPlayer } from './VideoPlayer/VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
 import { videoSources } from 'utils/constants'
-import { Code, UploadFile } from '@mui/icons-material'
+import { Code } from '@mui/icons-material'
 
 import { Filesystem, Directory } from '@capacitor/filesystem'
+import FileUpload from './FileUpload'
 
-const Player = ({ showToast }) => {
+export const Home = ({ showToast }) => {
   const [id, setId] = useState()
   const [showVideoPlayer, setShowVideoPlayer] = useState()
   const [inputText, setInputText] = useState()
@@ -119,7 +122,7 @@ const Player = ({ showToast }) => {
   const formatTimeString = timeString => new Date(timeString).toLocaleString()
 
   const videoList = Object.keys(videos).sort((a, b) =>
-    videos[a]['last_accessed'] > videos[b]['last_accessed'] ? -1 : 1
+    videos[a]['last_accessed'] > videos[b]['last_accessed'] ? -1 : 1,
   )
 
   // if there's a cached entry and not one already selected, use that
@@ -129,7 +132,7 @@ const Player = ({ showToast }) => {
   // }
 
   return (
-    <div className='player'>
+    <Box sx={{ alignContent: 'center', height: '100%', padding: '10rem' }}>
       <Dialog
         open={showJSON}
         onClose={() => setShowJSON(false)}
@@ -171,100 +174,90 @@ const Player = ({ showToast }) => {
           </Button>
         </Card>
       </Dialog>
-
       {!showVideoPlayer && (
-        <div className='horizontal-container' style={{ gap: 30 }}>
-          <TextField
-            error={error}
-            fullWidth
-            helperText={error}
-            onChange={handleChange}
-            onKeyDown={e => {
-              if (e.key === 'Enter') handleSubmit()
-            }}
-            placeholder='YouTube URL'
-            value={inputText}
-            variant='outlined'
-          />
-          <Button
-            disabled={!inputText}
-            onClick={handleSubmit}
-            sx={{ textTransform: 'none' }}
-            variant='contained'
+        <Stack gap='5rem' justifySelf='center'>
+          <Stack
+            divider={<Divider flexItem orientation='vertical' />}
+            direction='row'
+            gap='5rem'
           >
-            Go
-          </Button>
-          <Divider
-            orientation='vertical'
-            sx={{ backgroundColor: 'secondary.main' }}
-          />
-          <input
-            accept='video/*, audio/*'
-            id='file-input'
-            type='file'
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-          <label htmlFor='file-input'>
-            <Tooltip title='Upload video file'>
-              <IconButton component='span'>
-                <UploadFile />
-              </IconButton>
-            </Tooltip>
-          </label>
-          <Typography variant='body2'>Upload or drop a file here</Typography>
-        </div>
+            <Stack gap='2rem' flex={3}>
+              <Typography variant='h4' component='h2'>
+                enter YouTube url
+              </Typography>
+              <Stack direction='row' gap='1rem'>
+                <TextField
+                  error={error}
+                  fullWidth
+                  helperText={error}
+                  onChange={handleChange}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleSubmit()
+                  }}
+                  placeholder='https://youtube.com/watch?v=...'
+                  value={inputText}
+                  variant='outlined'
+                />
+                <Button
+                  disabled={!inputText}
+                  onClick={handleSubmit}
+                  sx={{ textTransform: 'none' }}
+                  variant='contained'
+                >
+                  go
+                </Button>
+              </Stack>
+            </Stack>
+            <FileUpload accept='audio/*' stackProps={{ flex: 1 }} />
+            <Stack gap='1rem' justifyContent='center'>
+              <Tooltip title='show JSON'>
+                <IconButton onClick={() => setShowJSON(true)}>
+                  <Code />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Stack>
+          {videos && videoList.length > 0 && (
+            <Stack>
+              <Table>
+                <TableHead>
+                  <TableCell>Recents</TableCell>
+                  <TableCell></TableCell>
+                </TableHead>
+                {videoList.map(e => {
+                  return (
+                    <TableRow key={e}>
+                      <TableCell>
+                        <Button
+                          onClick={() => showVideoId(e)}
+                          sx={{
+                            justifyContent: 'start',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            textTransform: 'none',
+                            whiteSpace: 'nowrap',
+                          }}
+                          variant='text'
+                          color='primary'
+                        >
+                          {videos[e].title ?? e}
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        {formatTimeString(videos[e]['last_accessed'])}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </Table>
+            </Stack>
+          )}
+        </Stack>
       )}
-      {!showVideoPlayer && videos && videoList.length > 0 && (
-        <div
-          className='vertical-container'
-          style={{ alignSelf: 'center', width: '100%' }}
-        >
-          <Tooltip title='Show JSON' style={{ alignSelf: 'flex-end' }}>
-            <IconButton onClick={() => setShowJSON(true)}>
-              <Code />
-            </IconButton>
-          </Tooltip>
 
-          <Table>
-            <TableHead>
-              <TableCell>Previously Viewed</TableCell>
-              <TableCell></TableCell>
-            </TableHead>
-            {videoList.map(e => {
-              return (
-                <TableRow key={e}>
-                  <TableCell>
-                    <Button
-                      onClick={() => showVideoId(e)}
-                      sx={{
-                        justifyContent: 'start',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        textTransform: 'none',
-                        whiteSpace: 'nowrap',
-                        maxWidth: '500px',
-                      }}
-                      variant='text'
-                      color='secondary'
-                    >
-                      {videos[e].title ?? e}
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    {formatTimeString(videos[e]['last_accessed'])}
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </Table>
-        </div>
-      )}
       {showVideoPlayer && (
         <VideoPlayer id={id} setShowVideoPlayer={setShowVideoPlayer} />
       )}
-    </div>
+    </Box>
   )
 }
-
-export default Player

@@ -1,14 +1,7 @@
 .App {
-  display: flex;
-  flex-direction: column;
   width: 100vw;
   height: 100vh;
   box-sizing: border-box;
-  align-items: stretch;
-  overflow: auto;
-  gap: 10px;
-  /* max-width: 1500px; */
-  justify-self: center;
 }
 
 @font-face {
@@ -24,64 +17,4 @@ iframe {
   border-radius: 5px;
   height: 100%;
   width: 100%;
-}
-
-div.vertical-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-div.horizontal-container {
-  display: flex;
-  gap: 10px;
-}
-
-/* APP COMPONENTS */
-div.editor {
-  /* height: 80%; */
-  flex: 1;
-}
-
-div.editor-inputs {
-  padding: 5px;
-  display: flex;
-  flex: 1 0 auto;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.keyboard {
-  display: flex;
-  height: 100%;
-  box-sizing: border-box;
-  max-height: 400px;
-  min-height: 150px;
-  overflow: hidden;
-  padding: 2px;
-  width: 100%;
-}
-
-div.music-render {
-  overflow: auto;
-  min-height: 0;
-  flex: 2 0 auto;
-  display: flex;
-  padding-bottom: 5px;
-  padding-top: 5px;
-}
-
-/* VIDEO PLAYER */
-div.player {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 10px;
-  justify-content: space-around;
-  box-sizing: border-box;
-}
-
-div.controls {
-  align-items: stretch;
-  flex: 0;
 }
