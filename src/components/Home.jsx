@@ -7,7 +7,6 @@ import {
   TableHead,
   TableCell,
   Dialog,
-  Card,
   Tooltip,
   IconButton,
   Divider,
@@ -15,6 +14,7 @@ import {
   Stack,
   Box,
 } from '@mui/material'
+import { Card } from './Card'
 import { VideoPlayer } from './VideoPlayer/VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
 import { videoSources } from 'utils/constants'
@@ -131,7 +131,7 @@ export const Home = ({ showToast }) => {
   //   setShowVideoPlayer(true)
   // }
 
-  return (
+  return !showVideoPlayer ? (
     <Box sx={{ alignContent: 'center', height: '100%', padding: '10rem' }}>
       <Dialog
         open={showJSON}
@@ -139,7 +139,7 @@ export const Home = ({ showToast }) => {
         fullWidth
         maxWidth='md'
       >
-        <Card
+        <Stack
           style={{
             padding: '20px',
             display: 'flex',
@@ -172,92 +172,89 @@ export const Home = ({ showToast }) => {
           >
             Update
           </Button>
-        </Card>
+        </Stack>
       </Dialog>
-      {!showVideoPlayer && (
-        <Stack gap='5rem' justifySelf='center'>
-          <Stack
-            divider={<Divider flexItem orientation='vertical' />}
-            direction='row'
-            gap='5rem'
-          >
-            <Stack gap='2rem' flex={3}>
-              <Typography variant='h4' component='h2'>
-                enter YouTube url
-              </Typography>
-              <Stack direction='row' gap='1rem'>
-                <TextField
-                  error={error}
-                  fullWidth
-                  helperText={error}
-                  onChange={handleChange}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') handleSubmit()
-                  }}
-                  placeholder='https://youtube.com/watch?v=...'
-                  value={inputText}
-                  variant='outlined'
-                />
-                <Button
-                  disabled={!inputText}
-                  onClick={handleSubmit}
-                  sx={{ textTransform: 'none' }}
-                  variant='contained'
-                >
-                  go
-                </Button>
-              </Stack>
-            </Stack>
-            <FileUpload accept='audio/*' stackProps={{ flex: 1 }} />
-            <Stack gap='1rem' justifyContent='center'>
-              <Tooltip title='show JSON'>
-                <IconButton onClick={() => setShowJSON(true)}>
-                  <Code />
-                </IconButton>
-              </Tooltip>
+
+      <Stack gap='5rem' justifySelf='center'>
+        <Stack
+          divider={<Divider flexItem orientation='vertical' />}
+          direction='row'
+          gap='5rem'
+        >
+          <Stack gap='2rem' flex={3}>
+            <Typography variant='h4' component='h2'>
+              enter YouTube url
+            </Typography>
+            <Stack direction='row' gap='1rem'>
+              <TextField
+                error={error}
+                fullWidth
+                helperText={error}
+                onChange={handleChange}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') handleSubmit()
+                }}
+                placeholder='https://youtube.com/watch?v=...'
+                value={inputText}
+                variant='outlined'
+              />
+              <Button
+                disabled={!inputText}
+                onClick={handleSubmit}
+                sx={{ textTransform: 'none' }}
+                variant='contained'
+              >
+                go
+              </Button>
             </Stack>
           </Stack>
-          {videos && videoList.length > 0 && (
-            <Stack>
-              <Table>
-                <TableHead>
-                  <TableCell>Recents</TableCell>
-                  <TableCell></TableCell>
-                </TableHead>
-                {videoList.map(e => {
-                  return (
-                    <TableRow key={e}>
-                      <TableCell>
-                        <Button
-                          onClick={() => showVideoId(e)}
-                          sx={{
-                            justifyContent: 'start',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            textTransform: 'none',
-                            whiteSpace: 'nowrap',
-                          }}
-                          variant='text'
-                          color='primary'
-                        >
-                          {videos[e].title ?? e}
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        {formatTimeString(videos[e]['last_accessed'])}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </Table>
-            </Stack>
-          )}
+          <FileUpload accept='audio/*' stackProps={{ flex: 1 }} />
+          <Stack gap='1rem' justifyContent='center'>
+            <Tooltip title='show JSON'>
+              <IconButton onClick={() => setShowJSON(true)}>
+                <Code />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Stack>
-      )}
-
-      {showVideoPlayer && (
-        <VideoPlayer id={id} setShowVideoPlayer={setShowVideoPlayer} />
-      )}
+        {videos && videoList.length > 0 && (
+          <Stack>
+            <Table>
+              <TableHead>
+                <TableCell>Recents</TableCell>
+                <TableCell></TableCell>
+              </TableHead>
+              {videoList.map(e => {
+                return (
+                  <TableRow key={e}>
+                    <TableCell>
+                      <Button
+                        onClick={() => showVideoId(e)}
+                        sx={{
+                          justifyContent: 'start',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          textTransform: 'none',
+                          whiteSpace: 'nowrap',
+                        }}
+                        variant='text'
+                        color='primary'
+                      >
+                        {videos[e].title ?? e}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      {formatTimeString(videos[e]['last_accessed'])}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </Table>
+          </Stack>
+        )}
+      </Stack>
     </Box>
+  ) : (
+    <VideoPlayer id={id} setShowVideoPlayer={setShowVideoPlayer} />
   )
 }
