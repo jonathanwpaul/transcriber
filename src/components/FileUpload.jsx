@@ -57,6 +57,7 @@ export default function FileUpload({ onFileSelect, accept = '*', stackProps }) {
           position: 'relative',
           padding: '1rem',
         }}
+        tabIndex={0}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
