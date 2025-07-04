@@ -56,6 +56,9 @@ export default function FileUpload({ onFileSelect, accept = '*', stackProps }) {
           transition: 'background 0.2s',
           position: 'relative',
           padding: '1rem',
+          '&:hover': {
+            backgroundColor: theme.palette.background.paper,
+          },
         }}
         tabIndex={0}
         onDragOver={handleDragOver}
