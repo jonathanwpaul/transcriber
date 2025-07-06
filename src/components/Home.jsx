@@ -11,10 +11,10 @@ import {
   IconButton,
   Divider,
   Typography,
-  Stack,
   Box,
 } from '@mui/material'
 import { Card } from './Card'
+import { Stack } from './Stack'
 import { VideoPlayer } from './VideoPlayer/VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
 import { videoSources } from 'utils/constants'
@@ -139,14 +139,7 @@ export const Home = ({ showToast }) => {
         fullWidth
         maxWidth='md'
       >
-        <Stack
-          style={{
-            padding: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-          }}
-        >
+        <Stack direction='column'>
           <TextField
             multiline
             fullWidth
@@ -175,53 +168,55 @@ export const Home = ({ showToast }) => {
         </Stack>
       </Dialog>
 
-      <Stack gap='5rem' justifySelf='center'>
-        <Stack
-          divider={<Divider flexItem orientation='vertical' />}
-          direction='row'
-          gap='5rem'
-        >
-          <Stack gap='2rem' flex={3}>
-            <Typography variant='h4' component='h2'>
-              enter YouTube url
-            </Typography>
-            <Stack direction='row' gap='1rem'>
-              <TextField
-                error={error}
-                fullWidth
-                helperText={error}
-                onChange={handleChange}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') handleSubmit()
-                }}
-                placeholder='https://youtube.com/watch?v=...'
-                value={inputText}
-                variant='outlined'
-              />
-              <Button
-                disabled={!inputText}
-                onClick={handleSubmit}
-                sx={{ textTransform: 'none' }}
-                variant='contained'
-              >
-                go
-              </Button>
+      <Stack divider column gap='2rem' justifySelf='center'>
+        <Card elevation={2}>
+          <Stack divider>
+            <Stack direction='column' gap='2rem' flex={3}>
+              <Typography variant='h4' component='h2'>
+                enter YouTube url
+              </Typography>
+              <Stack direction='row' gap='1rem'>
+                <TextField
+                  error={error}
+                  fullWidth
+                  helperText={error}
+                  onChange={handleChange}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleSubmit()
+                  }}
+                  placeholder='https://youtube.com/watch?v=...'
+                  value={inputText}
+                  variant='outlined'
+                />
+                <Button
+                  disabled={!inputText}
+                  onClick={handleSubmit}
+                  sx={{ textTransform: 'none' }}
+                  variant='contained'
+                >
+                  go
+                </Button>
+              </Stack>
+            </Stack>
+            <FileUpload accept='audio/*' stackProps={{ flex: 1 }} />
+            <Stack gap='1rem' justifyContent='center'>
+              <Tooltip title='show JSON'>
+                <IconButton onClick={() => setShowJSON(true)}>
+                  <Code />
+                </IconButton>
+              </Tooltip>
             </Stack>
           </Stack>
-          <FileUpload accept='audio/*' stackProps={{ flex: 1 }} />
-          <Stack gap='1rem' justifyContent='center'>
-            <Tooltip title='show JSON'>
-              <IconButton onClick={() => setShowJSON(true)}>
-                <Code />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        </Stack>
+        </Card>
         {videos && videoList.length > 0 && (
-          <Stack>
+          <Card sx={{ padding: 0 }}>
             <Table>
               <TableHead>
-                <TableCell>Recents</TableCell>
+                <TableCell>
+                  <Typography variant='h4' component='h2'>
+                    Recents
+                  </Typography>
+                </TableCell>
                 <TableCell></TableCell>
               </TableHead>
               {videoList.map(e => {
@@ -250,7 +245,7 @@ export const Home = ({ showToast }) => {
                 )
               })}
             </Table>
-          </Stack>
+          </Card>
         )}
       </Stack>
     </Box>

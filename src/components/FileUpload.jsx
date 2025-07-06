@@ -49,15 +49,15 @@ export default function FileUpload({ onFileSelect, accept = '*', stackProps }) {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: dragActive
-            ? theme.palette.background.paper
-            : theme.palette.background.default,
+          // backgroundColor: dragActive
+          //   ? theme.palette.background.default
+          //   : theme.palette.background.paper,
           cursor: 'pointer',
           transition: 'background 0.2s',
           position: 'relative',
           padding: '1rem',
           '&:hover': {
-            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.primary.main,
           },
         }}
         tabIndex={0}

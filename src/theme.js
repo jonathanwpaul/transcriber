@@ -1,17 +1,26 @@
 import { createTheme } from '@mui/material/styles'
 
 export const theme = createTheme({
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#000000',
+        },
+      },
+    },
+  },
   palette: {
     mode: 'dark',
     primary: {
+      main: '#00AAAA',
+      // light: '#55FFFF',
+      // dark: '#00CCCC',
+    },
+    secondary: {
       main: '#FFFF00',
       light: '#FFFF55',
       dark: '#FFFF55',
-    },
-    secondary: {
-      main: '#00FFFF',
-      light: '#55FFFF',
-      dark: '#00CCCC',
     },
     error: {
       main: '#FF0000',
@@ -35,7 +44,7 @@ export const theme = createTheme({
     },
     background: {
       default: '#000000',
-      paper: '#121212',
+      paper: '#000000',
     },
     text: {
       primary: '#FFFFFF',
@@ -65,20 +74,8 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: 'Metrophobic, sans-serif',
-    h1: {
-      fontWeight: 700,
-    },
     button: {
       textTransform: 'uppercase',
-    },
-  },
-  spacing: 8,
-  shape: {
-    borderRadius: 4,
-  },
-  transitions: {
-    duration: {
-      standard: 300,
     },
   },
 })

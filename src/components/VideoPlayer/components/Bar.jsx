@@ -1,4 +1,5 @@
-import { Slider, useTheme } from '@mui/material'
+import { Box, Slider, Typography, useTheme } from '@mui/material'
+import { Stack } from '../../Stack'
 
 export const Bar = ({
   title,
@@ -10,33 +11,17 @@ export const Bar = ({
   sectionEnd,
   timestampFormatter,
 }) => {
-  const theme = useTheme()
   return (
-    <div
-      style={{
-        // position: 'fixed',
-        bottom: 0,
-        left: 0,
-        width: '100%',
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.shadows[4],
-        paddingBottom: 20,
-        paddingTop: 10,
-        paddingLeft: 30,
-        paddingRight: 30,
-      }}
-    >
-      <p>{title}</p>
-      <div
-        style={{
-          display: 'flex',
-          gap: 20,
-          justifyContent: 'space-between',
+    <Box>
+      <Typography>{title}</Typography>
+      <Stack
+        sx={{
           alignItems: 'center',
+          gap: '1rem',
         }}
       >
-        {timestampFormatter(currentTime)}
-        <div style={{ flex: 1, position: 'relative' }}>
+        <Typography>{timestampFormatter(currentTime)}</Typography>
+        <Stack sx={{ width: '100%', position: 'relative' }}>
           <Slider
             color='secondary'
             disableSwap
@@ -94,9 +79,9 @@ export const Bar = ({
             valueLabelDisplay='auto'
             valueLabelFormat={timestampFormatter}
           />
-        </div>
-        {timestampFormatter(duration)}
-      </div>
-    </div>
+        </Stack>
+        <Typography>{timestampFormatter(duration)}</Typography>
+      </Stack>
+    </Box>
   )
 }

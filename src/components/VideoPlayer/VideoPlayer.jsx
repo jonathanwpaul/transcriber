@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { useState, useRef, useCallback } from 'react'
 import {
   Box,
-  Card,
   IconButton,
   List,
   Slider,
@@ -10,6 +9,7 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material'
+import { Card } from '../Card'
 import { TimeTextInput } from './components'
 import {
   PauseCircle,
@@ -260,257 +260,269 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   if (loading || appSettingsLoading) return
 
   return (
-    <Stack sx={{ width: '100%', height: '100%' }} padding='1rem' gap='1rem'>
-      <Stack flex={1} gap='1rem'>
-        <Card
-          style={{
-            background: theme.palette.grey[1000],
-            borderRadius: '0.5rem',
-            boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)',
-            gap: '5px',
-            height: '100%',
-            padding: '1rem',
-          }}
-        >
-          {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
-            <List
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                padding: 0,
-              }}
-            >
-              {Object.values(videos[id].loops)
-                .sort((a, b) => a.sectionStart - b.sectionStart)
-                .map((loop, i) => renderLoop(loop, i))}
-            </List>
-          ) : (
-            <p>Save a loop to see it here</p>
-          )}
-        </Card>
-      </Stack>
-
-      <Tooltip title='Close video'>
-        <IconButton
-          disabled={controlsDisabled}
-          onClick={handleCloseVideo}
-          style={{
-            alignSelf: 'flex-start',
-            backgroundColor: 'red',
-            boxShadow: '2px 2px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
-            color: 'white',
-            left: 5,
-            padding: 5,
-            position: 'absolute',
-            top: 5,
-          }}
-        >
-          <Close />
-        </IconButton>
-      </Tooltip>
-      <Stack direction='row'>
-        <Card>
-          <Stack direction='row' gap='1rem'>
-            <YouTubeSource
-              id={id}
-              onPause={handlePause}
-              onPlay={handlePlay}
-              playerRef={playerRef}
-              setCurrentTime={setCurrentTime}
-              setDuration={setDuration}
-              setIsPlaying={setIsPlaying}
-              setPlaybackRate={setPlaybackRate}
-              setPossiblePlaybackRates={setPossiblePlaybackRates}
-              setSectionEnd={setSectionEnd}
-              setSectionStart={setSectionStart}
-              setVideos={setVideos}
-              videos={videos}
-            />
-            <Stack gap='1rem'>
-              <TimeTextInput
-                onChange={value => setSectionStart(value)}
-                changeAmount={0.5}
-                disabled={controlsDisabled}
-                label='start'
-                min={0}
-                max={duration}
-                value={sectionStart}
-              />
-              <TimeTextInput
-                value={currentTime}
-                disabled={controlsDisabled}
-                onChange={value => {
-                  setCurrentTime(value)
-                  playerRef.current.seekTo(value)
+    <Stack sx={{ width: '100%', height: '100%' }}>
+      <Stack sx={{ height: '100%' }} padding='1rem' gap='1rem'>
+        <Stack flex={2} gap='1rem'>
+          <Card
+            elevation={2}
+            style={{
+              background: theme.palette.grey[1000],
+              boxShadow: 'inset 0 4px 4px rgba(0, 0, 0, 0.4)',
+              gap: '5px',
+              height: '100%',
+              padding: '1rem',
+            }}
+          >
+            {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
+              <List
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: 0,
                 }}
-                label='current'
-                changeAmount={0.5}
-                min={0}
-                max={duration}
-              />
-              <TimeTextInput
-                value={sectionEnd}
-                disabled={controlsDisabled}
-                onChange={value => setSectionEnd(value)}
-                changeAmount={0.5}
-                label='end'
-                min={0}
-                max={duration}
-              />
-            </Stack>
-          </Stack>
-        </Card>
+              >
+                {Object.values(videos[id].loops)
+                  .sort((a, b) => a.sectionStart - b.sectionStart)
+                  .map((loop, i) => renderLoop(loop, i))}
+              </List>
+            ) : (
+              <p>Save a loop to see it here</p>
+            )}
+          </Card>
+        </Stack>
 
-        <Card>
-          <Stack>
-            <BPMInput
-              value={bpm}
-              onChange={handleBpmChange}
-              beatsPerMeasure={beatsPerMeasure || 4}
-              onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
-            />
-            <Stack direction='row' alignItems='center'>
-              <Tooltip title={`Previous ${measures} measures`}>
-                <IconButton
-                  onClick={() => {
-                    if (!bpm || !beatsPerMeasure) {
-                      showToast(
-                        'provide both BPM and beats/measure to use this function',
-                      )
-                      return
-                    }
-                    const newStart = Math.round(
-                      sectionStart -
-                        (measures * beatsPerMeasure) /*beats*/ /
-                          (bpm /*beats/min*/ / 60) /*min/sec*/,
-                    )
-                    setSectionEnd(sectionStart)
-                    setSectionStart(newStart)
+        <Tooltip title='Close video'>
+          <IconButton
+            disabled={controlsDisabled}
+            onClick={handleCloseVideo}
+            style={{
+              alignSelf: 'flex-start',
+              backgroundColor: 'red',
+              boxShadow: '2px 2px rgba(0, 0, 0, 0.4)', // Inset shadow for negative depth
+              color: 'white',
+              left: 5,
+              padding: 5,
+              position: 'absolute',
+              top: 5,
+            }}
+          >
+            <Close />
+          </IconButton>
+        </Tooltip>
+        {/*the row of control*/}
+        <Stack flex={1} direction='row' gap='1rem'>
+          <Card elevation={2}>
+            <Stack direction='row' gap='1rem'>
+              <YouTubeSource
+                id={id}
+                onPause={handlePause}
+                onPlay={handlePlay}
+                playerRef={playerRef}
+                setCurrentTime={setCurrentTime}
+                setDuration={setDuration}
+                setIsPlaying={setIsPlaying}
+                setPlaybackRate={setPlaybackRate}
+                setPossiblePlaybackRates={setPossiblePlaybackRates}
+                setSectionEnd={setSectionEnd}
+                setSectionStart={setSectionStart}
+                setVideos={setVideos}
+                videos={videos}
+              />
+              <Stack gap='1rem'>
+                <TimeTextInput
+                  onChange={value => setSectionStart(value)}
+                  changeAmount={0.5}
+                  disabled={controlsDisabled}
+                  label='start'
+                  min={0}
+                  max={duration}
+                  value={sectionStart}
+                />
+                <TimeTextInput
+                  value={currentTime}
+                  disabled={controlsDisabled}
+                  onChange={value => {
+                    setCurrentTime(value)
+                    playerRef.current.seekTo(value)
                   }}
-                >
+                  label='current'
+                  changeAmount={0.5}
+                  min={0}
+                  max={duration}
+                />
+                <TimeTextInput
+                  value={sectionEnd}
+                  disabled={controlsDisabled}
+                  onChange={value => setSectionEnd(value)}
+                  changeAmount={0.5}
+                  label='end'
+                  min={0}
+                  max={duration}
+                />
+              </Stack>
+            </Stack>
+          </Card>
+
+          <Card elevation={2}>
+            <Stack>
+              <BPMInput
+                value={bpm}
+                onChange={handleBpmChange}
+                beatsPerMeasure={beatsPerMeasure || 4}
+                onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
+              />
+              <Stack direction='row' alignItems='center'>
+                <Tooltip title={`Previous ${measures} measures`}>
+                  <IconButton
+                    onClick={() => {
+                      if (!bpm || !beatsPerMeasure) {
+                        showToast(
+                          'provide both BPM and beats/measure to use this function',
+                        )
+                        return
+                      }
+                      const newStart = Math.round(
+                        sectionStart -
+                          (measures * beatsPerMeasure) /*beats*/ /
+                            (bpm /*beats/min*/ / 60) /*min/sec*/,
+                      )
+                      setSectionEnd(sectionStart)
+                      setSectionStart(newStart)
+                    }}
+                  >
+                    <SkipPrevious />
+                  </IconButton>
+                </Tooltip>
+                <TextField
+                  type='number'
+                  label='measures'
+                  value={measures} // Add measures input
+                  onChange={e =>
+                    handleMeasuresChange(parseInt(e.target.value, 10))
+                  }
+                  style={{ width: 120, marginTop: '10px' }}
+                />
+                <Tooltip title={`Next ${measures} measures`}>
+                  <IconButton
+                    onClick={() => {
+                      if (!bpm || !beatsPerMeasure) {
+                        showToast(
+                          'provide both BPM and beats/measure to use this function',
+                        )
+                        return
+                      }
+                      const newEnd = Math.round(
+                        sectionEnd +
+                          (measures * beatsPerMeasure) /*beats*/ /
+                            (bpm /*beats/min*/ / 60) /*min/sec*/,
+                      )
+                      setSectionStart(sectionEnd)
+                      setSectionEnd(newEnd)
+                    }}
+                  >
+                    <SkipNext />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            </Stack>
+          </Card>
+          <Card elevation={2}>
+            <Stack direction='row' alignItems='stretch'>
+              <Tooltip title='Restart player'>
+                <IconButton onClick={restartPlayer}>
                   <SkipPrevious />
                 </IconButton>
               </Tooltip>
-              <TextField
-                type='number'
-                label='measures'
-                value={measures} // Add measures input
-                onChange={e =>
-                  handleMeasuresChange(parseInt(e.target.value, 10))
-                }
-                style={{ width: 120, marginTop: '10px' }}
-              />
-              <Tooltip title={`Next ${measures} measures`}>
-                <IconButton
-                  onClick={() => {
-                    if (!bpm || !beatsPerMeasure) {
-                      showToast(
-                        'provide both BPM and beats/measure to use this function',
-                      )
-                      return
-                    }
-                    const newEnd = Math.round(
-                      sectionEnd +
-                        (measures * beatsPerMeasure) /*beats*/ /
-                          (bpm /*beats/min*/ / 60) /*min/sec*/,
-                    )
-                    setSectionStart(sectionEnd)
-                    setSectionEnd(newEnd)
-                  }}
-                >
-                  <SkipNext />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          </Stack>
-        </Card>
-        <Card>
-          <Stack direction='row' alignItems='stretch'>
-            <Tooltip title='Restart player'>
-              <IconButton onClick={restartPlayer}>
-                <SkipPrevious />
+              <IconButton
+                aria-label='play/pause'
+                onClick={isPlaying ? handlePause : handlePlay}
+                sx={{
+                  fontSize: '5rem',
+                }}
+              >
+                {isPlaying ? (
+                  <PauseCircle
+                    sx={{
+                      color: theme.palette.primary.main,
+                      fontSize: 'inherit',
+                    }}
+                  />
+                ) : (
+                  <PlayCircle
+                    sx={{
+                      color: theme.palette.primary.main,
+                      fontSize: 'inherit',
+                    }}
+                  />
+                )}
               </IconButton>
-            </Tooltip>
-            <IconButton
-              aria-label='play/pause'
-              onClick={isPlaying ? handlePause : handlePlay}
-              sx={{
-                fontSize: '5rem',
-              }}
-            >
-              {isPlaying ? (
-                <PauseCircle
-                  sx={{
-                    color: theme.palette.primary.main,
-                    fontSize: 'inherit',
-                  }}
-                />
-              ) : (
-                <PlayCircle
-                  sx={{
-                    color: theme.palette.primary.main,
-                    fontSize: 'inherit',
-                  }}
-                />
-              )}
-            </IconButton>
-            <Slider
-              defaultValue={playbackRate}
-              max={2}
-              marks={[
-                { value: 0.125 },
-                { value: 0.25 },
-                { value: 0.5 },
-                { value: 1 },
-                { value: 1.5 },
-                { value: 2 },
-              ]}
-              onChange={handlePlaybackRateChange}
-              onKeyDown={preventHorizontalKeyboardNavigation}
-              orientation='vertical'
-              size='large'
-              step={null}
-              value={playbackRate}
-              valueLabelFormat={val => val + 'x'}
-              valueLabelDisplay='auto'
-            />
-            <Stack alignItems='center'>
-              <Tooltip title='Mark loop start'>
-                <IconButton onClick={markLoopStart}>
-                  <Flag sx={{ color: 'green' }} />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title='Mark loop end'>
-                <IconButton onClick={markLoopEnd}>
-                  <Flag sx={{ color: 'red' }} />
-                </IconButton>
-              </Tooltip>
+              <Slider
+                defaultValue={playbackRate}
+                max={2}
+                marks={[
+                  { value: 0.125 },
+                  { value: 0.25 },
+                  { value: 0.5 },
+                  { value: 1 },
+                  { value: 1.5 },
+                  { value: 2 },
+                ]}
+                onChange={handlePlaybackRateChange}
+                onKeyDown={preventHorizontalKeyboardNavigation}
+                orientation='vertical'
+                size='large'
+                step={null}
+                value={playbackRate}
+                valueLabelFormat={val => val + 'x'}
+                valueLabelDisplay='auto'
+              />
+              <Stack alignItems='center'>
+                <Tooltip title='Mark loop start'>
+                  <IconButton onClick={markLoopStart}>
+                    <Flag sx={{ color: 'green' }} />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title='Mark loop end'>
+                  <IconButton onClick={markLoopEnd}>
+                    <Flag sx={{ color: 'red' }} />
+                  </IconButton>
+                </Tooltip>
 
-              <Tooltip title='Save Loop'>
-                <IconButton onClick={saveLoop}>
-                  <Save />
-                </IconButton>
-              </Tooltip>
+                <Tooltip title='Save Loop'>
+                  <IconButton onClick={saveLoop}>
+                    <Save />
+                  </IconButton>
+                </Tooltip>
 
-              <Tooltip title='Jump to loop start'>
-                <IconButton onClick={restartLoop}>
-                  <RestartAlt />
-                </IconButton>
-              </Tooltip>
+                <Tooltip title='Jump to loop start'>
+                  <IconButton onClick={restartLoop}>
+                    <RestartAlt />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
             </Stack>
-          </Stack>
-        </Card>
+          </Card>
+        </Stack>
       </Stack>
-      <Bar
-        title={videos[id].title}
-        currentTime={currentTime}
-        duration={duration}
-        handleSeek={handleSeek}
-        handleIntervalChange={handleIntervalChange}
-        sectionStart={sectionStart}
-        sectionEnd={sectionEnd}
-        timestampFormatter={timestampFormatter}
-      />
+      <Box
+        sx={{
+          border: `1px solid ${theme.palette.primary.main}`,
+          backgroundColor: theme.palette.background.paper,
+          padding: '1rem',
+          // boxShadow: theme.shadows[4],
+        }}
+      >
+        <Bar
+          title={videos[id].title}
+          currentTime={currentTime}
+          duration={duration}
+          handleSeek={handleSeek}
+          handleIntervalChange={handleIntervalChange}
+          sectionStart={sectionStart}
+          sectionEnd={sectionEnd}
+          timestampFormatter={timestampFormatter}
+        />
+      </Box>
     </Stack>
   )
 }
