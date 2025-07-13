@@ -139,7 +139,7 @@ export const Home = ({ showToast }) => {
         fullWidth
         maxWidth='md'
       >
-        <Stack direction='column'>
+        <Stack direction='column' padding='1rem' gap='1rem'>
           <TextField
             multiline
             fullWidth
@@ -170,7 +170,11 @@ export const Home = ({ showToast }) => {
 
       <Stack divider column gap='2rem' justifySelf='center'>
         <Card elevation={2}>
-          <Stack divider>
+          <Stack
+            divider
+            alignItems='center'
+            sx={{ '&::after': { content: '""' } }}
+          >
             <Stack direction='column' gap='2rem' flex={3}>
               <Typography variant='h4' component='h2'>
                 enter YouTube url
@@ -199,12 +203,15 @@ export const Home = ({ showToast }) => {
               </Stack>
             </Stack>
             <FileUpload accept='audio/*' stackProps={{ flex: 1 }} />
-            <Stack gap='1rem' justifyContent='center'>
+            <Stack alignItems='center' column gap='1rem'>
               <Tooltip title='show JSON'>
                 <IconButton onClick={() => setShowJSON(true)}>
                   <Code />
                 </IconButton>
               </Tooltip>
+              <Typography textAlign='center' variant='body'>
+                show code
+              </Typography>
             </Stack>
           </Stack>
         </Card>

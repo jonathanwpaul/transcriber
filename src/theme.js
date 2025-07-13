@@ -45,11 +45,16 @@ export const theme = createTheme({
     background: {
       default: '#000000',
       paper: '#000000',
+      bar: '#222222',
     },
     text: {
       primary: '#FFFFFF',
       secondary: '#EEEEEE',
       disabled: '#AAAAAA',
+    },
+    slider: {
+      main: '#EEEEEE',
+      background: '#333333',
     },
     divider: '#333333',
     action: {

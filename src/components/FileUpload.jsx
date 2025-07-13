@@ -75,7 +75,7 @@ export default function FileUpload({ onFileSelect, accept = '*', stackProps }) {
             onChange={handleInputChange}
           />
           <UploadFile sx={{ fontSize: '4rem' }} />
-          <Typography variant='body1' sx={{ mb: 1 }}>
+          <Typography textAlign='center' variant='body1' sx={{ mb: 1 }}>
             upload media file
           </Typography>
         </Stack>

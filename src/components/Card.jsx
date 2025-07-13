@@ -6,13 +6,16 @@ export const Card = ({ children, ...props }) => {
   return (
     <MuiCard
       elevation={0}
-      sx={{
-        backgroundColor: theme.palette.background.paper,
-        border: `1px solid ${theme.palette.primary.main}`,
-        padding: '2rem',
-        borderRadius: '1rem',
-      }}
       {...props}
+      sx={[
+        {
+          backgroundColor: theme.palette.background.paper,
+          border: `1px solid ${theme.palette.primary.main}`,
+          padding: '2rem',
+          borderRadius: '1rem',
+        },
+        props.sx,
+      ]}
     >
       {children}
     </MuiCard>

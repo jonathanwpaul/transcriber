@@ -28,31 +28,29 @@ const SavedSection = ({
   }
 
   return (
-    <Card style={{ flex: 1, height: '50px', margin: '5px' }}>
+    <Card style={{ flex: 1, margin: '1rem' }}>
       <ListItemButton
         className='horizontal-container'
         onClick={onClick}
-        style={{
+        sx={{
+          gap: '1rem',
           height: '100%',
           justifyContent: 'space-between',
-          flexWrap: 'wrap',
-        }}
-        sx={{
           '&.Mui-selected': {
             backgroundColor: theme.palette.grey[900],
             // color: theme.palette.background.paper,
             '&:hover': {
               backgroundColor: theme.palette.grey[900],
-            }
+            },
           },
           '&:hover': {
             backgroundColor: theme.palette.grey[900],
-          }
+          },
         }}
         selected={isSelected}
       >
         <p>{`${timestampFormatter(startTime)} - ${timestampFormatter(
-          endTime
+          endTime,
         )}`}</p>
         <TextField
           value={currentTitle}
@@ -60,7 +58,7 @@ const SavedSection = ({
           onClick={e => e.stopPropagation()}
           variant='outlined'
           size='small'
-          style={{ flexGrow: 1, marginLeft: '10px', marginRight: '10px' }}
+          style={{ flexGrow: 1 }}
         />
         <IconButton>
           <Delete

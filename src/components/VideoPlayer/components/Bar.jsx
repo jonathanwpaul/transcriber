@@ -11,8 +11,10 @@ export const Bar = ({
   sectionEnd,
   timestampFormatter,
 }) => {
+  const theme = useTheme()
+  const flexProperty = { flex: '0 0 6rem' }
   return (
-    <Box>
+    <>
       <Typography>{title}</Typography>
       <Stack
         sx={{
@@ -20,20 +22,20 @@ export const Bar = ({
           gap: '1rem',
         }}
       >
-        <Typography>{timestampFormatter(currentTime)}</Typography>
-        <Stack sx={{ width: '100%', position: 'relative' }}>
+        <Box sx={flexProperty}>
+          <Typography>{timestampFormatter(currentTime)}</Typography>
+        </Box>
+        <Stack sx={{ flexBasis: '90%', position: 'relative', width: '100%' }}>
           <Slider
-            color='secondary'
             disableSwap
             min={0}
             max={duration}
             onChange={handleIntervalChange}
             size='large'
             step={0.1}
-            style={{
-              position: 'absolute',
-            }}
             sx={{
+              color: theme.palette.slider.background,
+              position: 'absolute',
               '& .MuiSlider-thumb': {
                 '&[data-index="0"]': {
                   color: 'green',
@@ -56,9 +58,7 @@ export const Bar = ({
                 borderRadius: '5px',
                 borderLeft: '5px solid green',
                 borderRight: '5px solid red',
-                color: '#eeeeee95',
-                opacity: 0.8,
-                height: 30,
+                height: 20,
               },
               '.MuiSlider-rail': {
                 height: 0,
@@ -70,6 +70,7 @@ export const Bar = ({
           />
           {/* the playback slider (mirrors video playback slider) */}
           <Slider
+            color={theme.palette.slider.main}
             min={0}
             max={duration}
             onChange={handleSeek}
@@ -80,8 +81,10 @@ export const Bar = ({
             valueLabelFormat={timestampFormatter}
           />
         </Stack>
-        <Typography>{timestampFormatter(duration)}</Typography>
+        <Box sx={flexProperty}>
+          <Typography>{timestampFormatter(duration)}</Typography>
+        </Box>
       </Stack>
-    </Box>
+    </>
   )
 }
