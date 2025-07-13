@@ -13,14 +13,6 @@ const BPMInput = ({
   const [bpm, setBpm] = useState(value)
   const [lastTap, setLastTap] = useState(null)
   const [tapIntervals, setTapIntervals] = useState([])
-  const inputRef = useRef()
-
-  useEffect(() => {
-    setBpm(value)
-    if (inputRef.current) {
-      inputRef.current.value = value
-    }
-  }, [value])
 
   const handleTap = () => {
     const now = Date.now()
@@ -65,12 +57,12 @@ const BPMInput = ({
         </IconButton>
       </Tooltip>
       <TextField
-        type='number'
+        InputLabelProps={{ shrink: !!bpm }}
         label='beats/min'
-        value={bpm}
         onChange={handleBpmChange}
-        inputRef={inputRef}
         style={{ width: 120 }}
+        type='number'
+        value={bpm}
       />
       <TextField
         type='number'
