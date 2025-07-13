@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { IconButton, TextField, Tooltip } from '@mui/material'
+import { IconButton, TextField, Tooltip, useTheme } from '@mui/material'
 import { ReactComponent as MetronomeIcon } from '../../../assets/icons/metronome.svg' // Import the metronome SVG
+import { Stack } from '@components/Stack'
 
 const BPMInput = ({
   value,
@@ -8,6 +9,7 @@ const BPMInput = ({
   beatsPerMeasure,
   onBeatsPerMeasureChange,
 }) => {
+  const theme = useTheme()
   const [bpm, setBpm] = useState(value)
   const [lastTap, setLastTap] = useState(null)
   const [tapIntervals, setTapIntervals] = useState([])
@@ -52,13 +54,14 @@ const BPMInput = ({
   }
 
   return (
-    <div
-      className='horizontal-container'
-      style={{ alignItems: 'center', flexWrap: 'wrap' }}
-    >
+    <Stack column alignItems='center' gap='1rem'>
       <Tooltip title='Tap to set BPM'>
         <IconButton onClick={handleTap}>
-          <MetronomeIcon height={50} width={50} />
+          <MetronomeIcon
+            fill={theme.palette.primary.main}
+            height={50}
+            width={50}
+          />
         </IconButton>
       </Tooltip>
       <TextField
@@ -76,7 +79,7 @@ const BPMInput = ({
         onChange={handleBeatsPerMeasureChange}
         style={{ width: 120 }}
       />
-    </div>
+    </Stack>
   )
 }
 
