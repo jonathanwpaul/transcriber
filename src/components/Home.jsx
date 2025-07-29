@@ -132,7 +132,13 @@ export const Home = ({ showToast }) => {
   // }
 
   return !showVideoPlayer ? (
-    <Box sx={{ alignContent: 'center', height: '100%', padding: '10rem' }}>
+    <Box
+      sx={{
+        alignContent: 'center',
+        height: '100%',
+        p: { xs: 1, sm: 8, md: 10 },
+      }}
+    >
       <Dialog
         open={showJSON}
         onClose={() => setShowJSON(false)}
@@ -169,7 +175,7 @@ export const Home = ({ showToast }) => {
       </Dialog>
 
       <Stack divider column gap='2rem' justifySelf='center'>
-        <Card elevation={2}>
+        <Card elevation={2} sx={{ overflow: 'scroll' }}>
           <Stack
             divider
             alignItems='center'
@@ -179,7 +185,7 @@ export const Home = ({ showToast }) => {
               <Typography variant='h4' component='h2'>
                 enter YouTube url
               </Typography>
-              <Stack direction='row' gap='1rem'>
+              <Stack gap='1rem'>
                 <TextField
                   error={error}
                   fullWidth

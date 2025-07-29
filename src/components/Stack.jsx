@@ -8,7 +8,7 @@ export const Stack = ({ children, divider, column, ...props }) => {
           <Divider flexItem orientation={column ? 'horizontal' : 'vertical'} />
         )
       }
-      direction={column ? 'column' : { md: 'row', sm: 'column' }}
+      direction={column ? 'column' : { sm: 'row', xs: 'column' }}
       gap='5rem'
       {...props}
     >
