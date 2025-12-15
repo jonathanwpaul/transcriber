@@ -13,9 +13,11 @@ import {
 
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter, round } from '@utils/video'
+import { videoSources } from '@utils/constants'
 
 import { Bar } from './components/Bar'
 import BPMInput from './components/BPMInput'
+import { LocalFileSource } from './components/LocalFileSource'
 import SavedSection from './components/SavedSection'
 import { TimeTextInput } from './components'
 import { YouTubeSource } from './components/YouTubeSource'
@@ -62,7 +64,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   const measures = appSettings['measures']
   const videos = JSON.parse(videosString) || {}
 
-  const { beatsPerMeasure, bpm } = videos[id] || {}
+  const { beatsPerMeasure, bpm, type: sourceType } = videos[id] || {}
 
   const playerRef = useRef()
   const timerRef = useRef()
@@ -305,20 +307,38 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                 <Card className="p-4">
                   <div className="flex flex-col gap-4 lg:flex-row">
                     <div className="w-full lg:flex-1">
-                      <YouTubeSource
-                        id={id}
-                        onPause={handlePause}
-                        onPlay={handlePlay}
-                        playerRef={playerRef}
-                        setCurrentTime={setCurrentTime}
-                        setDuration={setDuration}
-                        setIsPlaying={setIsPlaying}
-                        setPlaybackRate={setPlaybackRate}
-                        setSectionEnd={setSectionEnd}
-                        setSectionStart={setSectionStart}
-                        setVideos={setVideos}
-                        videos={videos}
-                      />
+                      {sourceType === videoSources.FILE ? (
+                        <LocalFileSource
+                          id={id}
+                          onPause={handlePause}
+                          onPlay={handlePlay}
+                          playerRef={playerRef}
+                          setCurrentTime={setCurrentTime}
+                          setDuration={setDuration}
+                          setIsPlaying={setIsPlaying}
+                          setPlaybackRate={setPlaybackRate}
+                          setSectionEnd={setSectionEnd}
+                          setSectionStart={setSectionStart}
+                          setVideos={setVideos}
+                          showToast={showToast}
+                          videos={videos}
+                        />
+                      ) : (
+                        <YouTubeSource
+                          id={id}
+                          onPause={handlePause}
+                          onPlay={handlePlay}
+                          playerRef={playerRef}
+                          setCurrentTime={setCurrentTime}
+                          setDuration={setDuration}
+                          setIsPlaying={setIsPlaying}
+                          setPlaybackRate={setPlaybackRate}
+                          setSectionEnd={setSectionEnd}
+                          setSectionStart={setSectionStart}
+                          setVideos={setVideos}
+                          videos={videos}
+                        />
+                      )}
                     </div>
 
                     <div className="grid w-full gap-3 lg:w-64">

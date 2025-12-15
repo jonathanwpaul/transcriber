@@ -19,6 +19,25 @@ import {
   TooltipTrigger,
 } from './ui/tooltip'
 
+const ACCEPTED_AUDIO_EXTENSIONS = ['mp3', 'wav']
+const ACCEPTED_AUDIO_MIME_TYPES = [
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/x-wav',
+]
+
+function makeLocalFileId(file) {
+  return `file:${file.name}:${file.size}:${file.lastModified}`
+}
+
+function isAcceptedAudioFile(file) {
+  const ext = (file.name.split('.').pop() || '').toLowerCase()
+  if (ACCEPTED_AUDIO_EXTENSIONS.includes(ext)) return true
+  if (ACCEPTED_AUDIO_MIME_TYPES.includes(file.type)) return true
+  return false
+}
+
 export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [id, setId] = useState()
   const [showVideoPlayer, setShowVideoPlayer] = useState()
@@ -68,6 +87,37 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       setId(id)
       setShowVideoPlayer(true)
     })
+  }
+
+  const handleLocalFileSelect = file => {
+    if (!file) return
+
+    if (!isAcceptedAudioFile(file)) {
+      showToast('Please select a .mp3 or .wav file')
+      return
+    }
+
+    const id = makeLocalFileId(file)
+    const newSourceUrl = URL.createObjectURL(file)
+
+    const existing = videos[id]
+    if (existing?.sourceUrl && existing.sourceUrl.startsWith('blob:')) {
+      // Revoke prior object URL to avoid leaks
+      URL.revokeObjectURL(existing.sourceUrl)
+    }
+
+    videos[id] = {
+      ...(videos[id] || {}),
+      type: videoSources.FILE,
+      title: file.name,
+      fileName: file.name,
+      fileSize: file.size,
+      lastModified: file.lastModified,
+      mimeType: file.type,
+      sourceUrl: newSourceUrl,
+    }
+
+    showVideoId(id)
   }
 
   const handleSubmit = () => {
@@ -165,7 +215,10 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-              <FileUpload accept="audio/*" />
+              <FileUpload
+                accept=".mp3,.wav,audio/mpeg,audio/wav"
+                onFileSelect={handleLocalFileSelect}
+              />
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="outline" className="w-full sm:w-auto" onClick={() => setShowJSON(true)}>
