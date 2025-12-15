@@ -1,5 +1,4 @@
-import { Box, Slider, Typography, useTheme } from '@mui/material'
-import { Stack } from '../../Stack'
+import { Slider } from '@components/ui/slider'
 
 export const Bar = ({
   title,
@@ -11,80 +10,42 @@ export const Bar = ({
   sectionEnd,
   timestampFormatter,
 }) => {
-  const theme = useTheme()
-  const flexProperty = { flex: '0 0 6rem' }
   return (
-    <>
-      <Typography>{title}</Typography>
-      <Stack
-        sx={{
-          alignItems: 'center',
-          gap: '1rem',
-        }}
-      >
-        <Box sx={flexProperty}>
-          <Typography>{timestampFormatter(currentTime)}</Typography>
-        </Box>
-        <Stack sx={{ flexBasis: '90%', position: 'relative', width: '100%' }}>
+    <div className="flex flex-col gap-2">
+      <div className="truncate text-sm font-medium">{title}</div>
+
+      <div className="flex items-center gap-3">
+        <div className="w-16 shrink-0 text-xs text-muted-foreground">
+          {timestampFormatter(currentTime)}
+        </div>
+
+        <div className="relative flex-1">
+          {/* loop range */}
+          <div className="absolute inset-0 flex items-center">
+            <Slider
+              min={0}
+              max={duration}
+              step={0.1}
+              value={[sectionStart, sectionEnd]}
+              onValueChange={handleIntervalChange}
+              className="opacity-80"
+            />
+          </div>
+
+          {/* playback position */}
           <Slider
-            disableSwap
             min={0}
             max={duration}
-            onChange={handleIntervalChange}
-            size='large'
             step={0.1}
-            sx={{
-              color: theme.palette.slider.background,
-              position: 'absolute',
-              '& .MuiSlider-thumb': {
-                '&[data-index="0"]': {
-                  color: 'green',
-                  transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
-                },
-
-                '&[data-index="1"]': {
-                  color: 'red',
-                  transform: 'translateX(-50%) translateY(-150%)', //rotate(-135deg)',
-                },
-                /* Border */
-                // borderRadius: '0px 50% 50% 50%',
-
-                /* Size */
-                height: '2rem',
-                width: '2rem',
-              },
-              '& .MuiSlider-track': {
-                boxSizing: 'border-box',
-                borderRadius: '5px',
-                borderLeft: '5px solid green',
-                borderRight: '5px solid red',
-                height: 20,
-              },
-              '.MuiSlider-rail': {
-                height: 0,
-              },
-            }}
-            value={[sectionStart, sectionEnd]}
-            valueLabelDisplay='auto'
-            valueLabelFormat={timestampFormatter}
+            value={[currentTime]}
+            onValueChange={val => handleSeek(val[0])}
           />
-          {/* the playback slider (mirrors video playback slider) */}
-          <Slider
-            color={theme.palette.slider.main}
-            min={0}
-            max={duration}
-            onChange={handleSeek}
-            size='large'
-            step={0.1}
-            value={currentTime}
-            valueLabelDisplay='auto'
-            valueLabelFormat={timestampFormatter}
-          />
-        </Stack>
-        <Box sx={flexProperty}>
-          <Typography>{timestampFormatter(duration)}</Typography>
-        </Box>
-      </Stack>
-    </>
+        </div>
+
+        <div className="w-16 shrink-0 text-right text-xs text-muted-foreground">
+          {timestampFormatter(duration)}
+        </div>
+      </div>
+    </div>
   )
 }

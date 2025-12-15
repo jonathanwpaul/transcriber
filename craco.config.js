@@ -7,6 +7,11 @@ const alias = {
 }
 
 module.exports = {
+  style: {
+    postcss: {
+      mode: 'file',
+    },
+  },
   webpack: {
     alias,
   },

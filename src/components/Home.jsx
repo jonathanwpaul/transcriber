@@ -1,34 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  TextField,
-  Button,
-  Table,
-  TableRow,
-  TableHead,
-  TableCell,
-  Dialog,
-  Tooltip,
-  IconButton,
-  Divider,
-  Typography,
-  Box,
-} from '@mui/material'
-import { Card } from './Card'
-import { Stack } from './Stack'
+import { Code2, Moon, Sun } from 'lucide-react'
+
 import { VideoPlayer } from './VideoPlayer/VideoPlayer'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
 import { videoSources } from 'utils/constants'
-import { Code } from '@mui/icons-material'
 
-import { Filesystem, Directory } from '@capacitor/filesystem'
 import FileUpload from './FileUpload'
 
-export const Home = ({ showToast }) => {
+import { Button } from './ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
+import { Input } from './ui/input'
+import { Textarea } from './ui/textarea'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from './ui/tooltip'
+
+export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [id, setId] = useState()
   const [showVideoPlayer, setShowVideoPlayer] = useState()
   const [inputText, setInputText] = useState()
   const [error, setError] = useState(false)
-  const [file, setFile] = useState(null)
   const {
     preference: videosString,
     loading,
@@ -42,7 +37,12 @@ export const Home = ({ showToast }) => {
   const JSONInputRef = useRef()
 
   useEffect(() => {
-    setJSONText(JSON.stringify(videos, null, 2))
+    try {
+      const parsed = JSON.parse(videosString || '{}')
+      setJSONText(JSON.stringify(parsed || {}, null, 2))
+    } catch {
+      setJSONText(videosString || '{}')
+    }
   }, [videosString])
 
   if (loading) return
@@ -60,48 +60,6 @@ export const Home = ({ showToast }) => {
   const handleChange = e => {
     setInputText(e.target.value)
     setError(null)
-  }
-
-  const handleFileChange = async e => {
-    const file = e.target.files[0]
-
-    if (file) {
-      try {
-        // Get the file path
-        const filePath = file.path || file.name
-
-        // Read the file content using Capacitor's Filesystem API
-        const fileData = await Filesystem.readFile({
-          path: filePath,
-          directory: Directory.Documents, // Adjust the directory as needed
-        })
-
-        // Use the file path as the ID
-        const id = filePath
-
-        // Add the file to the videos object
-        if (!videos[id]) {
-          videos[id] = { type: videoSources.FILE, content: fileData.data }
-        }
-
-        // Show the video
-        showVideoId(id)
-      } catch (error) {
-        console.error('Error reading file:', error)
-        showToast('Failed to load the file. Please try again.')
-      }
-    }
-  }
-
-  const handleFileDrop = e => {
-    e.preventDefault()
-    const file = e.dataTransfer.files[0]
-    if (file) {
-      setFile(file)
-      const id = URL.createObjectURL(file)
-      if (!videos[id]) videos[id] = { type: videoSources.FILE }
-      showVideoId(id)
-    }
   }
 
   const showVideoId = id => {
@@ -132,137 +90,121 @@ export const Home = ({ showToast }) => {
   // }
 
   return !showVideoPlayer ? (
-    <Box
-      sx={{
-        alignContent: 'center',
-        height: '100%',
-        p: { xs: 1, sm: 8, md: 10 },
-      }}
-    >
-      <Dialog
-        open={showJSON}
-        onClose={() => setShowJSON(false)}
-        fullWidth
-        maxWidth='md'
-      >
-        <Stack direction='column' padding='1rem' gap='1rem'>
-          <TextField
-            multiline
-            fullWidth
-            maxRows={20}
-            value={JSONText}
-            onChange={e => {
-              setJSONText(e.target.value)
-            }}
-            ref={JSONInputRef}
-          />
-          <Button
-            className='button'
-            onClick={() => {
-              if (!JSON.parse(JSONText)) {
-                showToast('Invalid JSON')
-              } else {
-                setVideos('videos', JSON.parse(JSONText))
-                setShowJSON(false)
-              }
-            }}
-            variant='contained'
-            style={{ alignSelf: 'flex-end', textTransform: 'none' }}
-          >
-            Update
-          </Button>
-        </Stack>
-      </Dialog>
+    <TooltipProvider>
+      <div className="mx-auto flex h-full w-full max-w-5xl flex-col gap-4 p-4 sm:p-6">
+        <div className="flex items-center justify-end gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
+                aria-label="Toggle theme"
+              >
+                {themeMode === 'dark' ? <Sun /> : <Moon />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Toggle light/dark</TooltipContent>
+          </Tooltip>
+        </div>
 
-      <Stack divider column gap='2rem' justifySelf='center'>
-        <Card elevation={2} sx={{ overflow: 'scroll' }}>
-          <Stack
-            divider
-            alignItems='center'
-            sx={{ '&::after': { content: '""' } }}
-          >
-            <Stack direction='column' gap='2rem' flex={3}>
-              <Typography variant='h4' component='h2'>
-                enter YouTube url
-              </Typography>
-              <Stack gap='1rem'>
-                <TextField
-                  error={error}
-                  fullWidth
-                  helperText={error}
-                  onChange={handleChange}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') handleSubmit()
-                  }}
-                  placeholder='https://youtube.com/watch?v=...'
-                  value={inputText}
-                  variant='outlined'
-                />
+        <Dialog open={showJSON} onOpenChange={open => setShowJSON(open)}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>videos JSON</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-3">
+              <Textarea
+                ref={JSONInputRef}
+                value={JSONText}
+                onChange={e => setJSONText(e.target.value)}
+                rows={18}
+              />
+              <div className="flex justify-end">
                 <Button
-                  disabled={!inputText}
-                  onClick={handleSubmit}
-                  sx={{ textTransform: 'none' }}
-                  variant='contained'
+                  onClick={() => {
+                    try {
+                      const parsed = JSON.parse(JSONText)
+                      setVideos('videos', parsed)
+                      setShowJSON(false)
+                    } catch {
+                      showToast('Invalid JSON')
+                    }
+                  }}
                 >
+                  Update
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Load a source</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <div className="text-sm font-medium">YouTube URL</div>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="flex-1">
+                  <Input
+                    value={inputText || ''}
+                    onChange={handleChange}
+                    placeholder="https://youtube.com/watch?v=..."
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') handleSubmit()
+                    }}
+                  />
+                  {error && <div className="mt-1 text-xs text-destructive">{error}</div>}
+                </div>
+                <Button className="sm:w-28" disabled={!inputText} onClick={handleSubmit}>
                   go
                 </Button>
-              </Stack>
-            </Stack>
-            <FileUpload accept='audio/*' stackProps={{ flex: 1 }} />
-            <Stack alignItems='center' column gap='1rem'>
-              <Tooltip title='show JSON'>
-                <IconButton onClick={() => setShowJSON(true)}>
-                  <Code />
-                </IconButton>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+              <FileUpload accept="audio/*" />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto" onClick={() => setShowJSON(true)}>
+                    <Code2 className="mr-2" />
+                    show code
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Show raw saved data</TooltipContent>
               </Tooltip>
-              <Typography textAlign='center' variant='body'>
-                show code
-              </Typography>
-            </Stack>
-          </Stack>
+            </div>
+          </CardContent>
         </Card>
+
         {videos && videoList.length > 0 && (
-          <Card sx={{ padding: 0 }}>
-            <Table>
-              <TableHead>
-                <TableCell>
-                  <Typography variant='h4' component='h2'>
-                    Recents
-                  </Typography>
-                </TableCell>
-                <TableCell></TableCell>
-              </TableHead>
-              {videoList.map(e => {
-                return (
-                  <TableRow key={e}>
-                    <TableCell>
-                      <Button
-                        onClick={() => showVideoId(e)}
-                        sx={{
-                          justifyContent: 'start',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          textTransform: 'none',
-                          whiteSpace: 'nowrap',
-                        }}
-                        variant='text'
-                        color='primary'
-                      >
-                        {videos[e].title ?? e}
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      {formatTimeString(videos[e]['last_accessed'])}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </Table>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Recents</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-1">
+              {videoList.map(e => (
+                <button
+                  key={e}
+                  onClick={() => showVideoId(e)}
+                  className="flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+                >
+                  <div className="min-w-0 flex-1 truncate font-medium text-primary">
+                    {videos[e].title ?? e}
+                  </div>
+                  <div className="shrink-0 text-xs text-muted-foreground">
+                    {formatTimeString(videos[e]['last_accessed'])}
+                  </div>
+                </button>
+              ))}
+            </CardContent>
           </Card>
         )}
-      </Stack>
-    </Box>
+      </div>
+    </TooltipProvider>
   ) : (
-    <VideoPlayer id={id} setShowVideoPlayer={setShowVideoPlayer} />
+    <VideoPlayer id={id} setShowVideoPlayer={setShowVideoPlayer} showToast={showToast} />
   )
 }

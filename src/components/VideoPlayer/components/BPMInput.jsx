@@ -1,15 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { IconButton, TextField, Tooltip, useTheme } from '@mui/material'
-import { ReactComponent as MetronomeIcon } from '../../../assets/icons/metronome.svg' // Import the metronome SVG
-import { Stack } from '@components/Stack'
+import React, { useState } from 'react'
+import { ReactComponent as MetronomeIcon } from '../../../assets/icons/metronome.svg'
 
-const BPMInput = ({
-  value,
-  onChange,
-  beatsPerMeasure,
-  onBeatsPerMeasureChange,
-}) => {
-  const theme = useTheme()
+import { Button } from '@components/ui/button'
+import { Input } from '@components/ui/input'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@components/ui/tooltip'
+
+const BPMInput = ({ value, onChange, beatsPerMeasure, onBeatsPerMeasureChange }) => {
   const [bpm, setBpm] = useState(value)
   const [lastTap, setLastTap] = useState(null)
   const [tapIntervals, setTapIntervals] = useState([])
@@ -46,32 +47,33 @@ const BPMInput = ({
   }
 
   return (
-    <Stack column alignItems='center' gap='1rem'>
-      <Tooltip title='Tap to set BPM'>
-        <IconButton onClick={handleTap}>
-          <MetronomeIcon
-            fill={theme.palette.primary.main}
-            height={50}
-            width={50}
-          />
-        </IconButton>
-      </Tooltip>
-      <TextField
-        InputLabelProps={{ shrink: !!bpm }}
-        label='beats/min'
-        onChange={handleBpmChange}
-        style={{ width: 120 }}
-        type='number'
-        value={bpm}
-      />
-      <TextField
-        type='number'
-        label='beats/measure'
-        value={beatsPerMeasure}
-        onChange={handleBeatsPerMeasureChange}
-        style={{ width: 120 }}
-      />
-    </Stack>
+    <TooltipProvider>
+      <div className="flex flex-col items-center gap-3">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button type="button" variant="ghost" size="icon" onClick={handleTap}>
+              <MetronomeIcon className="h-10 w-10 fill-primary" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Tap to set BPM</TooltipContent>
+        </Tooltip>
+
+        <div className="grid w-full grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <div className="mb-1 text-xs font-medium text-muted-foreground">beats/min</div>
+            <Input type="number" value={bpm ?? ''} onChange={handleBpmChange} />
+          </div>
+          <div className="col-span-2">
+            <div className="mb-1 text-xs font-medium text-muted-foreground">beats/measure</div>
+            <Input
+              type="number"
+              value={beatsPerMeasure ?? ''}
+              onChange={handleBeatsPerMeasureChange}
+            />
+          </div>
+        </div>
+      </div>
+    </TooltipProvider>
   )
 }
 

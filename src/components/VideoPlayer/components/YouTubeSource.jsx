@@ -11,7 +11,6 @@ export const YouTubeSource = ({
   setDuration,
   setIsPlaying,
   setPlaybackRate,
-  setPossiblePlaybackRates,
   setSectionEnd,
   setSectionStart,
   setVideos,
@@ -37,7 +36,6 @@ export const YouTubeSource = ({
     setDuration(playerRef.current.getDuration())
     setIsPlaying(e.target.getPlayerState() === 1)
     setPlaybackRate(e.target.getPlaybackRate())
-    setPossiblePlaybackRates(e.target.getAvailablePlaybackRates())
     setSectionStart(0)
     setSectionEnd(e.target.getDuration())
 
@@ -53,14 +51,18 @@ export const YouTubeSource = ({
   return (
     <>
       {type === videoSources.YOUTUBE && (
-        <YouTube
-          opts={videoOptions}
-          videoId={id}
-          onReady={onReady}
-          onPlay={onPlay}
-          onPause={onPause}
-          style={{ aspectRatio: '16/9' }}
-        />
+        <div className="w-full overflow-hidden rounded-lg border bg-card">
+          <div className="aspect-video w-full">
+            <YouTube
+              opts={videoOptions}
+              videoId={id}
+              onReady={onReady}
+              onPlay={onPlay}
+              onPause={onPause}
+              className="h-full w-full"
+            />
+          </div>
+        </div>
       )}
     </>
   )

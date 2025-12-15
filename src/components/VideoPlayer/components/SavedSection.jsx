@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import { Delete } from '@mui/icons-material'
-import {
-  Card,
-  IconButton,
-  ListItemButton,
-  TextField,
-  useTheme,
-} from '@mui/material'
+import { Trash2 } from 'lucide-react'
+
 import { timestampFormatter } from '@utils/video'
+
+import { Button } from '@components/ui/button'
+import { Card } from '@components/ui/card'
+import { Input } from '@components/ui/input'
 
 const SavedSection = ({
   onClick,
@@ -19,7 +17,6 @@ const SavedSection = ({
   onTitleChange,
 }) => {
   const [currentTitle, setCurrentTitle] = useState(title || '')
-  const theme = useTheme()
 
   const handleTitleChange = e => {
     const newTitle = e.target.value
@@ -28,47 +25,42 @@ const SavedSection = ({
   }
 
   return (
-    <Card style={{ flex: 1, margin: '1rem' }}>
-      <ListItemButton
-        className='horizontal-container'
+    <Card
+      className={
+        'mx-2 my-2 transition-colors ' +
+        (isSelected ? 'border-primary bg-accent' : 'hover:bg-accent')
+      }
+    >
+      <button
+        type="button"
         onClick={onClick}
-        sx={{
-          gap: '1rem',
-          height: '100%',
-          justifyContent: 'space-between',
-          '&.Mui-selected': {
-            backgroundColor: theme.palette.grey[900],
-            // color: theme.palette.background.paper,
-            '&:hover': {
-              backgroundColor: theme.palette.grey[900],
-            },
-          },
-          '&:hover': {
-            backgroundColor: theme.palette.grey[900],
-          },
-        }}
-        selected={isSelected}
+        className="flex w-full items-center gap-3 p-3 text-left"
       >
-        <p>{`${timestampFormatter(startTime)} - ${timestampFormatter(
-          endTime,
-        )}`}</p>
-        <TextField
-          value={currentTitle}
-          onChange={handleTitleChange}
-          onClick={e => e.stopPropagation()}
-          variant='outlined'
-          size='small'
-          style={{ flexGrow: 1 }}
-        />
-        <IconButton>
-          <Delete
-            onClick={e => {
-              e.stopPropagation()
-              onDelete()
-            }}
+        <div className="shrink-0 text-xs text-muted-foreground">
+          {timestampFormatter(startTime)} - {timestampFormatter(endTime)}
+        </div>
+
+        <div className="min-w-0 flex-1" onClick={e => e.stopPropagation()}>
+          <Input
+            value={currentTitle}
+            onChange={handleTitleChange}
+            placeholder="title"
           />
-        </IconButton>
-      </ListItemButton>
+        </div>
+
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          onClick={e => {
+            e.stopPropagation()
+            onDelete()
+          }}
+          aria-label="Delete loop"
+        >
+          <Trash2 />
+        </Button>
+      </button>
     </Card>
   )
 }

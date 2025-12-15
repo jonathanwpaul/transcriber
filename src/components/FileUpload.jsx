@@ -1,10 +1,9 @@
 import React, { useRef, useState } from 'react'
-import { Box, Stack, Typography } from '@mui/material'
-import { useTheme } from '@emotion/react'
-import { UploadFile } from '@mui/icons-material'
+import { Upload } from 'lucide-react'
 
-export default function FileUpload({ onFileSelect, accept = '*', stackProps }) {
-  const theme = useTheme()
+import { cn } from '../lib/utils'
+
+export default function FileUpload({ onFileSelect, accept = '*', className }) {
   const inputRef = useRef(null)
   const [dragActive, setDragActive] = useState(false)
   const [fileName, setFileName] = useState('')
@@ -39,48 +38,36 @@ export default function FileUpload({ onFileSelect, accept = '*', stackProps }) {
   }
 
   return (
-    <Stack gap='1rem' {...stackProps}>
-      <Box
-        sx={{
-          border: `0.125rem dashed ${theme.palette.grey[800]}`,
-          borderRadius: 2,
-          display: 'flex',
-          height: '100%',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          // backgroundColor: dragActive
-          //   ? theme.palette.background.default
-          //   : theme.palette.background.paper,
-          cursor: 'pointer',
-          transition: 'background 0.2s',
-          position: 'relative',
-          padding: '1rem',
-          '&:hover': {
-            color: theme.palette.primary.main,
-          },
-        }}
+    <div className={cn('flex flex-col gap-2', className)}>
+      <div
+        className={cn(
+          'flex min-h-28 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 transition-colors',
+          dragActive ? 'border-primary bg-accent' : 'border-border bg-card',
+        )}
         tabIndex={0}
+        role="button"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => inputRef.current && inputRef.current.click()}
       >
-        <Stack gap='0.5rem' alignItems='center'>
-          <input
-            ref={inputRef}
-            type='file'
-            accept={accept}
-            style={{ display: 'none' }}
-            onChange={handleInputChange}
-          />
-          <UploadFile sx={{ fontSize: '4rem' }} />
-          <Typography textAlign='center' variant='body1' sx={{ mb: 1 }}>
-            upload media file
-          </Typography>
-        </Stack>
-      </Box>
-      {fileName && <Typography variant='body1'>{fileName}</Typography>}
-    </Stack>
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={handleInputChange}
+        />
+        <div className="flex flex-col items-center gap-2 text-center">
+          <Upload className="h-10 w-10 text-muted-foreground" />
+          <div className="text-sm font-medium">Upload media file</div>
+          <div className="text-xs text-muted-foreground">
+            Tap to browse or drag & drop
+          </div>
+        </div>
+      </div>
+
+      {fileName && <div className="text-xs text-muted-foreground">{fileName}</div>}
+    </div>
   )
 }
