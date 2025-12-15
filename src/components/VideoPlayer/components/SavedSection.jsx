@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { ChevronRight, Trash2 } from 'lucide-react'
 
 import { timestampFormatter } from '@utils/video'
 
@@ -15,6 +15,9 @@ const SavedSection = ({
   isSelected,
   title,
   onTitleChange,
+  hasChildren,
+  isCollapsed,
+  onToggleCollapse,
 }) => {
   const [currentTitle, setCurrentTitle] = useState(title || '')
 
@@ -34,8 +37,33 @@ const SavedSection = ({
       <button
         type="button"
         onClick={onClick}
-        className="flex w-full items-center gap-3 p-3 text-left"
+        className="flex w-full items-center gap-2 p-3 text-left"
       >
+        <div className="shrink-0">
+          {hasChildren ? (
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              className="h-8 w-8 border-border bg-background shadow-sm"
+              onClick={e => {
+                e.stopPropagation()
+                onToggleCollapse?.()
+              }}
+              aria-label={isCollapsed ? 'Expand children' : 'Collapse children'}
+            >
+              <ChevronRight
+                className={
+                  'h-4 w-4 transition-transform ' +
+                  (isCollapsed ? '' : 'rotate-90')
+                }
+              />
+            </Button>
+          ) : (
+            <div className="h-8 w-8" />
+          )}
+        </div>
+
         <div className="shrink-0 text-xs text-muted-foreground">
           {timestampFormatter(startTime)} - {timestampFormatter(endTime)}
         </div>

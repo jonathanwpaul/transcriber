@@ -41,6 +41,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   const [sectionStart, setSectionStart] = useState(0)
   const [sectionEnd, setSectionEnd] = useState(0)
 
+  // collapse state for loop tree nodes, keyed by a stable path string
+  const [collapsedLoops, setCollapsedLoops] = useState({})
+
   const {
     preference: videosString,
     loading,
@@ -222,9 +225,14 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     playerRef.current.seekTo(sectionStart)
   }
 
-  const renderLoop = (loop, i) => {
+  const renderLoop = (loop, pathKey) => {
+    const hasChildren = !!(
+      loop.children && Object.keys(loop.children).length > 0
+    )
+    const isCollapsed = !!collapsedLoops[pathKey]
+
     return (
-      <div key={`loop-${i}`} className="flex flex-col gap-2">
+      <div key={pathKey} className="flex flex-col gap-2">
         <SavedSection
           endTime={loop.sectionEnd}
           isSelected={
@@ -238,12 +246,19 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           }}
           startTime={loop.sectionStart}
           title={loop.title}
+          hasChildren={hasChildren}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={() => {
+            setCollapsedLoops(prev => ({ ...prev, [pathKey]: !prev[pathKey] }))
+          }}
         />
-        {loop.children && (
+
+        {hasChildren && !isCollapsed && (
           <div className="pl-4">
-            {Object.values(loop.children).map((child, j) =>
-              renderLoop(child, `${i}-${j}`),
-            )}
+            {Object.values(loop.children).map(child => {
+              const childKey = `${child.sectionStart}-${child.sectionEnd}`
+              return renderLoop(child, `${pathKey}/${childKey}`)
+            })}
           </div>
         )}
       </div>
@@ -294,7 +309,10 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                   <div className="flex flex-col">
                     {Object.values(videos[id].loops)
                       .sort((a, b) => a.sectionStart - b.sectionStart)
-                      .map((loop, i) => renderLoop(loop, i))}
+                      .map(loop => {
+                        const key = `${loop.sectionStart}-${loop.sectionEnd}`
+                        return renderLoop(loop, key)
+                      })}
                   </div>
                 ) : (
                   <div className="p-3 text-sm text-muted-foreground">
