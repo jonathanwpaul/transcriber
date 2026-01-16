@@ -67,9 +67,15 @@ export const LocalFileSource = ({
   const [highPassEnabled, setHighPassEnabled] = useState(
     () => !!entry.highPassEnabled,
   )
-  const [highPassFreq, setHighPassFreq] = useState(() => entry.highPassFreq ?? 80)
-  const [lowPassEnabled, setLowPassEnabled] = useState(() => !!entry.lowPassEnabled)
-  const [lowPassFreq, setLowPassFreq] = useState(() => entry.lowPassFreq ?? 12000)
+  const [highPassFreq, setHighPassFreq] = useState(
+    () => entry.highPassFreq ?? 80,
+  )
+  const [lowPassEnabled, setLowPassEnabled] = useState(
+    () => !!entry.lowPassEnabled,
+  )
+  const [lowPassFreq, setLowPassFreq] = useState(
+    () => entry.lowPassFreq ?? 12000,
+  )
 
   // Keep persisted settings in sync
   useEffect(() => {
@@ -91,7 +97,9 @@ export const LocalFileSource = ({
 
   const ensureAudioContext = async () => {
     if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)()
+      audioCtxRef.current = new (
+        window.AudioContext || window.webkitAudioContext
+      )()
     }
     if (audioCtxRef.current.state === 'suspended') {
       await audioCtxRef.current.resume()
@@ -277,7 +285,10 @@ export const LocalFileSource = ({
     const newSourceUrl = URL.createObjectURL(file)
 
     // revoke prior blob URL if present
-    if (videos[nextId]?.sourceUrl && videos[nextId].sourceUrl.startsWith('blob:')) {
+    if (
+      videos[nextId]?.sourceUrl &&
+      videos[nextId].sourceUrl.startsWith('blob:')
+    ) {
       URL.revokeObjectURL(videos[nextId].sourceUrl)
     }
 
@@ -304,34 +315,34 @@ export const LocalFileSource = ({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <Card className="p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="rounded-md border bg-background p-2">
-              <FileMusic className="h-5 w-5" />
+    <div className='flex flex-col gap-4'>
+      <Card className='p-4'>
+        <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+          <div className='flex min-w-0 items-center gap-3'>
+            <div className='rounded-md border bg-background p-2'>
+              <FileMusic className='h-5 w-5' />
             </div>
-            <div className="min-w-0">
-              <div className="truncate text-sm font-medium">
+            <div className='min-w-0'>
+              <div className='truncate text-sm font-medium'>
                 {entry.fileName || entry.title || 'Local audio file'}
               </div>
-              <div className="text-xs text-muted-foreground">
+              <div className='text-xs text-muted-foreground'>
                 {sourceUrl ? 'Ready' : 'No file loaded yet'}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             <input
               ref={fileInputRef}
-              type="file"
+              type='file'
               accept={ACCEPT}
-              className="hidden"
+              className='hidden'
               onChange={e => handleFilePick(e.target.files?.[0])}
             />
             <Button
-              type="button"
-              variant="outline"
+              type='button'
+              variant='outline'
               onClick={() => fileInputRef.current?.click()}
             >
               {sourceUrl ? 'Change file' : 'Choose file'}
@@ -340,18 +351,20 @@ export const LocalFileSource = ({
         </div>
 
         {/* Hidden audio element; playback is controlled via app UI */}
-        <audio ref={audioElRef} className="hidden" />
+        <audio ref={audioElRef} className='hidden' />
       </Card>
 
       {/* Extra ear-training / transcription tools (local files only) */}
-      <Card className="p-4">
-        <div className="mb-3 text-sm font-semibold">Equalizer</div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <Card className='p-4'>
+        <div className='mb-3 text-sm font-semibold'>Equalizer</div>
+        <div className='grid grid-cols-2 gap-3 sm:grid-cols-3'>
           {eqBands.map((b, idx) => (
-            <div key={b.freq} className="rounded-md border bg-card p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <div className="text-xs font-medium">{b.label}Hz</div>
-                <div className="text-xs text-muted-foreground">{eqGains[idx]} dB</div>
+            <div key={b.freq} className='rounded-md border bg-card p-3'>
+              <div className='mb-2 flex items-center justify-between'>
+                <div className='text-xs font-medium'>{b.label}Hz</div>
+                <div className='text-xs text-muted-foreground'>
+                  {eqGains[idx]} dB
+                </div>
               </div>
               <Slider
                 min={-12}
@@ -367,30 +380,36 @@ export const LocalFileSource = ({
             </div>
           ))}
         </div>
-        <div className="mt-3 flex justify-end">
-          <Button type="button" variant="ghost" onClick={() => setEqGains(eqBands.map(() => 0))}>
+        <div className='mt-3 flex justify-end'>
+          <Button
+            type='button'
+            variant='ghost'
+            onClick={() => setEqGains(eqBands.map(() => 0))}
+          >
             Reset EQ
           </Button>
         </div>
       </Card>
 
-      <Card className="p-4">
-        <div className="mb-3 text-sm font-semibold">Filters</div>
+      <Card className='p-4'>
+        <div className='mb-3 text-sm font-semibold'>Filters</div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-md border bg-card p-3">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="text-xs font-medium">High-pass</div>
-              <label className="flex items-center gap-2 text-xs">
+        <div className='grid gap-4 sm:grid-cols-2'>
+          <div className='rounded-md border bg-card p-3'>
+            <div className='mb-2 flex items-center justify-between gap-2'>
+              <div className='text-xs font-medium'>High-pass</div>
+              <label className='flex items-center gap-2 text-xs'>
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={highPassEnabled}
                   onChange={e => setHighPassEnabled(e.target.checked)}
                 />
                 enabled
               </label>
             </div>
-            <div className="mb-2 text-xs text-muted-foreground">cutoff: {highPassFreq} Hz</div>
+            <div className='mb-2 text-xs text-muted-foreground'>
+              cutoff: {highPassFreq} Hz
+            </div>
             <Slider
               min={20}
               max={2000}
@@ -400,19 +419,21 @@ export const LocalFileSource = ({
             />
           </div>
 
-          <div className="rounded-md border bg-card p-3">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="text-xs font-medium">Low-pass</div>
-              <label className="flex items-center gap-2 text-xs">
+          <div className='rounded-md border bg-card p-3'>
+            <div className='mb-2 flex items-center justify-between gap-2'>
+              <div className='text-xs font-medium'>Low-pass</div>
+              <label className='flex items-center gap-2 text-xs'>
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={lowPassEnabled}
                   onChange={e => setLowPassEnabled(e.target.checked)}
                 />
                 enabled
               </label>
             </div>
-            <div className="mb-2 text-xs text-muted-foreground">cutoff: {lowPassFreq} Hz</div>
+            <div className='mb-2 text-xs text-muted-foreground'>
+              cutoff: {lowPassFreq} Hz
+            </div>
             <Slider
               min={2000}
               max={20000}
@@ -423,8 +444,10 @@ export const LocalFileSource = ({
           </div>
         </div>
 
-        <div className="mt-3 flex items-center gap-2">
-          <div className="text-xs text-muted-foreground">Tip: use HP to cut rumble, LP to focus on melody.</div>
+        <div className='mt-3 flex items-center gap-2'>
+          <div className='text-xs text-muted-foreground'>
+            Tip: use HP to cut rumble, LP to focus on melody.
+          </div>
         </div>
       </Card>
     </div>

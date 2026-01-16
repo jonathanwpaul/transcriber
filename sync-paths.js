@@ -25,7 +25,7 @@ const jsConfig = {
 // Write the jsconfig.json file
 fs.writeFileSync(
   path.resolve(__dirname, 'jsconfig.json'),
-  JSON.stringify(jsConfig, null, 2)
+  JSON.stringify(jsConfig, null, 2),
 )
 
 console.log('jsconfig.json updated successfully!')

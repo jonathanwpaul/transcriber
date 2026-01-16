@@ -10,7 +10,12 @@ import {
   TooltipTrigger,
 } from '@components/ui/tooltip'
 
-const BPMInput = ({ value, onChange, beatsPerMeasure, onBeatsPerMeasureChange }) => {
+const BPMInput = ({
+  value,
+  onChange,
+  beatsPerMeasure,
+  onBeatsPerMeasureChange,
+}) => {
   const [bpm, setBpm] = useState(value)
   const [lastTap, setLastTap] = useState(null)
   const [tapIntervals, setTapIntervals] = useState([])
@@ -48,25 +53,34 @@ const BPMInput = ({ value, onChange, beatsPerMeasure, onBeatsPerMeasureChange })
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col items-center gap-3">
+      <div className='flex flex-col items-center gap-3'>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button type="button" variant="ghost" size="icon" onClick={handleTap}>
-              <MetronomeIcon className="h-10 w-10 fill-primary" />
+            <Button
+              type='button'
+              variant='ghost'
+              size='icon'
+              onClick={handleTap}
+            >
+              <MetronomeIcon className='h-10 w-10 fill-primary' />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Tap to set BPM</TooltipContent>
         </Tooltip>
 
-        <div className="grid w-full grid-cols-2 gap-2">
-          <div className="col-span-2">
-            <div className="mb-1 text-xs font-medium text-muted-foreground">beats/min</div>
-            <Input type="number" value={bpm ?? ''} onChange={handleBpmChange} />
+        <div className='grid w-full grid-cols-2 gap-2'>
+          <div className='col-span-2'>
+            <div className='mb-1 text-xs font-medium text-muted-foreground'>
+              beats/min
+            </div>
+            <Input type='number' value={bpm ?? ''} onChange={handleBpmChange} />
           </div>
-          <div className="col-span-2">
-            <div className="mb-1 text-xs font-medium text-muted-foreground">beats/measure</div>
+          <div className='col-span-2'>
+            <div className='mb-1 text-xs font-medium text-muted-foreground'>
+              beats/measure
+            </div>
             <Input
-              type="number"
+              type='number'
               value={beatsPerMeasure ?? ''}
               onChange={handleBeatsPerMeasureChange}
             />

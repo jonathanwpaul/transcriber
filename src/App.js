@@ -22,19 +22,18 @@ function App() {
   }, [themeMode])
 
   const showToast = useMemo(
-    () =>
-      message => {
-        setToastMessage(message)
-        setToastOpen(true)
-        window.setTimeout(() => setToastOpen(false), 2000)
-      },
+    () => message => {
+      setToastMessage(message)
+      setToastOpen(true)
+      window.setTimeout(() => setToastOpen(false), 2000)
+    },
     [],
   )
 
   return (
     <div className='App'>
       {toastOpen && (
-        <div className="fixed top-3 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-lg border bg-card px-4 py-2 text-sm text-card-foreground shadow-lg">
+        <div className='fixed top-3 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-lg border bg-card px-4 py-2 text-sm text-card-foreground shadow-lg'>
           {toastMessage}
         </div>
       )}

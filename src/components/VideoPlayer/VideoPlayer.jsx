@@ -232,7 +232,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     const isCollapsed = !!collapsedLoops[pathKey]
 
     return (
-      <div key={pathKey} className="flex flex-col gap-2">
+      <div key={pathKey} className='flex flex-col gap-2'>
         <SavedSection
           endTime={loop.sectionEnd}
           isSelected={
@@ -254,7 +254,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
         />
 
         {hasChildren && !isCollapsed && (
-          <div className="pl-4">
+          <div className='pl-4'>
             {Object.values(loop.children).map(child => {
               const childKey = `${child.sectionStart}-${child.sectionEnd}`
               return renderLoop(child, `${pathKey}/${childKey}`)
@@ -283,16 +283,16 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
   return (
     <TooltipProvider>
-      <div className="relative flex h-full w-full flex-col">
-        <div className="absolute left-3 top-3 z-10">
+      <div className='relative flex h-full w-full flex-col'>
+        <div className='absolute left-3 top-3 z-10'>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="destructive"
-                size="icon"
+                variant='destructive'
+                size='icon'
                 disabled={controlsDisabled}
                 onClick={handleCloseVideo}
-                aria-label="Close"
+                aria-label='Close'
               >
                 <X />
               </Button>
@@ -301,12 +301,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           </Tooltip>
         </div>
 
-        <div className="flex-1 overflow-auto p-4">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
-            <div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
-              <Card className="h-fit max-h-[45vh] overflow-auto p-2">
-                {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
-                  <div className="flex flex-col">
+        <div className='flex-1 overflow-auto p-4'>
+          <div className='mx-auto flex w-full max-w-6xl flex-col gap-4'>
+            <div className='grid gap-4 lg:grid-cols-[1fr_2fr]'>
+              <Card className='h-fit max-h-[45vh] overflow-auto p-2'>
+                {videos[id].loops &&
+                Object.keys(videos[id].loops).length > 0 ? (
+                  <div className='flex flex-col'>
                     {Object.values(videos[id].loops)
                       .sort((a, b) => a.sectionStart - b.sectionStart)
                       .map(loop => {
@@ -315,16 +316,16 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                       })}
                   </div>
                 ) : (
-                  <div className="p-3 text-sm text-muted-foreground">
+                  <div className='p-3 text-sm text-muted-foreground'>
                     Save a loop to see it here
                   </div>
                 )}
               </Card>
 
-              <div className="flex flex-col gap-4">
-                <Card className="p-4">
-                  <div className="flex flex-col gap-4 lg:flex-row">
-                    <div className="w-full lg:flex-1">
+              <div className='flex flex-col gap-4'>
+                <Card className='p-4'>
+                  <div className='flex flex-col gap-4 lg:flex-row'>
+                    <div className='w-full lg:flex-1'>
                       {sourceType === videoSources.FILE ? (
                         <LocalFileSource
                           id={id}
@@ -359,12 +360,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                       )}
                     </div>
 
-                    <div className="grid w-full gap-3 lg:w-64">
+                    <div className='grid w-full gap-3 lg:w-64'>
                       <TimeTextInput
                         onChange={value => setSectionStart(value)}
                         changeAmount={0.5}
                         disabled={controlsDisabled}
-                        label="start"
+                        label='start'
                         min={0}
                         max={duration}
                         value={sectionStart}
@@ -376,7 +377,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                           setCurrentTime(value)
                           playerRef.current.seekTo(value)
                         }}
-                        label="current"
+                        label='current'
                         changeAmount={0.5}
                         min={0}
                         max={duration}
@@ -386,7 +387,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                         disabled={controlsDisabled}
                         onChange={value => setSectionEnd(value)}
                         changeAmount={0.5}
-                        label="end"
+                        label='end'
                         min={0}
                         max={duration}
                       />
@@ -394,8 +395,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                   </div>
                 </Card>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Card className="p-4">
+                <div className='grid gap-4 sm:grid-cols-2'>
+                  <Card className='p-4'>
                     <BPMInput
                       value={bpm}
                       onChange={handleBpmChange}
@@ -404,14 +405,14 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                     />
                   </Card>
 
-                  <Card className="p-4">
-                    <div className="flex flex-col items-center gap-3">
+                  <Card className='p-4'>
+                    <div className='flex flex-col items-center gap-3'>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
+                            type='button'
+                            variant='outline'
+                            size='icon'
                             onClick={() => {
                               if (!bpm || !beatsPerMeasure) {
                                 showToast(
@@ -421,8 +422,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                               }
                               const newStart = Math.round(
                                 sectionStart -
-                                  (measures * beatsPerMeasure) /
-                                    (bpm / 60),
+                                  (measures * beatsPerMeasure) / (bpm / 60),
                               )
                               setSectionEnd(sectionStart)
                               setSectionStart(newStart)
@@ -434,12 +434,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                         <TooltipContent>{`Previous ${measures} measures`}</TooltipContent>
                       </Tooltip>
 
-                      <div className="w-full">
-                        <div className="mb-1 text-xs font-medium text-muted-foreground">
+                      <div className='w-full'>
+                        <div className='mb-1 text-xs font-medium text-muted-foreground'>
                           measures
                         </div>
                         <Input
-                          type="number"
+                          type='number'
                           value={measures}
                           onChange={e =>
                             handleMeasuresChange(parseInt(e.target.value, 10))
@@ -450,9 +450,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
+                            type='button'
+                            variant='outline'
+                            size='icon'
                             onClick={() => {
                               if (!bpm || !beatsPerMeasure) {
                                 showToast(
@@ -462,8 +462,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                               }
                               const newEnd = Math.round(
                                 sectionEnd +
-                                  (measures * beatsPerMeasure) /
-                                    (bpm / 60),
+                                  (measures * beatsPerMeasure) / (bpm / 60),
                               )
                               setSectionStart(sectionEnd)
                               setSectionEnd(newEnd)
@@ -478,11 +477,16 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                   </Card>
                 </div>
 
-                <Card className="p-4">
-                  <div className="flex flex-wrap items-center gap-3">
+                <Card className='p-4'>
+                  <div className='flex flex-wrap items-center gap-3'>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button type="button" variant="outline" size="icon" onClick={restartPlayer}>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          onClick={restartPlayer}
+                        >
                           <SkipBack />
                         </Button>
                       </TooltipTrigger>
@@ -490,22 +494,26 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                     </Tooltip>
 
                     <Button
-                      type="button"
-                      size="icon"
-                      className="h-14 w-14 rounded-full"
+                      type='button'
+                      size='icon'
+                      className='h-14 w-14 rounded-full'
                       onClick={isPlaying ? handlePause : handlePlay}
                       disabled={controlsDisabled}
                       aria-label={isPlaying ? 'Pause' : 'Play'}
                     >
-                      {isPlaying ? <Pause className="h-7 w-7" /> : <Play className="h-7 w-7" />}
+                      {isPlaying ? (
+                        <Pause className='h-7 w-7' />
+                      ) : (
+                        <Play className='h-7 w-7' />
+                      )}
                     </Button>
 
-                    <div className="flex items-center gap-2">
-                      <div className="text-xs text-muted-foreground">
+                    <div className='flex items-center gap-2'>
+                      <div className='text-xs text-muted-foreground'>
                         {playbackRate.toFixed(2)}x
                       </div>
                       <Slider
-                        orientation="vertical"
+                        orientation='vertical'
                         min={0.125}
                         max={2}
                         step={0.125}
@@ -514,11 +522,16 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                       />
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className='flex flex-wrap gap-2'>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button type="button" variant="outline" size="icon" onClick={markLoopStart}>
-                            <Flag className="text-emerald-500" />
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='icon'
+                            onClick={markLoopStart}
+                          >
+                            <Flag className='text-emerald-500' />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Mark loop start</TooltipContent>
@@ -526,8 +539,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button type="button" variant="outline" size="icon" onClick={markLoopEnd}>
-                            <Flag className="text-red-500" />
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='icon'
+                            onClick={markLoopEnd}
+                          >
+                            <Flag className='text-red-500' />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Mark loop end</TooltipContent>
@@ -535,7 +553,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button type="button" variant="secondary" size="icon" onClick={saveLoop}>
+                          <Button
+                            type='button'
+                            variant='secondary'
+                            size='icon'
+                            onClick={saveLoop}
+                          >
                             <Save />
                           </Button>
                         </TooltipTrigger>
@@ -544,7 +567,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button type="button" variant="outline" size="icon" onClick={restartLoop}>
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='icon'
+                            onClick={restartLoop}
+                          >
                             <RotateCcw />
                           </Button>
                         </TooltipTrigger>
@@ -558,8 +586,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           </div>
         </div>
 
-        <div className="border-t bg-card p-4">
-          <div className="mx-auto w-full max-w-6xl">
+        <div className='border-t bg-card p-4'>
+          <div className='mx-auto w-full max-w-6xl'>
             <Bar
               title={videos[id].title}
               currentTime={currentTime}

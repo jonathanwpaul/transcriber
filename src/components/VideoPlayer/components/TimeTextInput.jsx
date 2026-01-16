@@ -15,36 +15,38 @@ const TimeTextInput = props => {
   }
 
   return (
-    <div className="flex w-full min-w-[10rem] max-w-[14rem] flex-col gap-1">
-      {label && <div className="text-xs font-medium text-muted-foreground">{label}</div>}
-      <div className="flex items-center gap-2">
+    <div className='flex w-full min-w-[10rem] max-w-[14rem] flex-col gap-1'>
+      {label && (
+        <div className='text-xs font-medium text-muted-foreground'>{label}</div>
+      )}
+      <div className='flex items-center gap-2'>
         <Input
           value={value}
           disabled={disabled}
           onChange={e => onChange(Number(e.target.value))}
-          type="number"
+          type='number'
           step={0.1}
         />
-        <div className="flex flex-col gap-1">
+        <div className='flex flex-col gap-1'>
           <Button
-            type="button"
-            size="icon"
-            variant="outline"
+            type='button'
+            size='icon'
+            variant='outline'
             disabled={disabled}
             onClick={() => handleChange(changeAmount)}
-            className="h-9 w-9"
-            aria-label="Increase"
+            className='h-9 w-9'
+            aria-label='Increase'
           >
             <ChevronUp />
           </Button>
           <Button
-            type="button"
-            size="icon"
-            variant="outline"
+            type='button'
+            size='icon'
+            variant='outline'
             disabled={disabled}
             onClick={() => handleChange(-1 * changeAmount)}
-            className="h-9 w-9"
-            aria-label="Decrease"
+            className='h-9 w-9'
+            aria-label='Decrease'
           >
             <ChevronDown />
           </Button>

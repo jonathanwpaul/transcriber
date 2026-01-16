@@ -141,15 +141,17 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
 
   return !showVideoPlayer ? (
     <TooltipProvider>
-      <div className="mx-auto flex h-full w-full max-w-5xl flex-col gap-4 p-4 sm:p-6">
-        <div className="flex items-center justify-end gap-2">
+      <div className='mx-auto flex h-full w-full max-w-5xl flex-col gap-4 p-4 sm:p-6'>
+        <div className='flex items-center justify-end gap-2'>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
-                aria-label="Toggle theme"
+                variant='ghost'
+                size='icon'
+                onClick={() =>
+                  setThemeMode(themeMode === 'dark' ? 'light' : 'dark')
+                }
+                aria-label='Toggle theme'
               >
                 {themeMode === 'dark' ? <Sun /> : <Moon />}
               </Button>
@@ -159,18 +161,18 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
         </div>
 
         <Dialog open={showJSON} onOpenChange={open => setShowJSON(open)}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className='max-w-3xl'>
             <DialogHeader>
               <DialogTitle>videos JSON</DialogTitle>
             </DialogHeader>
-            <div className="flex flex-col gap-3">
+            <div className='flex flex-col gap-3'>
               <Textarea
                 ref={JSONInputRef}
                 value={JSONText}
                 onChange={e => setJSONText(e.target.value)}
                 rows={18}
               />
-              <div className="flex justify-end">
+              <div className='flex justify-end'>
                 <Button
                   onClick={() => {
                     try {
@@ -190,39 +192,49 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
         </Dialog>
 
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className='pb-2'>
             <CardTitle>Load a source</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <div className="text-sm font-medium">YouTube URL</div>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="flex-1">
+          <CardContent className='flex flex-col gap-4'>
+            <div className='flex flex-col gap-2'>
+              <div className='text-sm font-medium'>YouTube URL</div>
+              <div className='flex flex-col gap-2 sm:flex-row'>
+                <div className='flex-1'>
                   <Input
                     value={inputText || ''}
                     onChange={handleChange}
-                    placeholder="https://youtube.com/watch?v=..."
+                    placeholder='https://youtube.com/watch?v=...'
                     onKeyDown={e => {
                       if (e.key === 'Enter') handleSubmit()
                     }}
                   />
-                  {error && <div className="mt-1 text-xs text-destructive">{error}</div>}
+                  {error && (
+                    <div className='mt-1 text-xs text-destructive'>{error}</div>
+                  )}
                 </div>
-                <Button className="sm:w-28" disabled={!inputText} onClick={handleSubmit}>
+                <Button
+                  className='sm:w-28'
+                  disabled={!inputText}
+                  onClick={handleSubmit}
+                >
                   go
                 </Button>
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className='grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center'>
               <FileUpload
-                accept=".mp3,.wav,audio/mpeg,audio/wav"
+                accept='.mp3,.wav,audio/mpeg,audio/wav'
                 onFileSelect={handleLocalFileSelect}
               />
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" className="w-full sm:w-auto" onClick={() => setShowJSON(true)}>
-                    <Code2 className="mr-2" />
+                  <Button
+                    variant='outline'
+                    className='w-full sm:w-auto'
+                    onClick={() => setShowJSON(true)}
+                  >
+                    <Code2 className='mr-2' />
                     show code
                   </Button>
                 </TooltipTrigger>
@@ -234,20 +246,20 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
 
         {videos && videoList.length > 0 && (
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className='pb-2'>
               <CardTitle>Recents</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-1">
+            <CardContent className='flex flex-col gap-1'>
               {videoList.map(e => (
                 <button
                   key={e}
                   onClick={() => showVideoId(e)}
-                  className="flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+                  className='flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-accent'
                 >
-                  <div className="min-w-0 flex-1 truncate font-medium text-primary">
+                  <div className='min-w-0 flex-1 truncate font-medium text-primary'>
                     {videos[e].title ?? e}
                   </div>
-                  <div className="shrink-0 text-xs text-muted-foreground">
+                  <div className='shrink-0 text-xs text-muted-foreground'>
                     {formatTimeString(videos[e]['last_accessed'])}
                   </div>
                 </button>
@@ -258,6 +270,10 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       </div>
     </TooltipProvider>
   ) : (
-    <VideoPlayer id={id} setShowVideoPlayer={setShowVideoPlayer} showToast={showToast} />
+    <VideoPlayer
+      id={id}
+      setShowVideoPlayer={setShowVideoPlayer}
+      showToast={showToast}
+    />
   )
 }

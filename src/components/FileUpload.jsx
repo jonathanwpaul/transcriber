@@ -45,7 +45,7 @@ export default function FileUpload({ onFileSelect, accept = '*', className }) {
           dragActive ? 'border-primary bg-accent' : 'border-border bg-card',
         )}
         tabIndex={0}
-        role="button"
+        role='button'
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -53,21 +53,23 @@ export default function FileUpload({ onFileSelect, accept = '*', className }) {
       >
         <input
           ref={inputRef}
-          type="file"
+          type='file'
           accept={accept}
-          className="hidden"
+          className='hidden'
           onChange={handleInputChange}
         />
-        <div className="flex flex-col items-center gap-2 text-center">
-          <Upload className="h-10 w-10 text-muted-foreground" />
-          <div className="text-sm font-medium">Upload media file</div>
-          <div className="text-xs text-muted-foreground">
+        <div className='flex flex-col items-center gap-2 text-center'>
+          <Upload className='h-10 w-10 text-muted-foreground' />
+          <div className='text-sm font-medium'>Upload media file</div>
+          <div className='text-xs text-muted-foreground'>
             Tap to browse or drag & drop
           </div>
         </div>
       </div>
 
-      {fileName && <div className="text-xs text-muted-foreground">{fileName}</div>}
+      {fileName && (
+        <div className='text-xs text-muted-foreground'>{fileName}</div>
+      )}
     </div>
   )
 }

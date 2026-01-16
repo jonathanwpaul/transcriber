@@ -35,17 +35,17 @@ const SavedSection = ({
       }
     >
       <button
-        type="button"
+        type='button'
         onClick={onClick}
-        className="flex w-full items-center gap-2 p-3 text-left"
+        className='flex w-full items-center gap-2 p-3 text-left'
       >
-        <div className="shrink-0">
+        <div className='shrink-0'>
           {hasChildren ? (
             <Button
-              type="button"
-              size="icon"
-              variant="outline"
-              className="h-8 w-8 border-border bg-background shadow-sm"
+              type='button'
+              size='icon'
+              variant='outline'
+              className='h-8 w-8 border-border bg-background shadow-sm'
               onClick={e => {
                 e.stopPropagation()
                 onToggleCollapse?.()
@@ -60,31 +60,31 @@ const SavedSection = ({
               />
             </Button>
           ) : (
-            <div className="h-8 w-8" />
+            <div className='h-8 w-8' />
           )}
         </div>
 
-        <div className="shrink-0 text-xs text-muted-foreground">
+        <div className='shrink-0 text-xs text-muted-foreground'>
           {timestampFormatter(startTime)} - {timestampFormatter(endTime)}
         </div>
 
-        <div className="min-w-0 flex-1" onClick={e => e.stopPropagation()}>
+        <div className='min-w-0 flex-1' onClick={e => e.stopPropagation()}>
           <Input
             value={currentTitle}
             onChange={handleTitleChange}
-            placeholder="title"
+            placeholder='title'
           />
         </div>
 
         <Button
-          type="button"
-          size="icon"
-          variant="ghost"
+          type='button'
+          size='icon'
+          variant='ghost'
           onClick={e => {
             e.stopPropagation()
             onDelete()
           }}
-          aria-label="Delete loop"
+          aria-label='Delete loop'
         >
           <Trash2 />
         </Button>

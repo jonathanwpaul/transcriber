@@ -51,15 +51,15 @@ export const YouTubeSource = ({
   return (
     <>
       {type === videoSources.YOUTUBE && (
-        <div className="w-full overflow-hidden rounded-lg border bg-card">
-          <div className="aspect-video w-full">
+        <div className='w-full overflow-hidden rounded-lg border bg-card'>
+          <div className='aspect-video w-full'>
             <YouTube
               opts={videoOptions}
               videoId={id}
               onReady={onReady}
               onPlay={onPlay}
               onPause={onPause}
-              className="h-full w-full"
+              className='h-full w-full'
             />
           </div>
         </div>
