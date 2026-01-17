@@ -295,12 +295,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
         </div>
 
         {/* Main content area - fills remaining space between title and bottom bar (~85%) */}
-        <div className='flex-1 overflow-y-auto p-4'>
-          <div className='mx-auto flex h-full w-full max-w-6xl flex-col gap-4'>
+        <div className='flex-1 overflow-y-auto px-4 pt-4'>
+          <div className='mx-auto flex w-full max-w-6xl flex-col gap-4 pb-16'>
             <div className='flex-1 min-h-0'>
               <div className='flex h-full flex-col gap-4 lg:grid lg:grid-cols-[1fr_2fr] lg:gap-4'>
                 {/* Loops list */}
-                <Card className='min-h-0 max-h-full overflow-auto p-2'>
+                <Card className='min-h-[40vh] sm:min-h-0 max-h-full overflow-auto p-2 pb-6'>
                   {videos[id].loops &&
                   Object.keys(videos[id].loops).length > 0 ? (
                     <div className='flex flex-col'>
