@@ -40,7 +40,7 @@ jobs:
       - name: Build with Gradle
         run: |
           cd android
-          gradle wrapper --gradle-version 8.3 && ./gradlew assembleDebug
+          ./gradlew assembleDebug
 
       - name: Generate release tag
         id: tag
