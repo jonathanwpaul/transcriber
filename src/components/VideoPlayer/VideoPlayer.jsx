@@ -464,7 +464,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
         </div>
 
         {/* Bottom bar - ~10% of the screen height, not overlaying content */}
-        <div className='flex flex-none items-center border-t bg-card px-4 py-2 md:h-[10vh]'>
+        <div className='flex items-center border-t bg-card px-4 py-2'>
           <div className='mx-auto w-full max-w-6xl'>
             <Bar
               title={videos[id].title}
