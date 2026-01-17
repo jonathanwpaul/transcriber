@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 
-const TimeTextInput = props => {
+export const TimeTextInput = props => {
   const { onChange, value, changeAmount, min = 0, max, label, disabled } = props
 
   const handleChange = amt => {
@@ -27,33 +27,7 @@ const TimeTextInput = props => {
           type='number'
           step={0.1}
         />
-        <div className='flex flex-col gap-1'>
-          <Button
-            type='button'
-            size='icon'
-            variant='outline'
-            disabled={disabled}
-            onClick={() => handleChange(changeAmount)}
-            className='h-9 w-9'
-            aria-label='Increase'
-          >
-            <ChevronUp />
-          </Button>
-          <Button
-            type='button'
-            size='icon'
-            variant='outline'
-            disabled={disabled}
-            onClick={() => handleChange(-1 * changeAmount)}
-            className='h-9 w-9'
-            aria-label='Decrease'
-          >
-            <ChevronDown />
-          </Button>
-        </div>
       </div>
     </div>
   )
 }
-
-export default TimeTextInput

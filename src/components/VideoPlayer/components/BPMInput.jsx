@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from '@components/ui/tooltip'
 
-const BPMInput = ({
+export const BPMInput = ({
   value,
   onChange,
   beatsPerMeasure,
@@ -90,5 +90,3 @@ const BPMInput = ({
     </TooltipProvider>
   )
 }
-
-export default BPMInput

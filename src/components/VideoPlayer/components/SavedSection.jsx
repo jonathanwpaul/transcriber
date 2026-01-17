@@ -7,7 +7,7 @@ import { Button } from '@components/ui/button'
 import { Card } from '@components/ui/card'
 import { Input } from '@components/ui/input'
 
-const SavedSection = ({
+export const SavedSection = ({
   onClick,
   onDelete,
   startTime,
@@ -92,5 +92,3 @@ const SavedSection = ({
     </Card>
   )
 }
-
-export default SavedSection

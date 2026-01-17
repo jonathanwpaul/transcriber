@@ -3,7 +3,7 @@ import * as SliderPrimitive from '@radix-ui/react-slider'
 
 import { cn } from '../../lib/utils'
 
-const Slider = React.forwardRef(({ className, ...props }, ref) => {
+export const Slider = React.forwardRef(({ className, ...props }, ref) => {
   const values = props.value ?? props.defaultValue ?? []
   const thumbCount = Array.isArray(values) ? Math.max(values.length, 1) : 1
 
@@ -41,5 +41,3 @@ const Slider = React.forwardRef(({ className, ...props }, ref) => {
   )
 })
 Slider.displayName = SliderPrimitive.Root.displayName
-
-export { Slider }
