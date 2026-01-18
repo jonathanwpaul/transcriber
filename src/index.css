@@ -7,9 +7,11 @@
     --radius: 0.75rem;
 
     /* Light theme */
-    --background: 0 0% 100%;
+    /* Slightly tinted background so cards stand out as true "surfaces" */
+    --background: 210 40% 97%;
     --foreground: 222.2 47.4% 11.2%;
 
+    /* Keep cards pure white for maximum contrast against the tinted background */
     --card: 0 0% 100%;
     --card-foreground: 222.2 47.4% 11.2%;
 
@@ -34,10 +36,11 @@
   }
 
   .dark {
+    /* Use a slightly lighter background and slightly brighter cards for separation */
     --background: 0 0% 0%;
     --foreground: 210 40% 98%;
 
-    --card: 0 0% 4%;
+    --card: 0 0% 12%;
     --card-foreground: 210 40% 98%;
 
     --border: 0 0% 18%;
@@ -49,10 +52,10 @@
     --secondary: 270 74% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 12%;
+    --muted: 0 0% 20%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 0 0% 12%;
+    --accent: 0 0% 16%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
