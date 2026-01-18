@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
 import { ReactComponent as MetronomeIcon } from '../../../assets/icons/metronome.svg'
 
@@ -22,6 +22,14 @@ export const BPMInput = ({
   const [lastTap, setLastTap] = useState(null)
   const [tapIntervals, setTapIntervals] = useState([])
 
+  // Keep local BPM state in sync when the parent value changes (e.g. from
+  // persisted JSON) so the input shows the correct value on load.
+  useEffect(() => {
+    if (typeof value === 'number' && value !== bpm) {
+      setBpm(value)
+    }
+  }, [value, bpm])
+
   const handleTap = () => {
     const now = Date.now()
     if (lastTap && lastTap > now - 10000) {
@@ -38,19 +46,10 @@ export const BPMInput = ({
     setLastTap(now)
   }
 
-  const handleBpmChange = e => {
-    const newBpm = parseInt(e.target.value, 10)
-    if (!isNaN(newBpm)) {
-      setBpm(newBpm)
-      onChange(newBpm)
-    }
-  }
-
-  const handleBeatsPerMeasureChange = e => {
-    const newBeatsPerMeasure = parseInt(e.target.value, 10)
-    if (!isNaN(newBeatsPerMeasure)) {
-      onBeatsPerMeasureChange(newBeatsPerMeasure)
-    }
+  const handleBeatsPerMeasureChange = newBeatsPerMeasure => {
+    if (typeof newBeatsPerMeasure !== 'number') return
+    if (Number.isNaN(newBeatsPerMeasure)) return
+    onBeatsPerMeasureChange(newBeatsPerMeasure)
   }
 
   return (

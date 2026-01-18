@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { ArrowBigLeftDash, ArrowBigRightDash, Pencil, X } from 'lucide-react'
 
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
@@ -59,9 +59,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
   const { beatsPerMeasure, bpm, type: sourceType } = videos[id] || {}
 
-  const [isRhythmLocked, setIsRhythmLocked] = useState(
-    () => !!(bpm && beatsPerMeasure),
-  )
+  // Effective rhythm values with sensible defaults
+  const effectiveBeatsPerMeasure =
+    typeof beatsPerMeasure === 'number' ? beatsPerMeasure : 4
+  const effectiveBpm = typeof bpm === 'number' && bpm > 0 ? bpm : null
+
+  // UI-only state: whether we're showing traversal controls vs BPM editor
+  const [isRhythmLocked, setIsRhythmLocked] = useState(null)
 
   const playerRef = useRef()
   const timerRef = useRef()
@@ -273,6 +277,24 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     setAppSettings('appSettings', { ...appSettings, measures: newMeasures })
   }
 
+  // Persist default beatsPerMeasure (4) into the song entry if missing so it's
+  // treated like a real saved value.
+  useEffect(() => {
+    if (!id || !videos[id]) return
+    if (typeof videos[id].beatsPerMeasure !== 'number') {
+      videos[id].beatsPerMeasure = 4
+      setVideos('videos', videos)
+    }
+  }, [id, videosString, setVideos])
+
+  // Initialize rhythm lock from saved BPM / beats if present. Only run this
+  // once (when state is still null) so user toggles are respected.
+  useEffect(() => {
+    if (isRhythmLocked === null) {
+      setIsRhythmLocked(!!(effectiveBpm && effectiveBeatsPerMeasure))
+    }
+  }, [effectiveBpm, effectiveBeatsPerMeasure, isRhythmLocked])
+
   if (loading || appSettingsLoading) return
 
   return (
@@ -300,7 +322,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
         <div className='mx-auto flex overflow-y-auto snap-y snap-mandatory h-full w-full max-w-6xl flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr] lg:p-4'>
           <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
-            <Card className='flex h-full flex-col gap-4 p-4'>
+            <Card className='flex h-full flex-col gap-6 p-4'>
               {sourceType === videoSources.YOUTUBE && (
                 <YouTubeSource
                   id={id}
@@ -318,7 +340,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                 />
               )}
 
-              <div className='grid gap-3 pt-2 sm:grid-cols-3'>
+              <div className='grid gap-3 sm:grid-cols-3'>
                 <TimeTextInput
                   onChange={value => setSectionStart(value)}
                   changeAmount={0.5}
@@ -350,17 +372,18 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                   max={duration}
                 />
               </div>
-              <div className='h-[2px] fill-red' />
 
-              <div className='grid gap-4 pt-2 items-start md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]'>
-                {!isRhythmLocked ? (
+              <div className='h-[2px] bg-muted' />
+
+              <div className='grid gap-4 items-start md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]'>
+                {!(isRhythmLocked ?? false) ? (
                   <BPMInput
-                    value={bpm}
+                    value={effectiveBpm ?? ''}
                     onChange={handleBpmChange}
-                    beatsPerMeasure={beatsPerMeasure || 4}
+                    beatsPerMeasure={effectiveBeatsPerMeasure}
                     onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
                     onSubmit={() => {
-                      if (!bpm || !beatsPerMeasure) {
+                      if (!effectiveBpm || !effectiveBeatsPerMeasure) {
                         showToast(
                           'provide both BPM and beats/measure to use this function',
                         )
@@ -375,8 +398,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                       <div className='flex flex-col justify-end gap-1 text-xs text-muted-foreground'>
                         <div className='font-medium'>Rhythm locked</div>
                         <div>
-                          BPM: {bpm ?? '—'} • beats/measure:{' '}
-                          {beatsPerMeasure ?? '—'}
+                          BPM: {effectiveBpm ?? '—'} • beats/measure:{' '}
+                          {effectiveBeatsPerMeasure ?? '—'}
                         </div>
                       </div>
 
@@ -404,9 +427,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                           <Button
                             type='button'
                             variant='outline'
-                            size='icon'
+                            size='lg'
                             onClick={() => {
-                              if (!bpm || !beatsPerMeasure) {
+                              if (!effectiveBpm || !effectiveBeatsPerMeasure) {
                                 showToast(
                                   'provide both BPM and beats/measure to use this function',
                                 )
@@ -414,7 +437,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                               }
                               const newStart = Math.round(
                                 sectionStart -
-                                  (measures * beatsPerMeasure) / (bpm / 60),
+                                  (measures * effectiveBeatsPerMeasure) /
+                                    (effectiveBpm / 60),
                               )
                               setSectionEnd(sectionStart)
                               setSectionStart(newStart)
@@ -445,9 +469,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                           <Button
                             type='button'
                             variant='outline'
-                            size='icon'
+                            size='lg'
                             onClick={() => {
-                              if (!bpm || !beatsPerMeasure) {
+                              if (!effectiveBpm || !effectiveBeatsPerMeasure) {
                                 showToast(
                                   'provide both BPM and beats/measure to use this function',
                                 )
@@ -455,7 +479,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                               }
                               const newEnd = Math.round(
                                 sectionEnd +
-                                  (measures * beatsPerMeasure) / (bpm / 60),
+                                  (measures * effectiveBeatsPerMeasure) /
+                                    (effectiveBpm / 60),
                               )
                               setSectionStart(sectionEnd)
                               setSectionEnd(newEnd)
