@@ -32,17 +32,39 @@ export const BPMInput = ({
 
   const handleTap = () => {
     const now = Date.now()
+
+    // If the last tap was within the last 10s, include this interval in the
+    // running average; otherwise start fresh.
     if (lastTap && lastTap > now - 10000) {
       const interval = now - lastTap
-      setTapIntervals([...tapIntervals, interval])
-      const averageInterval =
-        tapIntervals.reduce((a, b) => a + b, 0) / tapIntervals.length
-      const newBpm = Math.round(60000 / averageInterval)
-      setBpm(newBpm)
-      onChange(newBpm)
+
+      // Mobile can sometimes fire duplicate click/tap events very close
+      // together; ignore anything unrealistically fast so it doesn't
+      // double the detected BPM.
+      const MIN_INTERVAL_MS = 150
+      if (interval < MIN_INTERVAL_MS) {
+        setLastTap(now)
+        return
+      }
+
+      const nextIntervals = [...tapIntervals, interval].slice(-8) // keep last 8
+
+      setTapIntervals(nextIntervals)
+
+      const total = nextIntervals.reduce((a, b) => a + b, 0)
+      const averageInterval = total / nextIntervals.length
+
+      if (averageInterval > 0) {
+        const newBpm = Math.round(60000 / averageInterval)
+        setBpm(newBpm)
+        onChange(newBpm)
+      }
     } else {
+      // First tap or after a long pause: reset intervals so the next tap sets
+      // a clean starting point for averaging.
       setTapIntervals([])
     }
+
     setLastTap(now)
   }
 
@@ -55,7 +77,7 @@ export const BPMInput = ({
   return (
     <TooltipProvider>
       <div className='flex h-full items-stretch justify-center gap-4 md:justify-start'>
-        <div className='h-full'>
+        <div className='flex h-full flex-col items-center justify-between gap-1'>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -69,6 +91,17 @@ export const BPMInput = ({
             </TooltipTrigger>
             <TooltipContent>Tap to set BPM</TooltipContent>
           </Tooltip>
+
+          <div className='h-3 flex items-center justify-center'>
+            {bpm ? (
+              <div
+                className='bpm-dot h-2 w-2 rounded-full bg-pink-500'
+                style={{ animationDuration: `${60000 / bpm}ms` }}
+              />
+            ) : (
+              <div className='h-2 w-2 rounded-full bg-muted opacity-40' />
+            )}
+          </div>
         </div>
 
         <div className='flex w-full items-stretch gap-3'>
