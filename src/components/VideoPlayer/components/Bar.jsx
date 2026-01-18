@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Flag, Pause, Play, RotateCcw, Save, SkipBack } from 'lucide-react'
 
 import { Button } from '@components/ui/button'
@@ -24,9 +25,22 @@ export const Bar = ({
   restartLoop,
   controlsDisabled,
 }) => {
+  // Local scrubbing state for the playback position slider so dragging feels
+  // smooth and isn't fighting with currentTime updates from the player.
+  const [isScrubbing, setIsScrubbing] = useState(false)
+  const [scrubTime, setScrubTime] = useState(currentTime)
+
+  // Keep the scrub value in sync with the actual currentTime whenever the user
+  // is not actively dragging the slider.
+  useEffect(() => {
+    if (!isScrubbing) {
+      setScrubTime(currentTime)
+    }
+  }, [currentTime, isScrubbing])
+
   return (
-    <div className='flex flex-col gap-2'>
-      <div className='flex flex-wrap items-center gap-3'>
+    <div className='w-full flex flex-col gap-2'>
+      <div className='flex flex-wrap items-center gap-6'>
         <div className='flex flex-col md:flex-row md:justify-end md:items-center w-full items-end gap-3'>
           <div className='order-2 flex items-center gap-5'>
             <div className='flex gap-2'>
@@ -186,8 +200,15 @@ export const Bar = ({
               min={0}
               max={duration}
               step={0.1}
-              value={[currentTime]}
-              onValueChange={val => handleSeek(val[0])}
+              value={[isScrubbing ? scrubTime : currentTime]}
+              onValueChange={val => {
+                setIsScrubbing(true)
+                setScrubTime(val[0])
+              }}
+              onValueCommit={val => {
+                setIsScrubbing(false)
+                handleSeek(val[0])
+              }}
               className='relative z-20'
             />
           </div>

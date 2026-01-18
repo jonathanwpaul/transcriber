@@ -109,9 +109,18 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
   const handleSeek = newValue => {
     if (!playerRef.current) return
-    clearInterval(timerRef.current)
-    setCurrentTime(round(newValue))
-    playerRef.current.seekTo(round(newValue))
+    const target = round(newValue)
+
+    // Immediately move React state and the underlying player.
+    setCurrentTime(target)
+    playerRef.current.seekTo(target)
+
+    // If we're currently playing, restart the timer interval so that
+    // currentTime continues to advance smoothly after the seek.
+    if (isPlaying) {
+      clearInterval(timerRef.current)
+      timerRef.current = setInterval(timeIncrement, 100)
+    }
   }
 
   const handlePlaybackRateChange = newValue => {
@@ -373,8 +382,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                 />
               </div>
 
-              <div className='h-[2px] bg-muted' />
-
               <div className='grid gap-4 items-start md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]'>
                 {!(isRhythmLocked ?? false) ? (
                   <BPMInput
@@ -518,30 +525,28 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           </section>
         </div>
 
-        <div className='flex flex-none items-center border-t bg-card px-4 py-2'>
-          <div className='mx-auto w-full max-w-6xl'>
-            <Bar
-              title={videos[id].title}
-              currentTime={currentTime}
-              duration={duration}
-              handleSeek={handleSeek}
-              handleIntervalChange={handleIntervalChange}
-              sectionStart={sectionStart}
-              sectionEnd={sectionEnd}
-              timestampFormatter={timestampFormatter}
-              isPlaying={isPlaying}
-              onPlay={handlePlay}
-              onPause={handlePause}
-              restartPlayer={restartPlayer}
-              playbackRate={playbackRate}
-              handlePlaybackRateChange={handlePlaybackRateChange}
-              markLoopStart={markLoopStart}
-              markLoopEnd={markLoopEnd}
-              saveLoop={saveLoop}
-              restartLoop={restartLoop}
-              controlsDisabled={controlsDisabled}
-            />
-          </div>
+        <div className='flex flex-none h-[20vh] md:h-unset items-center w-full border-t bg-card px-4 py-2'>
+          <Bar
+            title={videos[id].title}
+            currentTime={currentTime}
+            duration={duration}
+            handleSeek={handleSeek}
+            handleIntervalChange={handleIntervalChange}
+            sectionStart={sectionStart}
+            sectionEnd={sectionEnd}
+            timestampFormatter={timestampFormatter}
+            isPlaying={isPlaying}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            restartPlayer={restartPlayer}
+            playbackRate={playbackRate}
+            handlePlaybackRateChange={handlePlaybackRateChange}
+            markLoopStart={markLoopStart}
+            markLoopEnd={markLoopEnd}
+            saveLoop={saveLoop}
+            restartLoop={restartLoop}
+            controlsDisabled={controlsDisabled}
+          />
         </div>
       </div>
     </TooltipProvider>
