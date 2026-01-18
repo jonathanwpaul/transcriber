@@ -1,5 +1,5 @@
 #!/bin/bash
 npm install
-npx cap add android 2>/dev/null
 npm run build
-npx cap sync
+# Update the already-checked-in Android project with latest web build
+npx cap sync android

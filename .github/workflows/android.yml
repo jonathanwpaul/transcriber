@@ -14,6 +14,8 @@ jobs:
       # build node files/capacitor
       - name: set up NodeJS
         uses: actions/setup-node@v4.0.3
+        with:
+          node-version: 18
       - name: build env
         env:
           CI: ''
@@ -25,15 +27,15 @@ jobs:
       - name: set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 20
+          java-version: 17
           distribution: temurin
 
       # Set up Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3.2.1
         with:
-          api-level: 34
-          build-tools-version: 35
+          api-level: 33
+          build-tools-version: 33.0.2
 
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
