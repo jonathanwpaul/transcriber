@@ -142,25 +142,53 @@ export const Bar = ({
         {/* Track sliders (loop + playback position) */}
         <div className='order-3 basis-full w-full'>
           <div className='relative w-full'>
-            {/* loop range */}
-            <div className='absolute inset-0 flex items-center'>
+            {/* loop region highlight behind sliders */}
+            {duration > 0 && sectionEnd > sectionStart && (
+              <div
+                className='pointer-events-none absolute top-1/2 -translate-y-1/2 h-5 rounded-full bg-muted z-0'
+                style={{
+                  left: `${(Math.max(0, sectionStart) / duration) * 100}%`,
+                  width: `${
+                    ((Math.min(duration, sectionEnd) -
+                      Math.max(0, sectionStart)) /
+                      duration) *
+                    100
+                  }%`,
+                }}
+              />
+            )}
+
+            {/* loop range thumbs (transparent track, on top of highlight) */}
+            <div className='absolute inset-0 flex items-center z-10'>
               <Slider
                 min={0}
                 max={duration}
                 step={0.1}
                 value={[sectionStart, sectionEnd]}
                 onValueChange={handleIntervalChange}
-                className='opacity-80'
+                className='relative opacity-80'
+                rangeClassName='bg-muted'
+                thumbClassNames={[
+                  // Start thumb: rectangle extending to the left, with its
+                  // right edge (and right border) aligned exactly on the
+                  // track position.
+                  'relative rounded-none border-r-2 border-r-emerald-500 border-l-0 -translate-x-1/2 h-8 w-[10px] sm:h-8 sm:w-[8px] before:block before:absolute before:-bottom-6 before:-left-2 before:h-8 before:w-3 before:rounded-full before:bg-emerald-500 sm:before:hidden',
+                  // End thumb: rectangle extending to the right, with its
+                  // left edge (and left border) aligned exactly on the
+                  // track position.
+                  'relative rounded-none border-l-2 border-l-red-500 border-r-0 translate-x-1/2 h-8 w-[10px] sm:h-8 sm:w-[8px] before:block before:absolute before:-bottom-6 before:-right-2 before:h-8 before:w-3 before:rounded-full before:bg-red-500 sm:before:hidden',
+                ]}
               />
             </div>
 
-            {/* playback position */}
+            {/* playback position (thin bar + thumb, above everything) */}
             <Slider
               min={0}
               max={duration}
               step={0.1}
               value={[currentTime]}
               onValueChange={val => handleSeek(val[0])}
+              className='relative z-20'
             />
           </div>
         </div>
