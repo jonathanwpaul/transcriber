@@ -3,13 +3,13 @@ import { Check } from 'lucide-react'
 import { ReactComponent as MetronomeIcon } from '../../../assets/icons/metronome.svg'
 
 import { Button } from '@components/ui/button'
-import { Input } from '@components/ui/input'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@components/ui/tooltip'
+import { ScrubbableNumberInput } from './ScrubbableNumberInput'
 
 export const BPMInput = ({
   value,
@@ -78,20 +78,25 @@ export const BPMInput = ({
               <div className='mb-1 text-xs font-medium text-muted-foreground'>
                 beats/min
               </div>
-              <Input
-                type='number'
+              <ScrubbableNumberInput
                 value={bpm ?? ''}
-                onChange={handleBpmChange}
+                onChange={val => {
+                  setBpm(val)
+                  onChange(val)
+                }}
+                step={1}
+                min={0}
               />
             </div>
             <div className='col-span-2'>
               <div className='mb-1 text-xs font-medium text-muted-foreground'>
                 beats/measure
               </div>
-              <Input
-                type='number'
+              <ScrubbableNumberInput
                 value={beatsPerMeasure ?? ''}
                 onChange={handleBeatsPerMeasureChange}
+                step={1}
+                min={1}
               />
             </div>
           </div>

@@ -11,10 +11,11 @@ import {
   BPMInput,
   TimeTextInput,
   SavedSection,
+  ScrubbableNumberInput,
   YouTubeSource,
 } from './components'
 
-import { Button, Card, Input } from '../ui'
+import { Button, Card } from '../ui'
 import {
   Tooltip,
   TooltipContent,
@@ -429,12 +430,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                         <div className='mb-1 text-xs font-medium text-muted-foreground'>
                           measures
                         </div>
-                        <Input
-                          type='number'
+                        <ScrubbableNumberInput
                           value={measures}
-                          onChange={e =>
-                            handleMeasuresChange(parseInt(e.target.value, 10))
+                          onChange={val =>
+                            handleMeasuresChange(parseInt(val, 10) || 0)
                           }
+                          step={1}
+                          min={1}
                         />
                       </div>
 

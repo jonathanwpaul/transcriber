@@ -1,5 +1,6 @@
 export { BPMInput } from './BPMInput'
 export { Bar } from './Bar'
 export { SavedSection } from './SavedSection'
+export { ScrubbableNumberInput } from './ScrubbableNumberInput'
 export { TimeTextInput } from './TimeTextInput'
 export { YouTubeSource } from './YouTubeSource'
