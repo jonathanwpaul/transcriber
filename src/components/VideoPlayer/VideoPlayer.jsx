@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { useState, useRef, useCallback } from 'react'
-import { ArrowBigLeftDash, ArrowBigRightDash, X } from 'lucide-react'
+import { ArrowBigLeftDash, ArrowBigRightDash, Pencil, X } from 'lucide-react'
 
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter, round } from '@utils/video'
@@ -57,6 +57,10 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   const videos = JSON.parse(videosString) || {}
 
   const { beatsPerMeasure, bpm, type: sourceType } = videos[id] || {}
+
+  const [isRhythmLocked, setIsRhythmLocked] = useState(
+    () => !!(bpm && beatsPerMeasure),
+  )
 
   const playerRef = useRef()
   const timerRef = useRef()
@@ -347,82 +351,122 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
               </div>
               <div className='h-[2px] fill-red' />
 
-              <div className='grid gap-4 pt-2 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-start'>
-                <BPMInput
-                  value={bpm}
-                  onChange={handleBpmChange}
-                  beatsPerMeasure={beatsPerMeasure || 4}
-                  onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
-                />
-
-                <div className='flex items-end lg:items-end gap-3'>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        onClick={() => {
-                          if (!bpm || !beatsPerMeasure) {
-                            showToast(
-                              'provide both BPM and beats/measure to use this function',
-                            )
-                            return
-                          }
-                          const newStart = Math.round(
-                            sectionStart -
-                              (measures * beatsPerMeasure) / (bpm / 60),
-                          )
-                          setSectionEnd(sectionStart)
-                          setSectionStart(newStart)
-                        }}
-                      >
-                        <ArrowBigLeftDash />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{`Previous ${measures} measures`}</TooltipContent>
-                  </Tooltip>
-
-                  <div className='w-full'>
-                    <div className='mb-1 text-xs font-medium text-muted-foreground'>
-                      measures
-                    </div>
-                    <Input
-                      type='number'
-                      value={measures}
-                      onChange={e =>
-                        handleMeasuresChange(parseInt(e.target.value, 10))
+              <div className='grid gap-4 pt-2 items-start md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]'>
+                {!isRhythmLocked ? (
+                  <BPMInput
+                    value={bpm}
+                    onChange={handleBpmChange}
+                    beatsPerMeasure={beatsPerMeasure || 4}
+                    onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
+                    onSubmit={() => {
+                      if (!bpm || !beatsPerMeasure) {
+                        showToast(
+                          'provide both BPM and beats/measure to use this function',
+                        )
+                        return
                       }
-                    />
-                  </div>
+                      setIsRhythmLocked(true)
+                    }}
+                  />
+                ) : (
+                  <>
+                    <div className='flex items-center gap-3 md:items-end'>
+                      <div className='flex flex-col justify-end gap-1 text-xs text-muted-foreground'>
+                        <div className='font-medium'>Rhythm locked</div>
+                        <div>
+                          BPM: {bpm ?? '—'} • beats/measure:{' '}
+                          {beatsPerMeasure ?? '—'}
+                        </div>
+                      </div>
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        onClick={() => {
-                          if (!bpm || !beatsPerMeasure) {
-                            showToast(
-                              'provide both BPM and beats/measure to use this function',
-                            )
-                            return
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type='button'
+                            variant='ghost'
+                            size='icon'
+                            onClick={() => setIsRhythmLocked(false)}
+                            aria-label='Edit BPM and beats/measure'
+                          >
+                            <Pencil />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Edit BPM &amp; beats/measure
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+
+                    <div className='flex items-end gap-3 lg:items-end'>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='icon'
+                            onClick={() => {
+                              if (!bpm || !beatsPerMeasure) {
+                                showToast(
+                                  'provide both BPM and beats/measure to use this function',
+                                )
+                                return
+                              }
+                              const newStart = Math.round(
+                                sectionStart -
+                                  (measures * beatsPerMeasure) / (bpm / 60),
+                              )
+                              setSectionEnd(sectionStart)
+                              setSectionStart(newStart)
+                            }}
+                          >
+                            <ArrowBigLeftDash />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{`Previous ${measures} measures`}</TooltipContent>
+                      </Tooltip>
+
+                      <div className='w-full'>
+                        <div className='mb-1 text-xs font-medium text-muted-foreground'>
+                          measures
+                        </div>
+                        <Input
+                          type='number'
+                          value={measures}
+                          onChange={e =>
+                            handleMeasuresChange(parseInt(e.target.value, 10))
                           }
-                          const newEnd = Math.round(
-                            sectionEnd +
-                              (measures * beatsPerMeasure) / (bpm / 60),
-                          )
-                          setSectionStart(sectionEnd)
-                          setSectionEnd(newEnd)
-                        }}
-                      >
-                        <ArrowBigRightDash />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{`Next ${measures} measures`}</TooltipContent>
-                  </Tooltip>
-                </div>
+                        />
+                      </div>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='icon'
+                            onClick={() => {
+                              if (!bpm || !beatsPerMeasure) {
+                                showToast(
+                                  'provide both BPM and beats/measure to use this function',
+                                )
+                                return
+                              }
+                              const newEnd = Math.round(
+                                sectionEnd +
+                                  (measures * beatsPerMeasure) / (bpm / 60),
+                              )
+                              setSectionStart(sectionEnd)
+                              setSectionEnd(newEnd)
+                            }}
+                          >
+                            <ArrowBigRightDash />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{`Next ${measures} measures`}</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </>
+                )}
               </div>
             </Card>
           </section>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Check } from 'lucide-react'
 import { ReactComponent as MetronomeIcon } from '../../../assets/icons/metronome.svg'
 
 import { Button } from '@components/ui/button'
@@ -15,6 +16,7 @@ export const BPMInput = ({
   onChange,
   beatsPerMeasure,
   onBeatsPerMeasureChange,
+  onSubmit,
 }) => {
   const [bpm, setBpm] = useState(value)
   const [lastTap, setLastTap] = useState(null)
@@ -53,7 +55,7 @@ export const BPMInput = ({
 
   return (
     <TooltipProvider>
-      <div className='flex gap-4 h-full items-stretch justify-center md:justify-start'>
+      <div className='flex h-full items-stretch justify-center gap-4 md:justify-start'>
         <div className='h-full'>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -70,23 +72,48 @@ export const BPMInput = ({
           </Tooltip>
         </div>
 
-        <div className='grid w-full grid-cols-2 gap-2'>
-          <div className='col-span-2'>
-            <div className='mb-1 text-xs font-medium text-muted-foreground'>
-              beats/min
+        <div className='flex w-full items-stretch gap-3'>
+          <div className='grid w-full grid-cols-2 gap-2'>
+            <div className='col-span-2'>
+              <div className='mb-1 text-xs font-medium text-muted-foreground'>
+                beats/min
+              </div>
+              <Input
+                type='number'
+                value={bpm ?? ''}
+                onChange={handleBpmChange}
+              />
             </div>
-            <Input type='number' value={bpm ?? ''} onChange={handleBpmChange} />
-          </div>
-          <div className='col-span-2'>
-            <div className='mb-1 text-xs font-medium text-muted-foreground'>
-              beats/measure
+            <div className='col-span-2'>
+              <div className='mb-1 text-xs font-medium text-muted-foreground'>
+                beats/measure
+              </div>
+              <Input
+                type='number'
+                value={beatsPerMeasure ?? ''}
+                onChange={handleBeatsPerMeasureChange}
+              />
             </div>
-            <Input
-              type='number'
-              value={beatsPerMeasure ?? ''}
-              onChange={handleBeatsPerMeasureChange}
-            />
           </div>
+
+          {onSubmit && (
+            <div className='flex items-center'>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='icon'
+                    onClick={onSubmit}
+                    aria-label='Lock in BPM and beats/measure'
+                  >
+                    <Check className='text-green-500' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Lock in BPM &amp; beats/measure</TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </div>
       </div>
     </TooltipProvider>

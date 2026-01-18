@@ -51,15 +51,20 @@ export const YouTubeSource = ({
   return (
     <>
       {type === videoSources.YOUTUBE && (
-        <div className='w-full overflow-hidden rounded-lg border bg-card'>
-          <div className='aspect-video w-full'>
+        <div className='w-full overflow-hidden rounded-lg border bg-card flex-none'>
+          {/*
+            Keep a responsive 16:9 aspect ratio based on width, but also enforce
+            a sensible minimum height on small screens so the player (and its
+            controls) never gets vertically clipped.
+          */}
+          <div className='relative w-full aspect-video'>
             <YouTube
               opts={videoOptions}
               videoId={id}
               onReady={onReady}
               onPlay={onPlay}
               onPause={onPause}
-              className='h-full w-full'
+              className='absolute inset-0 h-full w-full'
             />
           </div>
         </div>
