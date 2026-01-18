@@ -53,20 +53,22 @@ export const BPMInput = ({
 
   return (
     <TooltipProvider>
-      <div className='flex flex-col items-center gap-3'>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type='button'
-              variant='ghost'
-              size='icon'
-              onClick={handleTap}
-            >
-              <MetronomeIcon className='h-10 w-10 fill-primary' />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Tap to set BPM</TooltipContent>
-        </Tooltip>
+      <div className='flex gap-4 h-full items-stretch justify-center md:justify-start'>
+        <div className='h-full'>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className='h-full w-20'
+                type='button'
+                variant='secondary'
+                onClick={handleTap}
+              >
+                <MetronomeIcon className='fill-white' />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Tap to set BPM</TooltipContent>
+          </Tooltip>
+        </div>
 
         <div className='grid w-full grid-cols-2 gap-2'>
           <div className='col-span-2'>

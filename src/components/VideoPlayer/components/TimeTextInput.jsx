@@ -15,7 +15,7 @@ export const TimeTextInput = props => {
   }
 
   return (
-    <div className='flex w-full min-w-[10rem] max-w-[14rem] flex-col gap-1'>
+    <div className='flex w-full flex-col gap-1'>
       {label && (
         <div className='text-xs font-medium text-muted-foreground'>{label}</div>
       )}

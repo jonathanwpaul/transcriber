@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { useState, useRef, useCallback } from 'react'
-import { SkipBack, SkipForward, X } from 'lucide-react'
+import { ArrowBigLeftDash, ArrowBigRightDash, X } from 'lucide-react'
 
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter, round } from '@utils/video'
@@ -273,7 +273,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   return (
     <TooltipProvider>
       <div className='flex h-full w-full flex-col'>
-        {/* Title bar - ~5% of the screen height */}
         <div className='flex h-[5vh] flex-none items-center justify-between border-b bg-card px-4'>
           <div className='max-w-[80%] truncate text-sm font-medium'>
             {videos[id]?.title || 'Now Playing'}
@@ -294,177 +293,161 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           </Tooltip>
         </div>
 
-        {/* Main content area - fills remaining space between title and bottom bar (~85%) */}
-        <div className='flex-1 overflow-y-auto px-4 pt-4'>
-          <div className='mx-auto flex w-full max-w-6xl flex-col gap-4 pb-16'>
-            <div className='flex-1 min-h-0'>
-              <div className='flex h-full flex-col gap-4 lg:grid lg:grid-cols-[1fr_2fr] lg:gap-4'>
-                {/* Loops list */}
-                <Card className='min-h-[40vh] sm:min-h-0 max-h-full overflow-auto p-2 pb-6'>
-                  {videos[id].loops &&
-                  Object.keys(videos[id].loops).length > 0 ? (
-                    <div className='flex flex-col'>
-                      {Object.values(videos[id].loops)
-                        .sort((a, b) => a.sectionStart - b.sectionStart)
-                        .map(loop => {
-                          const key = `${loop.sectionStart}-${loop.sectionEnd}`
-                          return renderLoop(loop, key)
-                        })}
+        <div className='mx-auto flex overflow-y-auto snap-y snap-mandatory h-full w-full max-w-6xl flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr] lg:p-4'>
+          <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
+            <Card className='flex h-full flex-col gap-4 p-4'>
+              {sourceType === videoSources.YOUTUBE && (
+                <YouTubeSource
+                  id={id}
+                  onPause={handlePause}
+                  onPlay={handlePlay}
+                  playerRef={playerRef}
+                  setCurrentTime={setCurrentTime}
+                  setDuration={setDuration}
+                  setIsPlaying={setIsPlaying}
+                  setPlaybackRate={setPlaybackRate}
+                  setSectionEnd={setSectionEnd}
+                  setSectionStart={setSectionStart}
+                  setVideos={setVideos}
+                  videos={videos}
+                />
+              )}
+
+              <div className='grid gap-3 pt-2 sm:grid-cols-3'>
+                <TimeTextInput
+                  onChange={value => setSectionStart(value)}
+                  changeAmount={0.5}
+                  disabled={controlsDisabled}
+                  label='start'
+                  min={0}
+                  max={duration}
+                  value={sectionStart}
+                />
+                <TimeTextInput
+                  value={currentTime}
+                  disabled={controlsDisabled}
+                  onChange={value => {
+                    setCurrentTime(value)
+                    playerRef.current.seekTo(value)
+                  }}
+                  label='current'
+                  changeAmount={0.5}
+                  min={0}
+                  max={duration}
+                />
+                <TimeTextInput
+                  value={sectionEnd}
+                  disabled={controlsDisabled}
+                  onChange={value => setSectionEnd(value)}
+                  changeAmount={0.5}
+                  label='end'
+                  min={0}
+                  max={duration}
+                />
+              </div>
+              <div className='h-[2px] fill-red' />
+
+              <div className='grid gap-4 pt-2 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-start'>
+                <BPMInput
+                  value={bpm}
+                  onChange={handleBpmChange}
+                  beatsPerMeasure={beatsPerMeasure || 4}
+                  onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
+                />
+
+                <div className='flex items-end lg:items-end gap-3'>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='icon'
+                        onClick={() => {
+                          if (!bpm || !beatsPerMeasure) {
+                            showToast(
+                              'provide both BPM and beats/measure to use this function',
+                            )
+                            return
+                          }
+                          const newStart = Math.round(
+                            sectionStart -
+                              (measures * beatsPerMeasure) / (bpm / 60),
+                          )
+                          setSectionEnd(sectionStart)
+                          setSectionStart(newStart)
+                        }}
+                      >
+                        <ArrowBigLeftDash />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{`Previous ${measures} measures`}</TooltipContent>
+                  </Tooltip>
+
+                  <div className='w-full'>
+                    <div className='mb-1 text-xs font-medium text-muted-foreground'>
+                      measures
                     </div>
-                  ) : (
-                    <div className='p-3 text-sm text-muted-foreground'>
-                      Save a loop to see it here
-                    </div>
-                  )}
-                </Card>
-
-                {/* Video, time inputs, and BPM controls */}
-                <div className='flex flex-col gap-4'>
-                  <Card className='p-4'>
-                    <div className='flex flex-col gap-4 lg:flex-row'>
-                      <div className='w-full lg:flex-1'>
-                        {sourceType === videoSources.YOUTUBE && (
-                          <YouTubeSource
-                            id={id}
-                            onPause={handlePause}
-                            onPlay={handlePlay}
-                            playerRef={playerRef}
-                            setCurrentTime={setCurrentTime}
-                            setDuration={setDuration}
-                            setIsPlaying={setIsPlaying}
-                            setPlaybackRate={setPlaybackRate}
-                            setSectionEnd={setSectionEnd}
-                            setSectionStart={setSectionStart}
-                            setVideos={setVideos}
-                            videos={videos}
-                          />
-                        )}
-                      </div>
-
-                      <div className='grid w-full gap-3 lg:w-64'>
-                        <TimeTextInput
-                          onChange={value => setSectionStart(value)}
-                          changeAmount={0.5}
-                          disabled={controlsDisabled}
-                          label='start'
-                          min={0}
-                          max={duration}
-                          value={sectionStart}
-                        />
-                        <TimeTextInput
-                          value={currentTime}
-                          disabled={controlsDisabled}
-                          onChange={value => {
-                            setCurrentTime(value)
-                            playerRef.current.seekTo(value)
-                          }}
-                          label='current'
-                          changeAmount={0.5}
-                          min={0}
-                          max={duration}
-                        />
-                        <TimeTextInput
-                          value={sectionEnd}
-                          disabled={controlsDisabled}
-                          onChange={value => setSectionEnd(value)}
-                          changeAmount={0.5}
-                          label='end'
-                          min={0}
-                          max={duration}
-                        />
-                      </div>
-                    </div>
-                  </Card>
-
-                  <div className='grid gap-4 sm:grid-cols-2'>
-                    <Card className='p-4'>
-                      <BPMInput
-                        value={bpm}
-                        onChange={handleBpmChange}
-                        beatsPerMeasure={beatsPerMeasure || 4}
-                        onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
-                      />
-                    </Card>
-
-                    <Card className='p-4'>
-                      <div className='flex flex-col items-center gap-3'>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type='button'
-                              variant='outline'
-                              size='icon'
-                              onClick={() => {
-                                if (!bpm || !beatsPerMeasure) {
-                                  showToast(
-                                    'provide both BPM and beats/measure to use this function',
-                                  )
-                                  return
-                                }
-                                const newStart = Math.round(
-                                  sectionStart -
-                                    (measures * beatsPerMeasure) / (bpm / 60),
-                                )
-                                setSectionEnd(sectionStart)
-                                setSectionStart(newStart)
-                              }}
-                            >
-                              <SkipBack />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>{`Previous ${measures} measures`}</TooltipContent>
-                        </Tooltip>
-
-                        <div className='w-full'>
-                          <div className='mb-1 text-xs font-medium text-muted-foreground'>
-                            measures
-                          </div>
-                          <Input
-                            type='number'
-                            value={measures}
-                            onChange={e =>
-                              handleMeasuresChange(parseInt(e.target.value, 10))
-                            }
-                          />
-                        </div>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type='button'
-                              variant='outline'
-                              size='icon'
-                              onClick={() => {
-                                if (!bpm || !beatsPerMeasure) {
-                                  showToast(
-                                    'provide both BPM and beats/measure to use this function',
-                                  )
-                                  return
-                                }
-                                const newEnd = Math.round(
-                                  sectionEnd +
-                                    (measures * beatsPerMeasure) / (bpm / 60),
-                                )
-                                setSectionStart(sectionEnd)
-                                setSectionEnd(newEnd)
-                              }}
-                            >
-                              <SkipForward />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>{`Next ${measures} measures`}</TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </Card>
+                    <Input
+                      type='number'
+                      value={measures}
+                      onChange={e =>
+                        handleMeasuresChange(parseInt(e.target.value, 10))
+                      }
+                    />
                   </div>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='icon'
+                        onClick={() => {
+                          if (!bpm || !beatsPerMeasure) {
+                            showToast(
+                              'provide both BPM and beats/measure to use this function',
+                            )
+                            return
+                          }
+                          const newEnd = Math.round(
+                            sectionEnd +
+                              (measures * beatsPerMeasure) / (bpm / 60),
+                          )
+                          setSectionStart(sectionEnd)
+                          setSectionEnd(newEnd)
+                        }}
+                      >
+                        <ArrowBigRightDash />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{`Next ${measures} measures`}</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
-            </div>
-          </div>
+            </Card>
+          </section>
+
+          <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
+            <Card className='flex h-full flex-col overflow-hidden p-2 pb-6'>
+              {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
+                <div className='flex flex-col'>
+                  {Object.values(videos[id].loops)
+                    .sort((a, b) => a.sectionStart - b.sectionStart)
+                    .map(loop => {
+                      const key = `${loop.sectionStart}-${loop.sectionEnd}`
+                      return renderLoop(loop, key)
+                    })}
+                </div>
+              ) : (
+                <div className='p-3 text-sm text-muted-foreground'>
+                  Save a loop to see it here
+                </div>
+              )}
+            </Card>
+          </section>
         </div>
 
-        {/* Bottom bar - ~10% of the screen height, not overlaying content */}
-        <div className='flex items-center border-t bg-card px-4 py-2'>
+        <div className='flex flex-none items-center border-t bg-card px-4 py-2'>
           <div className='mx-auto w-full max-w-6xl'>
             <Bar
               title={videos[id].title}
