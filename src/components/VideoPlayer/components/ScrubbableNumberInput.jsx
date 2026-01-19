@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 
 import { Input } from '@components/ui/input'
-import { cn } from '../../lib/utils'
+import { cn } from '../../../lib/utils'
 
 /**
  * Numeric input that supports:
