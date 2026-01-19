@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Check } from 'lucide-react'
-import { ReactComponent as MetronomeIcon } from '../../../assets/icons/metronome.svg'
+import { Check, Pointer } from 'lucide-react'
 
 import { Button } from '@components/ui/button'
 import {
@@ -76,86 +75,83 @@ export const BPMInput = ({
 
   return (
     <TooltipProvider>
-      <div className='flex h-full items-stretch justify-center gap-4 md:justify-start'>
-        <div className='flex h-full flex-col items-center justify-between gap-1'>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className='h-full w-20'
-                type='button'
-                variant='secondary'
-                onClick={handleTap}
-              >
-                <MetronomeIcon className='fill-white' />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Tap to set BPM</TooltipContent>
-          </Tooltip>
-
-          <div className='h-3 flex items-center justify-center'>
-            {bpm ? (
-              <div
-                className='bpm-dot h-2 w-2 rounded-full bg-pink-500'
-                style={{ animationDuration: `${60000 / bpm}ms` }}
+      <div className='flex h-full items-center gap-3 md:justify-start'>
+        {/* Numeric inputs on the left */}
+        <div className='flex w-full flex-col gap-2'>
+          <div className='flex items-center gap-2'>
+            <div className='w-24 text-xs font-medium text-muted-foreground'>
+              beats/min
+            </div>
+            <div className='flex-1'>
+              <ScrubbableNumberInput
+                value={bpm ?? ''}
+                onChange={val => {
+                  setBpm(val)
+                  onChange(val)
+                }}
+                step={1}
+                min={0}
               />
-            ) : (
-              <div className='h-2 w-2 rounded-full bg-muted opacity-40' />
-            )}
+            </div>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div className='w-24 text-xs font-medium text-muted-foreground'>
+              beats/measure
+            </div>
+            <div className='flex-1'>
+              <ScrubbableNumberInput
+                value={beatsPerMeasure ?? ''}
+                onChange={handleBeatsPerMeasureChange}
+                step={1}
+                min={1}
+              />
+            </div>
           </div>
         </div>
 
-        <div className='flex w-full items-stretch gap-3'>
-          <div className='flex w-full flex-col gap-2'>
-            <div className='flex items-center gap-2'>
-              <div className='w-24 text-xs font-medium text-muted-foreground'>
-                beats/min
-              </div>
-              <div className='flex-1'>
-                <ScrubbableNumberInput
-                  value={bpm ?? ''}
-                  onChange={val => {
-                    setBpm(val)
-                    onChange(val)
-                  }}
-                  step={1}
-                  min={0}
-                />
-              </div>
-            </div>
-            <div className='flex items-center gap-2'>
-              <div className='w-24 text-xs font-medium text-muted-foreground'>
-                beats/measure
-              </div>
-              <div className='flex-1'>
-                <ScrubbableNumberInput
-                  value={beatsPerMeasure ?? ''}
-                  onChange={handleBeatsPerMeasureChange}
-                  step={1}
-                  min={1}
-                />
-              </div>
-            </div>
-          </div>
+        {/* Tap button to the right of inputs, flashing at the current BPM */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type='button'
+              variant='secondary'
+              className={`h-full w-24 p-0 flex items-center justify-center ${
+                bpm ? 'bpm-button-pulse' : ''
+              }`}
+              style={
+                bpm
+                  ? {
+                      animationDuration: `${60000 / bpm}ms`,
+                    }
+                  : undefined
+              }
+              onClick={handleTap}
+            >
+              <Pointer className='h-12 w-12' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Tap to set BPM</TooltipContent>
+        </Tooltip>
 
-          {onSubmit && (
-            <div className='flex items-center'>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    size='icon'
-                    onClick={onSubmit}
-                    aria-label='Lock in BPM and beats/measure'
-                  >
-                    <Check className='text-green-500' />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Lock in BPM &amp; beats/measure</TooltipContent>
-              </Tooltip>
-            </div>
-          )}
-        </div>
+        {/* Lock-in button on the far right */}
+        {onSubmit && (
+          <div className='flex items-center'>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='icon'
+                  onClick={onSubmit}
+                  aria-label='Lock in BPM and beats/measure'
+                >
+                  <Check className='text-green-500' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Lock in BPM &amp; beats/measure</TooltipContent>
+            </Tooltip>
+          </div>
+        )}
       </div>
     </TooltipProvider>
   )

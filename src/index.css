@@ -93,4 +93,26 @@
       opacity: 0.4;
     }
   }
+
+  /* Pulsing effect for the BPM tap button, using the secondary color. */
+  .bpm-button-pulse {
+    animation-name: bpm-button-pulse;
+    animation-timing-function: ease-out;
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes bpm-button-pulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 hsla(var(--secondary), 0.6);
+    }
+    50% {
+      transform: scale(1.04);
+      box-shadow: 0 0 0 10px hsla(var(--secondary), 0);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 hsla(var(--secondary), 0);
+    }
+  }
 }
