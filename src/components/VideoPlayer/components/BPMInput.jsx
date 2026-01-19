@@ -105,31 +105,35 @@ export const BPMInput = ({
         </div>
 
         <div className='flex w-full items-stretch gap-3'>
-          <div className='grid w-full grid-cols-2 gap-2'>
-            <div className='col-span-2'>
-              <div className='mb-1 text-xs font-medium text-muted-foreground'>
+          <div className='flex w-full flex-col gap-2'>
+            <div className='flex items-center gap-2'>
+              <div className='w-24 text-xs font-medium text-muted-foreground'>
                 beats/min
               </div>
-              <ScrubbableNumberInput
-                value={bpm ?? ''}
-                onChange={val => {
-                  setBpm(val)
-                  onChange(val)
-                }}
-                step={1}
-                min={0}
-              />
+              <div className='flex-1'>
+                <ScrubbableNumberInput
+                  value={bpm ?? ''}
+                  onChange={val => {
+                    setBpm(val)
+                    onChange(val)
+                  }}
+                  step={1}
+                  min={0}
+                />
+              </div>
             </div>
-            <div className='col-span-2'>
-              <div className='mb-1 text-xs font-medium text-muted-foreground'>
+            <div className='flex items-center gap-2'>
+              <div className='w-24 text-xs font-medium text-muted-foreground'>
                 beats/measure
               </div>
-              <ScrubbableNumberInput
-                value={beatsPerMeasure ?? ''}
-                onChange={handleBeatsPerMeasureChange}
-                step={1}
-                min={1}
-              />
+              <div className='flex-1'>
+                <ScrubbableNumberInput
+                  value={beatsPerMeasure ?? ''}
+                  onChange={handleBeatsPerMeasureChange}
+                  step={1}
+                  min={1}
+                />
+              </div>
             </div>
           </div>
 

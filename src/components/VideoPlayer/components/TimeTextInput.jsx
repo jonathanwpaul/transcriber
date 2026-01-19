@@ -14,11 +14,13 @@ export const TimeTextInput = props => {
   }
 
   return (
-    <div className='flex w-full flex-col gap-1'>
+    <div className='flex w-full items-center gap-2'>
       {label && (
-        <div className='text-xs font-medium text-muted-foreground'>{label}</div>
+        <div className='w-16 text-xs font-medium text-muted-foreground'>
+          {label}
+        </div>
       )}
-      <div className='flex items-center gap-2'>
+      <div className='flex-1'>
         <ScrubbableNumberInput
           value={value}
           disabled={disabled}
