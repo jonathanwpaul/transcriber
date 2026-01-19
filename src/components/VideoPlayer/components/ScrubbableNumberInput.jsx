@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 
 import { Input } from '@components/ui/input'
+import { cn } from '../../lib/utils'
 
 /**
  * Numeric input that supports:
@@ -91,7 +92,7 @@ export const ScrubbableNumberInput = ({
   return (
     <div
       ref={containerRef}
-      className={className}
+      className={cn('touch-none select-none', className)}
       onWheel={handleWheel}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
