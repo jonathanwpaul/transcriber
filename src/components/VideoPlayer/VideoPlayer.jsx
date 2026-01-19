@@ -349,7 +349,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                 />
               )}
 
-              <div className='grid gap-3 sm:grid-cols-3'>
+              <div className='flex-1 grid gap-3 sm:grid-cols-3'>
                 <TimeTextInput
                   onChange={value => setSectionStart(value)}
                   changeAmount={0.5}
@@ -382,7 +382,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                 />
               </div>
 
-              <div className='grid gap-4 items-start md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]'>
+              <div className='flex-1 grid gap-4 items-start md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]'>
                 {!(isRhythmLocked ?? false) ? (
                   <BPMInput
                     value={effectiveBpm ?? ''}
