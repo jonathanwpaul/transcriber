@@ -14,7 +14,7 @@ export class MediaPlayer {
     this.id = id
     this.source = source // e.g. { sourceUrl, mimeType }
 
-    // Callbacks from the host (VideoPlayer) – all optional.
+    // Callbacks from the host (Player) – all optional.
     this.callbacks = {
       onReady: callbacks.onReady ?? (() => {}),
       onDuration: callbacks.onDuration ?? (() => {}),

@@ -23,7 +23,7 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip'
 
-export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
+export const Player = ({ id, setShowPlayer, showToast, type }) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -58,15 +58,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   }
   const measures = appSettings['measures']
 
-  const videos = useMemo(
-    () => JSON.parse(videosString) || {},
-    [videosString],
-  )
+  const videos = useMemo(() => JSON.parse(videosString) || {}, [videosString])
 
-  const videoEntry = useMemo(
-    () => videos[id] || {},
-    [videos, id],
-  )
+  const videoEntry = useMemo(() => videos[id] || {}, [videos, id])
 
   const rawBpm = playerMetadata?.bpm ?? videoEntry.bpm
   const rawBeatsPerMeasure =
@@ -249,7 +243,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
       mediaPlayerRef.current.destroy?.()
       mediaPlayerRef.current = null
     }
-    setShowVideoPlayer(false)
+    setShowPlayer(false)
   }
 
   /**

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Code2, Moon, Sun } from 'lucide-react'
 
-import { VideoPlayer } from './VideoPlayer/VideoPlayer'
+import { Player } from './Player/Player'
 import { usePreferenceValue } from 'hooks/usePreferenceValue'
 import { videoSources } from 'utils/constants'
 
@@ -43,7 +43,7 @@ function fileToBase64(file) {
 
 export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [id, setId] = useState()
-  const [showVideoPlayer, setShowVideoPlayer] = useState()
+  const [showPlayer, setShowPlayer] = useState()
   const [inputText, setInputText] = useState()
   const [error, setError] = useState(false)
   const {
@@ -68,14 +68,14 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     }
   }, [videosString])
 
-  // When we return from the VideoPlayer view back to the Home view, reload the
+  // When we return from the Player view back to the Home view, reload the
   // latest videos from storage so that metadata written by MediaPlayer
   // subclasses (e.g. YouTube titles) is reflected in the Recents list.
   useEffect(() => {
-    if (!showVideoPlayer && reloadVideos) {
+    if (!showPlayer && reloadVideos) {
       reloadVideos()
     }
-  }, [showVideoPlayer, reloadVideos])
+  }, [showPlayer, reloadVideos])
 
   if (loading) return
 
@@ -98,7 +98,7 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     videos[id].last_accessed = new Date()
     setVideos('videos', videos).then(() => {
       setId(id)
-      setShowVideoPlayer(true)
+      setShowPlayer(true)
     })
   }
 
@@ -182,12 +182,12 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     )
 
   // if there's a cached entry and not one already selected, use that
-  // if (videoList.length > 0 && !showVideoPlayer && !id) {
+  // if (videoList.length > 0 && !showPlayer && !id) {
   //   setId(videoList[0])
-  //   setShowVideoPlayer(true)
+  //   setShowPlayer(true)
   // }
 
-  return !showVideoPlayer ? (
+  return !showPlayer ? (
     <TooltipProvider>
       <div className='mx-auto flex h-full w-full max-w-5xl flex-col gap-4 p-4 sm:p-6'>
         <div className='flex items-center justify-end gap-2'>
@@ -318,10 +318,6 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       </div>
     </TooltipProvider>
   ) : (
-    <VideoPlayer
-      id={id}
-      setShowVideoPlayer={setShowVideoPlayer}
-      showToast={showToast}
-    />
+    <Player id={id} setShowPlayer={setShowPlayer} showToast={showToast} />
   )
 }

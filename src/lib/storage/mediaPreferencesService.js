@@ -1,6 +1,5 @@
 import { Preferences } from '@capacitor/preferences'
 
-// Generic JSON helpers
 export async function getJSON(key, defaultValue = null) {
   const { value } = await Preferences.get({ key })
   if (!value) return defaultValue
