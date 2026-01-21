@@ -67,8 +67,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   // Effective rhythm values with sensible defaults
   const effectiveBeatsPerMeasure =
     typeof rawBeatsPerMeasure === 'number' ? rawBeatsPerMeasure : 4
-  const effectiveBpm =
-    typeof rawBpm === 'number' && rawBpm > 0 ? rawBpm : null
+  const effectiveBpm = typeof rawBpm === 'number' && rawBpm > 0 ? rawBpm : null
 
   const loops = playerMetadata?.loops || videoEntry.loops || {}
 
@@ -120,9 +119,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     setPlaybackRate(newValue)
     mediaPlayerRef.current.setPlaybackRate(newValue)
     if (mediaPlayerRef.current.setLastPlaybackRate) {
-      mediaPlayerRef.current
-        .setLastPlaybackRate(newValue)
-        .catch(() => {})
+      mediaPlayerRef.current.setLastPlaybackRate(newValue).catch(() => {})
     }
   }
 
@@ -297,9 +294,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
     mediaPlayerRef.current.setLoops(nextLoops).catch(() => {})
     if (mediaPlayerRef.current.setLastLoopSelected) {
-      mediaPlayerRef.current
-        .setLastLoopSelected(key)
-        .catch(() => {})
+      mediaPlayerRef.current.setLastLoopSelected(key).catch(() => {})
     }
   }
 
@@ -326,7 +321,6 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           .catch(() => {})
       }
       mediaPlayerRef.current.seekTo(start)
-      // TODO: make appsetting for playing on load of loop
       mediaPlayerRef.current.play()
     }
   }
@@ -412,7 +406,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
   const handleBeatsPerMeasureChange = newBeatsPerMeasure => {
     if (!mediaPlayerRef.current?.setBeatsPerMeasure) return
-    mediaPlayerRef.current.setBeatsPerMeasure(newBeatsPerMeasure).catch(() => {})
+    mediaPlayerRef.current
+      .setBeatsPerMeasure(newBeatsPerMeasure)
+      .catch(() => {})
   }
 
   const handleMeasuresChange = newMeasures => {
@@ -469,7 +465,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
               <div className='flex-1 grid gap-3 sm:grid-cols-3'>
                 <TimeTextInput
                   onChange={value => setSectionStart(value)}
-                  changeAmount={0.5}
+                  changeAmount={0.1}
                   disabled={controlsDisabled}
                   label='start'
                   min={0}
@@ -484,7 +480,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                     mediaPlayerRef.current?.seekTo(value)
                   }}
                   label='current'
-                  changeAmount={0.5}
+                  changeAmount={0.1}
                   min={0}
                   max={duration}
                 />
@@ -492,7 +488,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                   value={sectionEnd}
                   disabled={controlsDisabled}
                   onChange={value => setSectionEnd(value)}
-                  changeAmount={0.5}
+                  changeAmount={0.1}
                   label='end'
                   min={0}
                   max={duration}
