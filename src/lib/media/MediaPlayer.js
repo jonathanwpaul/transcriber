@@ -38,8 +38,8 @@ export class MediaPlayer {
       title: null,
       lastLoopSelected: null,
       lastPlaybackRate: null,
-      lastSectionStartPosition: null,
-      lastSectionEndPosition: null,
+      lastLoopStartPosition: null,
+      lastLoopEndPosition: null,
       lastPlaybackPosition: null,
     }
 
@@ -65,11 +65,10 @@ export class MediaPlayer {
         entry.lastLoopSelected ?? this._metadata.lastLoopSelected,
       lastPlaybackRate:
         entry.lastPlaybackRate ?? this._metadata.lastPlaybackRate,
-      lastSectionStartPosition:
-        entry.lastSectionStartPosition ??
-        this._metadata.lastSectionStartPosition,
-      lastSectionEndPosition:
-        entry.lastSectionEndPosition ?? this._metadata.lastSectionEndPosition,
+      lastLoopStartPosition:
+        entry.lastLoopStartPosition ?? this._metadata.lastLoopStartPosition,
+      lastLoopEndPosition:
+        entry.lastLoopEndPosition ?? this._metadata.lastLoopEndPosition,
       lastPlaybackPosition:
         entry.lastPlaybackPosition ?? this._metadata.lastPlaybackPosition,
     }
@@ -152,8 +151,8 @@ export class MediaPlayer {
 
   async setLastSectionPositions(start, end) {
     await this._saveMetadata({
-      lastSectionStartPosition: start,
-      lastSectionEndPosition: end,
+      lastLoopStartPosition: start,
+      lastLoopEndPosition: end,
     })
   }
 

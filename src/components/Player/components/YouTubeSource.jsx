@@ -11,8 +11,8 @@ export const YouTubeSource = ({
   setDuration,
   setIsPlaying,
   setPlaybackRate,
-  setSectionEnd,
-  setSectionStart,
+  setLoopEnd,
+  setLoopStart,
   setVideos,
   videos,
 }) => {
@@ -36,8 +36,8 @@ export const YouTubeSource = ({
     setDuration(playerRef.current.getDuration())
     setIsPlaying(e.target.getPlayerState() === 1)
     setPlaybackRate(e.target.getPlaybackRate())
-    setSectionStart(0)
-    setSectionEnd(e.target.getDuration())
+    setLoopStart(0)
+    setLoopEnd(e.target.getDuration())
 
     playerRef.current.play = () => {
       playerRef.current.playVideo()

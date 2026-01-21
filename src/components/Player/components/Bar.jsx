@@ -10,8 +10,8 @@ export const Bar = ({
   duration,
   handleSeek,
   handleIntervalChange,
-  sectionStart,
-  sectionEnd,
+  loopStart,
+  loopEnd,
   timestampFormatter,
   isPlaying,
   onPlay,
@@ -157,14 +157,13 @@ export const Bar = ({
         <div className='order-3 basis-full w-full'>
           <div className='relative w-full'>
             {/* loop region highlight behind sliders */}
-            {duration > 0 && sectionEnd > sectionStart && (
+            {duration > 0 && loopEnd > loopStart && (
               <div
                 className='pointer-events-none absolute top-1/2 -translate-y-1/2 h-5 rounded-full bg-muted z-0'
                 style={{
-                  left: `${(Math.max(0, sectionStart) / duration) * 100}%`,
+                  left: `${(Math.max(0, loopStart) / duration) * 100}%`,
                   width: `${
-                    ((Math.min(duration, sectionEnd) -
-                      Math.max(0, sectionStart)) /
+                    ((Math.min(duration, loopEnd) - Math.max(0, loopStart)) /
                       duration) *
                     100
                   }%`,
@@ -178,7 +177,7 @@ export const Bar = ({
                 min={0}
                 max={duration}
                 step={0.1}
-                value={[sectionStart, sectionEnd]}
+                value={[loopStart, loopEnd]}
                 onValueChange={handleIntervalChange}
                 className='relative opacity-80'
                 rangeClassName='bg-muted'

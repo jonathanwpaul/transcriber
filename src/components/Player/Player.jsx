@@ -28,8 +28,8 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
-  const [sectionStart, setSectionStart] = useState(0)
-  const [sectionEnd, setSectionEnd] = useState(0)
+  const [loopStart, setLoopStart] = useState(0)
+  const [loopEnd, setLoopEnd] = useState(0)
 
   // collapse state for loop tree nodes, keyed by a stable path string
   const [collapsedLoops, setCollapsedLoops] = useState({})
@@ -77,10 +77,10 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
   const [isRhythmLocked, setIsRhythmLocked] = useState(null)
 
   const mediaPlayerRef = useRef(null)
-  const sectionStartRef = useRef()
-  const sectionEndRef = useRef()
-  sectionStartRef.current = sectionStart
-  sectionEndRef.current = sectionEnd
+  const loopStartRef = useRef()
+  const loopEndRef = useRef()
+  loopStartRef.current = loopStart
+  loopEndRef.current = loopEnd
 
   // disable controls until the underlying player has mounted
   const controlsDisabled = !mediaPlayerRef.current
@@ -171,15 +171,15 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
         setCurrentTime(ct)
         setPlaybackRate(pr)
         // For now, default loop to full duration on ready.
-        setSectionStart(0)
-        setSectionEnd(d)
+        setLoopStart(0)
+        setLoopEnd(d)
       },
       onDuration: d => setDuration(d),
       onTimeUpdate: t => {
         const rounded = round(t)
         setCurrentTime(rounded)
-        if (t > sectionEndRef.current) {
-          handleSeek(sectionStartRef.current)
+        if (t > loopEndRef.current) {
+          handleSeek(loopStartRef.current)
         }
       },
       onPlaybackRateChange: r => setPlaybackRate(r),
@@ -219,8 +219,8 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
     const roundedStart = round(newStart)
     const roundedEnd = round(newEnd)
 
-    setSectionStart(roundedStart)
-    setSectionEnd(roundedEnd)
+    setLoopStart(roundedStart)
+    setLoopEnd(roundedEnd)
 
     if (mediaPlayerRef.current?.setLastSectionPositions) {
       mediaPlayerRef.current
@@ -251,20 +251,17 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
    */
   const calculatePath = (loops, loop, path = '') => {
     const getLoopDistance = k =>
-      loop.sectionStart -
-      loops[k].sectionStart +
-      loops[k].sectionEnd -
-      loop.sectionEnd
+      loop.loopStart - loops[k].loopStart + loops[k].loopEnd - loop.loopEnd
     const parentKeys = Object.keys(loops)
       .filter(
         k =>
-          loops[k].sectionStart <= loop.sectionStart &&
-          loops[k].sectionEnd >= loop.sectionEnd,
+          loops[k].loopStart <= loop.loopStart &&
+          loops[k].loopEnd >= loop.loopEnd,
       )
       .sort((a, b) => getLoopDistance(a) - getLoopDistance(b))
 
     if (parentKeys.length === 0) {
-      return path + `${loop.sectionStart}-${loop.sectionEnd}`
+      return path + `${loop.loopStart}-${loop.loopEnd}`
     }
     return calculatePath(
       loops[parentKeys[0]]?.children || {},
@@ -275,22 +272,22 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
 
   const saveLoop = () => {
     if (!mediaPlayerRef.current) return
-    const key = `${sectionStart}-${sectionEnd}`
+    const key = `${loopStart}-${loopEnd}`
     const currentLoops = loops || {}
     const nextLoops = _.cloneDeep(currentLoops)
 
     //find the path that this loop belongs into (nesting)
     const path = calculatePath(nextLoops, {
-      sectionStart,
-      sectionEnd,
+      loopStart,
+      loopEnd,
     })
 
     const existing = _.get(nextLoops, path, {})
 
     _.set(nextLoops, path.split('/'), {
       ...existing, // for any other fields we want to save with loops
-      sectionStart,
-      sectionEnd,
+      loopStart,
+      loopEnd,
     })
 
     mediaPlayerRef.current.setLoops(nextLoops).catch(() => {})
@@ -302,18 +299,15 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
   const deleteLoop = loop => {
     if (!mediaPlayerRef.current) return
     const currentLoops = loops || {}
-    const nextLoops = _.omit(
-      currentLoops,
-      `${loop.sectionStart}-${loop.sectionEnd}`,
-    )
+    const nextLoops = _.omit(currentLoops, `${loop.loopStart}-${loop.loopEnd}`)
     mediaPlayerRef.current.setLoops(nextLoops).catch(() => {})
   }
 
   const loadLoop = loop => {
-    const start = loop['sectionStart']
-    const end = loop['sectionEnd']
-    setSectionStart(start)
-    setSectionEnd(end)
+    const start = loop['loopStart']
+    const end = loop['loopEnd']
+    setLoopStart(start)
+    setLoopEnd(end)
     setCurrentTime(start)
     if (mediaPlayerRef.current) {
       if (mediaPlayerRef.current.setLastSectionPositions) {
@@ -327,28 +321,28 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
   }
   const markLoopStart = () => {
     const newStart = round(currentTime)
-    setSectionStart(newStart)
+    setLoopStart(newStart)
     if (mediaPlayerRef.current?.setLastSectionPositions) {
       mediaPlayerRef.current
-        .setLastSectionPositions(newStart, sectionEnd)
+        .setLastSectionPositions(newStart, loopEnd)
         .catch(() => {})
     }
   }
 
   const markLoopEnd = () => {
     const newEnd = round(currentTime)
-    setSectionEnd(newEnd)
+    setLoopEnd(newEnd)
     if (mediaPlayerRef.current?.setLastSectionPositions) {
       mediaPlayerRef.current
-        .setLastSectionPositions(sectionStart, newEnd)
+        .setLastSectionPositions(loopStart, newEnd)
         .catch(() => {})
     }
   }
 
   const restartLoop = () => {
     if (!mediaPlayerRef.current) return
-    setCurrentTime(sectionStart)
-    mediaPlayerRef.current.seekTo(sectionStart)
+    setCurrentTime(loopStart)
+    mediaPlayerRef.current.seekTo(loopStart)
   }
 
   const renderLoop = (loop, pathKey) => {
@@ -360,17 +354,15 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
     return (
       <div key={pathKey} className='flex flex-col gap-2'>
         <SavedSection
-          endTime={loop.sectionEnd}
-          isSelected={
-            loop.sectionStart === sectionStart && loop.sectionEnd === sectionEnd
-          }
+          endTime={loop.loopEnd}
+          isSelected={loop.loopStart === loopStart && loop.loopEnd === loopEnd}
           onClick={() => loadLoop(loop)}
           onDelete={() => deleteLoop(loop)}
           onTitleChange={title => {
             if (!mediaPlayerRef.current) return
             const currentLoops = loops || {}
             const nextLoops = _.cloneDeep(currentLoops)
-            // pathKey uses sectionStart-sectionEnd chain; use it directly to locate this loop
+            // pathKey uses loopStart-loopEnd chain; use it directly to locate this loop
             const segments = pathKey.split('/')
             const existingLoop = _.get(nextLoops, segments, {})
             _.set(nextLoops, segments, {
@@ -379,7 +371,7 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
             })
             mediaPlayerRef.current.setLoops(nextLoops).catch(() => {})
           }}
-          startTime={loop.sectionStart}
+          startTime={loop.loopStart}
           title={loop.title}
           hasChildren={hasChildren}
           isCollapsed={isCollapsed}
@@ -391,7 +383,7 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
         {hasChildren && !isCollapsed && (
           <div className='pl-4'>
             {Object.values(loop.children).map(child => {
-              const childKey = `${child.sectionStart}-${child.sectionEnd}`
+              const childKey = `${child.loopStart}-${child.loopEnd}`
               return renderLoop(child, `${pathKey}/${childKey}`)
             })}
           </div>
@@ -465,13 +457,13 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
 
               <div className='flex-1 grid gap-3 sm:grid-cols-3'>
                 <TimeTextInput
-                  onChange={value => setSectionStart(value)}
+                  onChange={value => setLoopStart(value)}
                   changeAmount={0.1}
                   disabled={controlsDisabled}
                   label='start'
                   min={0}
                   max={duration}
-                  value={sectionStart}
+                  value={loopStart}
                 />
                 <TimeTextInput
                   value={currentTime}
@@ -486,9 +478,9 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
                   max={duration}
                 />
                 <TimeTextInput
-                  value={sectionEnd}
+                  value={loopEnd}
                   disabled={controlsDisabled}
-                  onChange={value => setSectionEnd(value)}
+                  onChange={value => setLoopEnd(value)}
                   changeAmount={0.1}
                   label='end'
                   min={0}
@@ -557,12 +549,12 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
                                 return
                               }
                               const newStart = Math.round(
-                                sectionStart -
+                                loopStart -
                                   (measures * effectiveBeatsPerMeasure) /
                                     (effectiveBpm / 60),
                               )
-                              setSectionEnd(sectionStart)
-                              setSectionStart(newStart)
+                              setLoopEnd(loopStart)
+                              setLoopStart(newStart)
                             }}
                           >
                             <ArrowBigLeftDash />
@@ -599,12 +591,12 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
                                 return
                               }
                               const newEnd = Math.round(
-                                sectionEnd +
+                                loopEnd +
                                   (measures * effectiveBeatsPerMeasure) /
                                     (effectiveBpm / 60),
                               )
-                              setSectionStart(sectionEnd)
-                              setSectionEnd(newEnd)
+                              setLoopStart(loopEnd)
+                              setLoopEnd(newEnd)
                             }}
                           >
                             <ArrowBigRightDash />
@@ -624,9 +616,9 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
               {videoEntry.loops && Object.keys(videoEntry.loops).length > 0 ? (
                 <div className='flex flex-col'>
                   {Object.values(videoEntry.loops)
-                    .sort((a, b) => a.sectionStart - b.sectionStart)
+                    .sort((a, b) => a.loopStart - b.loopStart)
                     .map(loop => {
-                      const key = `${loop.sectionStart}-${loop.sectionEnd}`
+                      const key = `${loop.loopStart}-${loop.loopEnd}`
                       return renderLoop(loop, key)
                     })}
                 </div>
@@ -646,8 +638,8 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
             duration={duration}
             handleSeek={handleSeek}
             handleIntervalChange={handleIntervalChange}
-            sectionStart={sectionStart}
-            sectionEnd={sectionEnd}
+            loopStart={loopStart}
+            loopEnd={loopEnd}
             timestampFormatter={timestampFormatter}
             isPlaying={isPlaying}
             onPlay={handlePlay}
