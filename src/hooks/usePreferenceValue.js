@@ -1,29 +1,27 @@
-import { Preferences } from '@capacitor/preferences'
 import { useEffect, useState } from 'react'
+
+import { getJSON, setJSON } from '@lib/storage/mediaPreferencesService'
 
 export const usePreferenceValue = ({ key }) => {
   const [preference, setPreference] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const setValue = async (key, val) => {
-    const value = JSON.stringify(val)
-    await Preferences.set({
-      key,
-      value,
-    })
-    setPreference(value)
+  const setValue = async (keyArg, val) => {
+    try {
+      await setJSON(keyArg, val)
+      // keep local state in sync with what we just wrote
+      setPreference(JSON.stringify(val))
+    } catch (err) {
+      setError(err)
+    }
   }
-
-  // const removeKey = async key => {
-  //   await Preferences.remove({ key })
-  // }
 
   useEffect(() => {
     const fetchValue = async () => {
       try {
-        const value = await getValue(key)
-        setPreference(value)
+        const json = await getJSON(key, null)
+        setPreference(json !== null ? JSON.stringify(json) : null)
       } catch (err) {
         setError(err)
       } finally {
@@ -31,13 +29,7 @@ export const usePreferenceValue = ({ key }) => {
       }
     }
     fetchValue()
-  })
+  }, [key])
 
   return { preference, loading, error, setValue }
-}
-
-const getValue = async key => {
-  const { value } = await Preferences.get({ key })
-
-  return value
 }
