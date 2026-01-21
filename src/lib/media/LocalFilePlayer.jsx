@@ -1,45 +1,230 @@
-import React from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 
 import { MediaPlayer } from './MediaPlayer'
 
-// LocalFilePlayer will drive an HTMLMediaElement (<audio> or <video>) for local files
-// and optionally use the Web Audio API for advanced processing.
-// This file currently contains only the class skeleton; behavior will be added in a later step.
+// LocalFilePlayer drives an HTMLMediaElement (<audio> or <video>) for local files
+// and can optionally use the Web Audio API for advanced audio processing.
 
 export class LocalFilePlayer extends MediaPlayer {
   constructor(args) {
     super(args)
+    this._mediaElement = null
+    this._audioContext = null
+    this._audioSourceNode = null
   }
 
-  // Implement core control methods in a later step.
-  play() {
-    super.play()
+  // Called by the React wrapper when the underlying media element mounts.
+  _attachMediaElement(el) {
+    this._mediaElement = el
+  }
+
+  // ----- Core control methods -----
+
+  async play() {
+    if (!this._mediaElement) return
+    try {
+      await this._mediaElement.play()
+      this._updateIsPlaying(true)
+    } catch {
+      // Ignore play() rejections (e.g. autoplay restrictions).
+    }
   }
 
   pause() {
-    super.pause()
+    if (!this._mediaElement) return
+    this._mediaElement.pause()
+    this._updateIsPlaying(false)
   }
 
   seekTo(seconds) {
-    super.seekTo(seconds)
+    if (!this._mediaElement) return
+    this._mediaElement.currentTime = seconds
+    this._updateCurrentTime(seconds)
   }
 
   setPlaybackRate(rate) {
-    super.setPlaybackRate(rate)
+    if (!this._mediaElement) return
+    this._mediaElement.playbackRate = rate
+    this._updatePlaybackRate(rate)
   }
 
   getCurrentTime() {
-    return super.getCurrentTime()
+    if (!this._mediaElement) return this.currentTime
+    return this._mediaElement.currentTime ?? 0
   }
 
   getDuration() {
-    return super.getDuration()
+    if (!this._mediaElement) return this.duration
+    return this._mediaElement.duration ?? 0
   }
 
-  // LocalFilePlayer can override advanced processing hooks using Web Audio API later.
+  // ----- Lifecycle -----
+
+  destroy() {
+    if (this._mediaElement) {
+      this._mediaElement.pause()
+    }
+    if (this._audioSourceNode) {
+      try {
+        this._audioSourceNode.disconnect()
+      } catch {}
+      this._audioSourceNode = null
+    }
+    if (this._audioContext) {
+      try {
+        this._audioContext.close()
+      } catch {}
+      this._audioContext = null
+    }
+    this._mediaElement = null
+  }
+
+  // ----- Rendering -----
 
   renderComponent() {
-    // Will eventually return an <audio> or <video> element wired to this instance.
+    return <LocalFileMediaElement player={this} />
+  }
+}
+
+function LocalFileMediaElement({ player }) {
+  const mediaRef = useRef(null)
+
+  const { sourceUrl, mimeType } = player.source || {}
+  const isVideo = mimeType?.startsWith('video')
+
+  const setRef = useCallback(
+    el => {
+      mediaRef.current = el
+      if (el) {
+        player._attachMediaElement(el)
+      }
+    },
+    [player],
+  )
+
+  useEffect(() => {
+    const el = mediaRef.current
+    if (!el) return
+
+    let audioContext = null
+    let sourceNode = null
+
+    const handleLoadedMetadata = async () => {
+      const duration = el.duration ?? 0
+      const current = el.currentTime ?? 0
+      const rate = el.playbackRate ?? 1
+
+      if (player.whenReady) {
+        await player.whenReady()
+      }
+
+      player._updateDuration(duration)
+      player._updateCurrentTime(current)
+      player._updatePlaybackRate(rate)
+
+      const meta = player._metadata ?? {}
+      if (meta.lastPlaybackPosition != null) {
+        el.currentTime = meta.lastPlaybackPosition
+        player._updateCurrentTime(meta.lastPlaybackPosition)
+      }
+      if (meta.lastPlaybackRate != null) {
+        el.playbackRate = meta.lastPlaybackRate
+        player._updatePlaybackRate(meta.lastPlaybackRate)
+      }
+
+      player.callbacks.onReady({
+        duration,
+        currentTime: current,
+        playbackRate: rate,
+      })
+    }
+
+    const handleTimeUpdate = () => {
+      player._updateCurrentTime(el.currentTime ?? 0)
+    }
+
+    const handlePlay = () => {
+      player._updateIsPlaying(true)
+    }
+
+    const handlePause = () => {
+      player._updateIsPlaying(false)
+    }
+
+    const handleRateChange = () => {
+      player._updatePlaybackRate(el.playbackRate ?? 1)
+    }
+
+    el.addEventListener('loadedmetadata', handleLoadedMetadata)
+    el.addEventListener('timeupdate', handleTimeUpdate)
+    el.addEventListener('play', handlePlay)
+    el.addEventListener('pause', handlePause)
+    el.addEventListener('ratechange', handleRateChange)
+
+    // Optional Web Audio wiring for audio sources.
+    const AudioCtx =
+      typeof window !== 'undefined' &&
+      (window.AudioContext || window.webkitAudioContext)
+
+    if (!isVideo && AudioCtx && !player._audioContext) {
+      try {
+        audioContext = new AudioCtx()
+        sourceNode = audioContext.createMediaElementSource(el)
+        sourceNode.connect(audioContext.destination)
+
+        player._audioContext = audioContext
+        player._audioSourceNode = sourceNode
+      } catch {
+        // If Web Audio setup fails, fall back to plain HTMLMediaElement audio.
+      }
+    }
+
+    return () => {
+      el.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      el.removeEventListener('timeupdate', handleTimeUpdate)
+      el.removeEventListener('play', handlePlay)
+      el.removeEventListener('pause', handlePause)
+      el.removeEventListener('ratechange', handleRateChange)
+
+      if (sourceNode) {
+        try {
+          sourceNode.disconnect()
+        } catch {}
+      }
+      if (audioContext) {
+        try {
+          audioContext.close()
+        } catch {}
+      }
+    }
+  }, [player, isVideo])
+
+  if (!sourceUrl) {
     return null
   }
+
+  const commonProps = {
+    ref: setRef,
+    src: sourceUrl,
+    controls: true,
+    className: isVideo
+      ? 'absolute inset-0 h-full w-full'
+      : 'w-full',
+  }
+
+  if (isVideo) {
+    return (
+      <div className='w-full overflow-hidden rounded-lg border bg-card flex-none'>
+        <div className='relative w-full aspect-video'>
+          <video {...commonProps} />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className='w-full overflow-hidden rounded-lg border bg-card flex-none p-3'>
+      <audio {...commonProps} />
+    </div>
+  )
 }
