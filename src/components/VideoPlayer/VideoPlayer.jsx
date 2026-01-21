@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { ArrowBigLeftDash, ArrowBigRightDash, Pencil, X } from 'lucide-react'
 
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
@@ -57,8 +57,16 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     useSelectedAsParent: true,
   }
   const measures = appSettings['measures']
-  const videos = JSON.parse(videosString) || {}
-  const videoEntry = videos[id] || {}
+
+  const videos = useMemo(
+    () => JSON.parse(videosString) || {},
+    [videosString],
+  )
+
+  const videoEntry = useMemo(
+    () => videos[id] || {},
+    [videos, id],
+  )
 
   const rawBpm = playerMetadata?.bpm ?? videoEntry.bpm
   const rawBeatsPerMeasure =
@@ -619,9 +627,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
           <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
             <Card className='flex h-full flex-col overflow-hidden p-2 pb-6'>
-              {videos[id].loops && Object.keys(videos[id].loops).length > 0 ? (
+              {videoEntry.loops && Object.keys(videoEntry.loops).length > 0 ? (
                 <div className='flex flex-col'>
-                  {Object.values(videos[id].loops)
+                  {Object.values(videoEntry.loops)
                     .sort((a, b) => a.sectionStart - b.sectionStart)
                     .map(loop => {
                       const key = `${loop.sectionStart}-${loop.sectionEnd}`
@@ -639,7 +647,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
         <div className='flex flex-none h-[20vh] md:h-unset items-center w-full border-t bg-card px-4 py-2'>
           <Bar
-            title={videos[id].title}
+            title={videoEntry.title}
             currentTime={currentTime}
             duration={duration}
             handleSeek={handleSeek}
