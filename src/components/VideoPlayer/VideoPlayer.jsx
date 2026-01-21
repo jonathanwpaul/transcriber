@@ -141,6 +141,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     const source = {
       sourceUrl: entry.sourceUrl ?? null,
       mimeType: entry.mimeType ?? null,
+      filePath: entry.filePath ?? null,
+      fileDirectory: entry.fileDirectory ?? null,
     }
 
     let PlayerClass = null

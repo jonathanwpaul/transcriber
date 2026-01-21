@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Code2, Moon, Sun } from 'lucide-react'
 
 import { VideoPlayer } from './VideoPlayer/VideoPlayer'
@@ -37,6 +38,23 @@ const ACCEPTED_VIDEO_MIME_TYPES = [
 
 function makeLocalFileId(file) {
   return `file:${file.name}:${file.size}:${file.lastModified}`
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = reader.result
+      if (typeof result === 'string') {
+        const base64 = result.split(',')[1] || ''
+        resolve(base64)
+      } else {
+        reject(new Error('Unexpected FileReader result'))
+      }
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
 }
 
 export const Home = ({ showToast, themeMode, setThemeMode }) => {
@@ -90,30 +108,54 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     })
   }
 
-  const handleLocalFileSelect = file => {
+  const handleLocalFileSelect = async file => {
     if (!file) return
 
     const id = makeLocalFileId(file)
-    const newSourceUrl = URL.createObjectURL(file)
+    const mimeType = file.type || ''
 
-    const existing = videos[id]
-    if (existing?.sourceUrl && existing.sourceUrl.startsWith('blob:')) {
-      // Revoke prior object URL to avoid leaks
-      URL.revokeObjectURL(existing.sourceUrl)
+    // Only allow audio/video MIME types.
+    if (!mimeType.startsWith('audio/') && !mimeType.startsWith('video/')) {
+      showToast?.('Unsupported file type')
+      return
     }
 
-    videos[id] = {
-      ...(videos[id] || {}),
-      type: videoSources.FILE,
-      title: file.name,
-      fileName: file.name,
-      fileSize: file.size,
-      lastModified: file.lastModified,
-      mimeType: file.type,
-      sourceUrl: newSourceUrl,
-    }
+    // Persist the file with Capacitor Filesystem using a deterministic path
+    // derived from the local file id. This avoids relying on blob: URLs, which
+    // are not stable across reloads.
+    const safeId = id.replace(/[^a-zA-Z0-9-_]/g, '_')
+    const filePath = `media/${safeId}`
 
-    showVideoId(id)
+    try {
+      const base64Data = await fileToBase64(file)
+
+      await Filesystem.writeFile({
+        path: filePath,
+        data: base64Data,
+        directory: Directory.Data,
+      })
+
+      const existing = videos[id]
+
+      videos[id] = {
+        ...(existing || {}),
+        type: videoSources.FILE,
+        title: file.name,
+        fileName: file.name,
+        fileSize: file.size,
+        lastModified: file.lastModified,
+        mimeType,
+        filePath,
+        fileDirectory: Directory.Data,
+        // Do not persist blob: URLs – they are not stable across reloads.
+        sourceUrl: null,
+      }
+
+      showVideoId(id)
+    } catch (err) {
+      console.error('Failed to save file to Capacitor Filesystem', err)
+      showToast?.('Error saving local file')
+    }
   }
 
   const handleSubmit = () => {
@@ -125,9 +167,25 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
 
   const formatTimeString = timeString => new Date(timeString).toLocaleString()
 
-  const videoList = Object.keys(videos).sort((a, b) =>
-    videos[a]['last_accessed'] > videos[b]['last_accessed'] ? -1 : 1,
-  )
+  const videoList = Object.keys(videos)
+    .filter(key => {
+      const entry = videos[key]
+      if (!entry) return false
+
+      if (entry.type === videoSources.FILE) {
+        // Hide legacy local-file entries that only have blob: URLs persisted.
+        if (!entry.filePath) {
+          const src = entry.sourceUrl
+          if (!src || typeof src !== 'string') return false
+          if (src.startsWith('blob:')) return false
+        }
+      }
+
+      return true
+    })
+    .sort((a, b) =>
+      videos[a]['last_accessed'] > videos[b]['last_accessed'] ? -1 : 1,
+    )
 
   // if there's a cached entry and not one already selected, use that
   // if (videoList.length > 0 && !showVideoPlayer && !id) {

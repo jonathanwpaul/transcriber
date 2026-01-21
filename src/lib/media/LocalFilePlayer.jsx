@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Filesystem, Directory } from '@capacitor/filesystem'
 
 import { MediaPlayer } from './MediaPlayer'
 
@@ -87,7 +88,9 @@ export class LocalFilePlayer extends MediaPlayer {
 function LocalFileMediaElement({ player }) {
   const mediaRef = useRef(null)
 
-  const { sourceUrl, mimeType } = player.source || {}
+  const { sourceUrl, mimeType, filePath, fileDirectory } = player.source || {}
+  const [resolvedSourceUrl, setResolvedSourceUrl] = useState(sourceUrl || null)
+
   const isVideo = mimeType?.startsWith('video')
 
   const setRef = useCallback(
@@ -101,8 +104,48 @@ function LocalFileMediaElement({ player }) {
   )
 
   useEffect(() => {
+    let canceled = false
+
+    async function resolveSource() {
+      // If we have a persistent Capacitor file path, load it as a data URL.
+      if (filePath) {
+        try {
+          const directory = fileDirectory || Directory.Data
+          const result = await Filesystem.readFile({
+            path: filePath,
+            directory,
+          })
+          const base64Data = result.data
+          const mime = mimeType || 'application/octet-stream'
+          const dataUrl = `data:${mime};base64,${base64Data}`
+          if (!canceled) {
+            setResolvedSourceUrl(dataUrl)
+          }
+        } catch (err) {
+          console.error('Failed to read local media from Filesystem', err)
+          if (!canceled) {
+            // Fallback to whatever sourceUrl was provided (might be null/invalid).
+            setResolvedSourceUrl(sourceUrl || null)
+          }
+        }
+      } else {
+        setResolvedSourceUrl(sourceUrl || null)
+      }
+    }
+
+    resolveSource()
+
+    return () => {
+      canceled = true
+    }
+  }, [filePath, fileDirectory, mimeType, sourceUrl])
+
+  useEffect(() => {
     const el = mediaRef.current
-    if (!el) return
+    // If we don't yet have a media element or a resolved source URL, there's
+    // nothing to wire up. This effect will re-run once the element mounts or
+    // the source changes.
+    if (!el || !resolvedSourceUrl) return
 
     let audioContext = null
     let sourceNode = null
@@ -199,15 +242,15 @@ function LocalFileMediaElement({ player }) {
       player._audioSourceNode = null
       player._audioContext = null
     }
-  }, [player, isVideo])
+  }, [player, isVideo, resolvedSourceUrl])
 
-  if (!sourceUrl) {
+  if (!resolvedSourceUrl) {
     return null
   }
 
   const commonProps = {
     ref: setRef,
-    src: sourceUrl,
+    src: resolvedSourceUrl,
     controls: true,
     className: isVideo ? 'absolute inset-0 h-full w-full' : 'w-full',
   }
