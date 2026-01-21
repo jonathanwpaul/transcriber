@@ -70,12 +70,10 @@ export class LocalFilePlayer extends MediaPlayer {
       } catch {}
       this._audioSourceNode = null
     }
-    if (this._audioContext) {
-      try {
-        this._audioContext.close()
-      } catch {}
-      this._audioContext = null
-    }
+    // Do not close the AudioContext here; it is owned by the React effect
+    // cleanup in LocalFileMediaElement. That avoids double-closing when the
+    // player is destroyed and the component unmounts.
+    this._audioContext = null
     this._mediaElement = null
   }
 
@@ -196,6 +194,10 @@ function LocalFileMediaElement({ player }) {
           audioContext.close()
         } catch {}
       }
+      // Clear references on the player so destroy() doesn't attempt to
+      // disconnect/close them a second time.
+      player._audioSourceNode = null
+      player._audioContext = null
     }
   }, [player, isVideo])
 
@@ -207,9 +209,7 @@ function LocalFileMediaElement({ player }) {
     ref: setRef,
     src: sourceUrl,
     controls: true,
-    className: isVideo
-      ? 'absolute inset-0 h-full w-full'
-      : 'w-full',
+    className: isVideo ? 'absolute inset-0 h-full w-full' : 'w-full',
   }
 
   if (isVideo) {
