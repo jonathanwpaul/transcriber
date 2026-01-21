@@ -19,23 +19,24 @@ import {
   TooltipTrigger,
 } from './ui/tooltip'
 
-const ACCEPTED_AUDIO_EXTENSIONS = ['mp3', 'wav']
 const ACCEPTED_AUDIO_MIME_TYPES = [
   'audio/mpeg',
+  'audio/mp3',
   'audio/mp3',
   'audio/wav',
   'audio/x-wav',
 ]
 
+const ACCEPTED_VIDEO_MIME_TYPES = [
+  'video/mp4',
+  'video/webm',
+  'video/ogg',
+  'video/quicktime',
+  'video/x-m4v',
+]
+
 function makeLocalFileId(file) {
   return `file:${file.name}:${file.size}:${file.lastModified}`
-}
-
-function isAcceptedAudioFile(file) {
-  const ext = (file.name.split('.').pop() || '').toLowerCase()
-  if (ACCEPTED_AUDIO_EXTENSIONS.includes(ext)) return true
-  if (ACCEPTED_AUDIO_MIME_TYPES.includes(file.type)) return true
-  return false
 }
 
 export const Home = ({ showToast, themeMode, setThemeMode }) => {
@@ -91,11 +92,6 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
 
   const handleLocalFileSelect = file => {
     if (!file) return
-
-    if (!isAcceptedAudioFile(file)) {
-      showToast('Please select a .mp3 or .wav file')
-      return
-    }
 
     const id = makeLocalFileId(file)
     const newSourceUrl = URL.createObjectURL(file)
@@ -224,7 +220,7 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
 
             <div className='grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center'>
               <FileUpload
-                accept='.mp3,.wav,audio/mpeg,audio/wav'
+                accept='audio/*,video/*'
                 onFileSelect={handleLocalFileSelect}
               />
               <Tooltip>

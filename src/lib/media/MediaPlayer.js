@@ -1,7 +1,7 @@
 // Abstract base class for all media players.
 // Handles shared metadata, playback state, storage integration, and callback wiring.
 
-import { getVideos, setVideos } from '@/lib/storage/mediaPreferencesService'
+import { getVideos, setVideos } from '@lib/storage/mediaPreferencesService'
 
 export class MediaPlayer {
   constructor({ id, callbacks = {}, source = {} } = {}) {
