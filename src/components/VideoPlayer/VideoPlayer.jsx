@@ -125,7 +125,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
   // Create / recreate the underlying MediaPlayer instance when the id or source changes.
   useEffect(() => {
-    if (!id || !videos[id]) {
+    if (!id || !videoEntry) {
       if (mediaPlayerRef.current) {
         mediaPlayerRef.current.destroy?.()
         mediaPlayerRef.current = null
@@ -133,13 +133,12 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
       return
     }
 
-    const entry = videos[id]
-    const typeForPlayer = entry.type
+    const typeForPlayer = videoEntry.type
     const source = {
-      sourceUrl: entry.sourceUrl ?? null,
-      mimeType: entry.mimeType ?? null,
-      filePath: entry.filePath ?? null,
-      fileDirectory: entry.fileDirectory ?? null,
+      sourceUrl: videoEntry.sourceUrl ?? null,
+      mimeType: videoEntry.mimeType ?? null,
+      filePath: videoEntry.filePath ?? null,
+      fileDirectory: videoEntry.fileDirectory ?? null,
     }
 
     let PlayerClass = null
@@ -200,7 +199,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
         mediaPlayerRef.current = null
       }
     }
-  }, [id, videosString])
+  }, [id, videoEntry])
 
   const handleIntervalChange = newValue => {
     const minTime = 1

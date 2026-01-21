@@ -20,22 +20,6 @@ import {
   TooltipTrigger,
 } from './ui/tooltip'
 
-const ACCEPTED_AUDIO_MIME_TYPES = [
-  'audio/mpeg',
-  'audio/mp3',
-  'audio/mp3',
-  'audio/wav',
-  'audio/x-wav',
-]
-
-const ACCEPTED_VIDEO_MIME_TYPES = [
-  'video/mp4',
-  'video/webm',
-  'video/ogg',
-  'video/quicktime',
-  'video/x-m4v',
-]
-
 function makeLocalFileId(file) {
   return `file:${file.name}:${file.size}:${file.lastModified}`
 }
