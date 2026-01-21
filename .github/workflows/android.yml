@@ -37,12 +37,26 @@ jobs:
           api-level: 33
           build-tools-version: 33.0.2
 
+      - name: Decode Android keystore
+        run: |
+          mkdir -p android/app
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+
+      - name: Create key.properties
+        run: |
+          cat <<EOF > android/key.properties
+          storeFile=release.keystore
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          keyPassword=${{ secrets.ANDROID_KEY_ALIAS_PASSWORD }}
+          EOF
+
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
       - name: Build with Gradle
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew clean assembleRelease
 
       - name: Generate release tag
         id: tag
@@ -66,6 +80,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: android/app/build/outputs/apk/debug/app-debug.apk
+          asset_path: android/app/build/outputs/apk/release/app-release.apk
           asset_name: transcriber.apk
           asset_content_type: application/vnd.android.package-archive
