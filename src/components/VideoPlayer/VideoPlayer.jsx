@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ArrowBigLeftDash, ArrowBigRightDash, Pencil, X } from 'lucide-react'
 
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
@@ -33,6 +33,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
   // collapse state for loop tree nodes, keyed by a stable path string
   const [collapsedLoops, setCollapsedLoops] = useState({})
+  // metadata emitted by the MediaPlayer (BPM, beats/measure, loops, etc.)
+  const [playerMetadata, setPlayerMetadata] = useState(null)
 
   const {
     preference: videosString,
@@ -56,13 +58,19 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   }
   const measures = appSettings['measures']
   const videos = JSON.parse(videosString) || {}
+  const videoEntry = videos[id] || {}
 
-  const { beatsPerMeasure, bpm, type: sourceType } = videos[id] || {}
+  const rawBpm = playerMetadata?.bpm ?? videoEntry.bpm
+  const rawBeatsPerMeasure =
+    playerMetadata?.beatsPerMeasure ?? videoEntry.beatsPerMeasure
 
   // Effective rhythm values with sensible defaults
   const effectiveBeatsPerMeasure =
-    typeof beatsPerMeasure === 'number' ? beatsPerMeasure : 4
-  const effectiveBpm = typeof bpm === 'number' && bpm > 0 ? bpm : null
+    typeof rawBeatsPerMeasure === 'number' ? rawBeatsPerMeasure : 4
+  const effectiveBpm =
+    typeof rawBpm === 'number' && rawBpm > 0 ? rawBpm : null
+
+  const loops = playerMetadata?.loops || videoEntry.loops || {}
 
   // UI-only state: whether we're showing traversal controls vs BPM editor
   const [isRhythmLocked, setIsRhythmLocked] = useState(null)
@@ -166,6 +174,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
       },
       onPlaybackRateChange: r => setPlaybackRate(r),
       onPlayingChange: playing => setIsPlaying(playing),
+      onMetadataChange: meta => setPlayerMetadata(meta),
     }
 
     const player = new PlayerClass({
@@ -241,30 +250,41 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   }
 
   const saveLoop = () => {
+    if (!mediaPlayerRef.current) return
     const key = `${sectionStart}-${sectionEnd}`
-    videos[id].loops = videos[id].loops || {}
+    const currentLoops = loops || {}
+    const nextLoops = _.cloneDeep(currentLoops)
 
     //find the path that this loop belongs into (nesting)
-    const path = calculatePath(videos[id].loops, {
+    const path = calculatePath(nextLoops, {
       sectionStart,
       sectionEnd,
     })
 
-    _.set(videos[id].loops, path.split('/'), {
-      ...(videos[id].loops[key] || {}), //for any other fields we want to save with loops
+    const existing = _.get(nextLoops, path, {})
+
+    _.set(nextLoops, path.split('/'), {
+      ...existing, // for any other fields we want to save with loops
       sectionStart,
       sectionEnd,
     })
-    setVideos('videos', videos)
+
+    mediaPlayerRef.current.setLoops(nextLoops).catch(() => {})
+    if (mediaPlayerRef.current.setLastLoopSelected) {
+      mediaPlayerRef.current
+        .setLastLoopSelected(key)
+        .catch(() => {})
+    }
   }
 
   const deleteLoop = loop => {
-    videos[id].loops = _.omit(
-      videos[id].loops,
+    if (!mediaPlayerRef.current) return
+    const currentLoops = loops || {}
+    const nextLoops = _.omit(
+      currentLoops,
       `${loop.sectionStart}-${loop.sectionEnd}`,
     )
-    console.log(videos[id])
-    setVideos('videos', videos)
+    mediaPlayerRef.current.setLoops(nextLoops).catch(() => {})
   }
 
   const loadLoop = loop => {
@@ -307,8 +327,17 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           onClick={() => loadLoop(loop)}
           onDelete={() => deleteLoop(loop)}
           onTitleChange={title => {
-            loop.title = title
-            setVideos('videos', videos)
+            if (!mediaPlayerRef.current) return
+            const currentLoops = loops || {}
+            const nextLoops = _.cloneDeep(currentLoops)
+            // pathKey uses sectionStart-sectionEnd chain; use it directly to locate this loop
+            const segments = pathKey.split('/')
+            const existingLoop = _.get(nextLoops, segments, {})
+            _.set(nextLoops, segments, {
+              ...existingLoop,
+              title,
+            })
+            mediaPlayerRef.current.setLoops(nextLoops).catch(() => {})
           }}
           startTime={loop.sectionStart}
           title={loop.title}
@@ -332,13 +361,13 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   }
 
   const handleBpmChange = newBpm => {
-    videos[id].bpm = newBpm
-    setVideos('videos', videos)
+    if (!mediaPlayerRef.current?.setBpm) return
+    mediaPlayerRef.current.setBpm(newBpm).catch(() => {})
   }
 
   const handleBeatsPerMeasureChange = newBeatsPerMeasure => {
-    videos[id].beatsPerMeasure = newBeatsPerMeasure
-    setVideos('videos', videos)
+    if (!mediaPlayerRef.current?.setBeatsPerMeasure) return
+    mediaPlayerRef.current.setBeatsPerMeasure(newBeatsPerMeasure).catch(() => {})
   }
 
   const handleMeasuresChange = newMeasures => {
@@ -346,13 +375,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   }
 
   // Persist default beatsPerMeasure (4) into the song entry if missing so it's
-  // treated like a real saved value.
+  // treated like a real saved value. This is now handled via MediaPlayer
+  // metadata; we keep this effect as a no-op placeholder for backward
+  // compatibility and potential cleanup.
   useEffect(() => {
-    if (!id || !videos[id]) return
-    if (typeof videos[id].beatsPerMeasure !== 'number') {
-      videos[id].beatsPerMeasure = 4
-      setVideos('videos', videos)
-    }
+    // intentionally left blank
   }, [id, videosString, setVideos])
 
   // Initialize rhythm lock from saved BPM / beats if present. Only run this
@@ -370,7 +397,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
       <div className='flex h-full w-full flex-col'>
         <div className='flex h-[5vh] flex-none items-center justify-between border-b bg-card px-4'>
           <div className='max-w-[80%] truncate text-sm font-medium'>
-            {videos[id]?.title || 'Now Playing'}
+            {playerMetadata?.title || videoEntry.title || 'Now Playing'}
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -391,7 +418,8 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
         <div className='mx-auto flex overflow-y-auto snap-y snap-mandatory h-full w-full max-w-6xl flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr] lg:p-4'>
           <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
             <Card className='flex h-full flex-col gap-6 p-4'>
-              {mediaPlayerRef.current && mediaPlayerRef.current.renderComponent()}
+              {mediaPlayerRef.current &&
+                mediaPlayerRef.current.renderComponent()}
 
               <div className='flex-1 grid gap-3 sm:grid-cols-3'>
                 <TimeTextInput
