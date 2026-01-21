@@ -66,6 +66,7 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     preference: videosString,
     loading,
     setValue: setVideos,
+    reload: reloadVideos,
   } = usePreferenceValue({
     key: 'videos',
   })
@@ -82,6 +83,15 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       setJSONText(videosString || '{}')
     }
   }, [videosString])
+
+  // When we return from the VideoPlayer view back to the Home view, reload the
+  // latest videos from storage so that metadata written by MediaPlayer
+  // subclasses (e.g. YouTube titles) is reflected in the Recents list.
+  useEffect(() => {
+    if (!showVideoPlayer && reloadVideos) {
+      reloadVideos()
+    }
+  }, [showVideoPlayer, reloadVideos])
 
   if (loading) return
 

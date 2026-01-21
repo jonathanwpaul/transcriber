@@ -17,6 +17,15 @@ export const usePreferenceValue = ({ key }) => {
     }
   }
 
+  const reload = async () => {
+    try {
+      const json = await getJSON(key, null)
+      setPreference(json !== null ? JSON.stringify(json) : null)
+    } catch (err) {
+      setError(err)
+    }
+  }
+
   useEffect(() => {
     const fetchValue = async () => {
       try {
@@ -31,5 +40,5 @@ export const usePreferenceValue = ({ key }) => {
     fetchValue()
   }, [key])
 
-  return { preference, loading, error, setValue }
+  return { preference, loading, error, setValue, reload }
 }
