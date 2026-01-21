@@ -92,6 +92,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   const handlePause = () => {
     if (!mediaPlayerRef.current) return
     mediaPlayerRef.current.pause()
+    if (mediaPlayerRef.current.setLastPlaybackPosition) {
+      mediaPlayerRef.current
+        .setLastPlaybackPosition(currentTime)
+        .catch(() => {})
+    }
   }
 
   /**
@@ -114,6 +119,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     if (!mediaPlayerRef.current) return
     setPlaybackRate(newValue)
     mediaPlayerRef.current.setPlaybackRate(newValue)
+    if (mediaPlayerRef.current.setLastPlaybackRate) {
+      mediaPlayerRef.current
+        .setLastPlaybackRate(newValue)
+        .catch(() => {})
+    }
   }
 
   // Create / recreate the underlying MediaPlayer instance when the id or source changes.
@@ -206,8 +216,17 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     newStart = Math.max(0, Math.min(newStart, duration))
     newEnd = Math.max(0, Math.min(newEnd, duration))
 
-    setSectionStart(round(newStart))
-    setSectionEnd(round(newEnd))
+    const roundedStart = round(newStart)
+    const roundedEnd = round(newEnd)
+
+    setSectionStart(roundedStart)
+    setSectionEnd(roundedEnd)
+
+    if (mediaPlayerRef.current?.setLastSectionPositions) {
+      mediaPlayerRef.current
+        .setLastSectionPositions(roundedStart, roundedEnd)
+        .catch(() => {})
+    }
 
     // keep playhead within loop
     if (currentTime < newStart) handleSeek(newStart)
@@ -216,6 +235,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
 
   const handleCloseVideo = () => {
     if (mediaPlayerRef.current) {
+      if (mediaPlayerRef.current.setLastPlaybackPosition) {
+        mediaPlayerRef.current
+          .setLastPlaybackPosition(currentTime)
+          .catch(() => {})
+      }
       mediaPlayerRef.current.destroy?.()
       mediaPlayerRef.current = null
     }
@@ -288,21 +312,40 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   }
 
   const loadLoop = loop => {
-    setSectionStart(loop['sectionStart'])
-    setSectionEnd(loop['sectionEnd'])
-    setCurrentTime(loop['sectionStart'])
+    const start = loop['sectionStart']
+    const end = loop['sectionEnd']
+    setSectionStart(start)
+    setSectionEnd(end)
+    setCurrentTime(start)
     if (mediaPlayerRef.current) {
-      mediaPlayerRef.current.seekTo(loop['sectionStart'])
+      if (mediaPlayerRef.current.setLastSectionPositions) {
+        mediaPlayerRef.current
+          .setLastSectionPositions(start, end)
+          .catch(() => {})
+      }
+      mediaPlayerRef.current.seekTo(start)
       // TODO: make appsetting for playing on load of loop
       mediaPlayerRef.current.play()
     }
   }
   const markLoopStart = () => {
-    setSectionStart(round(currentTime))
+    const newStart = round(currentTime)
+    setSectionStart(newStart)
+    if (mediaPlayerRef.current?.setLastSectionPositions) {
+      mediaPlayerRef.current
+        .setLastSectionPositions(newStart, sectionEnd)
+        .catch(() => {})
+    }
   }
 
   const markLoopEnd = () => {
-    setSectionEnd(round(currentTime))
+    const newEnd = round(currentTime)
+    setSectionEnd(newEnd)
+    if (mediaPlayerRef.current?.setLastSectionPositions) {
+      mediaPlayerRef.current
+        .setLastSectionPositions(sectionStart, newEnd)
+        .catch(() => {})
+    }
   }
 
   const restartLoop = () => {
