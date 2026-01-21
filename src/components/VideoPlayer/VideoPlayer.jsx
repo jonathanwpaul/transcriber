@@ -5,7 +5,7 @@ import { ArrowBigLeftDash, ArrowBigRightDash, Pencil, X } from 'lucide-react'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter, round } from '@utils/video'
 import { videoSources } from '@utils/constants'
-import { YouTubePlayer, LocalFilePlayer } from '@lib/media'
+import { YouTubePlayer, LocalFilePlayer } from '../../lib/media'
 
 import {
   Bar,
@@ -107,6 +107,82 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     setPlaybackRate(newValue)
     mediaPlayerRef.current.setPlaybackRate(newValue)
   }
+
+  // Create / recreate the underlying MediaPlayer instance when the id or source changes.
+  useEffect(() => {
+    if (!id || !videos[id]) {
+      if (mediaPlayerRef.current) {
+        mediaPlayerRef.current.destroy?.()
+        mediaPlayerRef.current = null
+      }
+      return
+    }
+
+    const entry = videos[id]
+    const typeForPlayer = entry.type
+    const source = {
+      sourceUrl: entry.sourceUrl ?? null,
+      mimeType: entry.mimeType ?? null,
+    }
+
+    let PlayerClass = null
+    if (typeForPlayer === videoSources.YOUTUBE) {
+      PlayerClass = YouTubePlayer
+    } else if (typeForPlayer === videoSources.FILE) {
+      PlayerClass = LocalFilePlayer
+    }
+
+    // If we don't recognize the type, clean up and bail.
+    if (!PlayerClass) {
+      if (mediaPlayerRef.current) {
+        mediaPlayerRef.current.destroy?.()
+        mediaPlayerRef.current = null
+      }
+      return
+    }
+
+    // Destroy any existing player instance before creating a new one.
+    if (mediaPlayerRef.current) {
+      mediaPlayerRef.current.destroy?.()
+      mediaPlayerRef.current = null
+    }
+
+    const callbacks = {
+      onReady: ({ duration: d, currentTime: ct, playbackRate: pr }) => {
+        setDuration(d)
+        setCurrentTime(ct)
+        setPlaybackRate(pr)
+        // For now, default loop to full duration on ready.
+        setSectionStart(0)
+        setSectionEnd(d)
+      },
+      onDuration: d => setDuration(d),
+      onTimeUpdate: t => {
+        const rounded = round(t)
+        setCurrentTime(rounded)
+        if (t > sectionEndRef.current) {
+          handleSeek(sectionStartRef.current)
+        }
+      },
+      onPlaybackRateChange: r => setPlaybackRate(r),
+      onPlayingChange: playing => setIsPlaying(playing),
+    }
+
+    const player = new PlayerClass({
+      id,
+      source,
+      callbacks,
+    })
+
+    mediaPlayerRef.current = player
+
+    return () => {
+      player.destroy?.()
+      if (mediaPlayerRef.current === player) {
+        mediaPlayerRef.current = null
+      }
+    }
+  }, [id, videosString])
 
   const handleIntervalChange = newValue => {
     const minTime = 1
@@ -315,32 +391,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
         <div className='mx-auto flex overflow-y-auto snap-y snap-mandatory h-full w-full max-w-6xl flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr] lg:p-4'>
           <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
             <Card className='flex h-full flex-col gap-6 p-4'>
-              {sourceType === videoSources.YOUTUBE && (
-                <YouTubePlayer
-                  id={id}
-                  source={{ sourceUrl: null, mimeType: 'video/youtube' }}
-                  callbacks={{
-                    onReady: ({ duration: d, currentTime: ct, playbackRate: pr }) => {
-                      setDuration(d)
-                      setCurrentTime(ct)
-                      setPlaybackRate(pr)
-                      setSectionStart(0)
-                      setSectionEnd(d)
-                    },
-                    onDuration: d => setDuration(d),
-                    onTimeUpdate: t => {
-                      const rounded = round(t)
-                      setCurrentTime(rounded)
-                      if (t > sectionEndRef.current) {
-                        handleSeek(sectionStartRef.current)
-                      }
-                    },
-                    onPlaybackRateChange: r => setPlaybackRate(r),
-                    onPlayingChange: playing => setIsPlaying(playing),
-                  }}
-                  ref={mediaPlayerRef}
-                />
-              )}
+              {mediaPlayerRef.current && mediaPlayerRef.current.renderComponent()}
 
               <div className='flex-1 grid gap-3 sm:grid-cols-3'>
                 <TimeTextInput
