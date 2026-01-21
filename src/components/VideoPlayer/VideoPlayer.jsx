@@ -5,6 +5,7 @@ import { ArrowBigLeftDash, ArrowBigRightDash, Pencil, X } from 'lucide-react'
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter, round } from '@utils/video'
 import { videoSources } from '@utils/constants'
+import { YouTubePlayer, LocalFilePlayer } from '@lib/media'
 
 import {
   Bar,
@@ -12,7 +13,6 @@ import {
   TimeTextInput,
   SavedSection,
   ScrubbableNumberInput,
-  YouTubeSource,
 } from './components'
 
 import { Button, Card } from '../ui'
@@ -67,37 +67,23 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   // UI-only state: whether we're showing traversal controls vs BPM editor
   const [isRhythmLocked, setIsRhythmLocked] = useState(null)
 
-  const playerRef = useRef()
-  const timerRef = useRef()
+  const mediaPlayerRef = useRef(null)
   const sectionStartRef = useRef()
   const sectionEndRef = useRef()
   sectionStartRef.current = sectionStart
   sectionEndRef.current = sectionEnd
 
   // disable controls until the underlying player has mounted
-  const controlsDisabled = !playerRef.current
-
-  const timeIncrement = useCallback(() => {
-    setCurrentTime(round(playerRef.current?.getCurrentTime()))
-    if (playerRef.current?.getCurrentTime() > sectionEndRef.current) {
-      handleSeek(sectionStartRef.current)
-    }
-  }, [])
+  const controlsDisabled = !mediaPlayerRef.current
 
   const handlePlay = () => {
-    if (!playerRef.current) return
-    setIsPlaying(true)
-    timerRef.current = setInterval(
-      timeIncrement,
-      100, //every 0.1s
-    )
-    playerRef.current.play()
+    if (!mediaPlayerRef.current) return
+    mediaPlayerRef.current.play()
   }
 
   const handlePause = () => {
-    clearInterval(timerRef.current)
-    setIsPlaying(false)
-    playerRef.current?.pause()
+    if (!mediaPlayerRef.current) return
+    mediaPlayerRef.current.pause()
   }
 
   /**
@@ -108,25 +94,18 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   }
 
   const handleSeek = newValue => {
-    if (!playerRef.current) return
+    if (!mediaPlayerRef.current) return
     const target = round(newValue)
 
     // Immediately move React state and the underlying player.
     setCurrentTime(target)
-    playerRef.current.seekTo(target)
-
-    // If we're currently playing, restart the timer interval so that
-    // currentTime continues to advance smoothly after the seek.
-    if (isPlaying) {
-      clearInterval(timerRef.current)
-      timerRef.current = setInterval(timeIncrement, 100)
-    }
+    mediaPlayerRef.current.seekTo(target)
   }
 
   const handlePlaybackRateChange = newValue => {
-    if (!playerRef.current) return
+    if (!mediaPlayerRef.current) return
     setPlaybackRate(newValue)
-    playerRef.current.setPlaybackRate(newValue)
+    mediaPlayerRef.current.setPlaybackRate(newValue)
   }
 
   const handleIntervalChange = newValue => {
@@ -151,7 +130,10 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   }
 
   const handleCloseVideo = () => {
-    playerRef.current = null
+    if (mediaPlayerRef.current) {
+      mediaPlayerRef.current.destroy?.()
+      mediaPlayerRef.current = null
+    }
     setShowVideoPlayer(false)
   }
 
@@ -213,10 +195,11 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
     setSectionStart(loop['sectionStart'])
     setSectionEnd(loop['sectionEnd'])
     setCurrentTime(loop['sectionStart'])
-    playerRef.current.seekTo(loop['sectionStart'])
-
-    //TODO: make appsetting for playing on load of loop
-    playerRef.current?.play()
+    if (mediaPlayerRef.current) {
+      mediaPlayerRef.current.seekTo(loop['sectionStart'])
+      // TODO: make appsetting for playing on load of loop
+      mediaPlayerRef.current.play()
+    }
   }
   const markLoopStart = () => {
     setSectionStart(round(currentTime))
@@ -227,9 +210,9 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
   }
 
   const restartLoop = () => {
-    if (!playerRef.current) return
+    if (!mediaPlayerRef.current) return
     setCurrentTime(sectionStart)
-    playerRef.current.seekTo(sectionStart)
+    mediaPlayerRef.current.seekTo(sectionStart)
   }
 
   const renderLoop = (loop, pathKey) => {
@@ -333,19 +316,29 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
           <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
             <Card className='flex h-full flex-col gap-6 p-4'>
               {sourceType === videoSources.YOUTUBE && (
-                <YouTubeSource
+                <YouTubePlayer
                   id={id}
-                  onPause={handlePause}
-                  onPlay={handlePlay}
-                  playerRef={playerRef}
-                  setCurrentTime={setCurrentTime}
-                  setDuration={setDuration}
-                  setIsPlaying={setIsPlaying}
-                  setPlaybackRate={setPlaybackRate}
-                  setSectionEnd={setSectionEnd}
-                  setSectionStart={setSectionStart}
-                  setVideos={setVideos}
-                  videos={videos}
+                  source={{ sourceUrl: null, mimeType: 'video/youtube' }}
+                  callbacks={{
+                    onReady: ({ duration: d, currentTime: ct, playbackRate: pr }) => {
+                      setDuration(d)
+                      setCurrentTime(ct)
+                      setPlaybackRate(pr)
+                      setSectionStart(0)
+                      setSectionEnd(d)
+                    },
+                    onDuration: d => setDuration(d),
+                    onTimeUpdate: t => {
+                      const rounded = round(t)
+                      setCurrentTime(rounded)
+                      if (t > sectionEndRef.current) {
+                        handleSeek(sectionStartRef.current)
+                      }
+                    },
+                    onPlaybackRateChange: r => setPlaybackRate(r),
+                    onPlayingChange: playing => setIsPlaying(playing),
+                  }}
+                  ref={mediaPlayerRef}
                 />
               )}
 
@@ -364,7 +357,7 @@ export const VideoPlayer = ({ id, setShowVideoPlayer, showToast, type }) => {
                   disabled={controlsDisabled}
                   onChange={value => {
                     setCurrentTime(value)
-                    playerRef.current.seekTo(value)
+                    mediaPlayerRef.current?.seekTo(value)
                   }}
                   label='current'
                   changeAmount={0.5}
