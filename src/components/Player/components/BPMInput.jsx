@@ -67,12 +67,6 @@ export const BPMInput = ({
     setLastTap(now)
   }
 
-  const handleBeatsPerMeasureChange = newBeatsPerMeasure => {
-    if (typeof newBeatsPerMeasure !== 'number') return
-    if (Number.isNaN(newBeatsPerMeasure)) return
-    onBeatsPerMeasureChange(newBeatsPerMeasure)
-  }
-
   return (
     <TooltipProvider>
       <div className='flex h-full items-center gap-3 md:justify-start'>
@@ -84,7 +78,7 @@ export const BPMInput = ({
             </div>
             <div className='flex-1'>
               <ScrubbableNumberInput
-                value={bpm ?? ''}
+                value={bpm}
                 onChange={val => {
                   setBpm(val)
                   onChange(val)
@@ -100,8 +94,8 @@ export const BPMInput = ({
             </div>
             <div className='flex-1'>
               <ScrubbableNumberInput
-                value={beatsPerMeasure ?? ''}
-                onChange={handleBeatsPerMeasureChange}
+                value={beatsPerMeasure}
+                onChange={onBeatsPerMeasureChange}
                 step={1}
                 min={1}
               />

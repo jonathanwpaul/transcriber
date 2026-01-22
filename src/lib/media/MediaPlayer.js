@@ -32,9 +32,14 @@ export class MediaPlayer {
 
     // Persisted metadata for this media id.
     this._metadata = {
+      type: null,
+      sourceUrl: null,
+      mimeType: null,
+      filePath: null,
+      fileDirectory: null,
       bpm: null,
-      beatsPerMeasure: null,
-      loops: null,
+      beatsPerMeasure: 4,
+      loops: {},
       title: null,
       lastLoopSelected: null,
       lastPlaybackRate: null,
@@ -54,23 +59,11 @@ export class MediaPlayer {
 
     const videos = await getVideos()
     const entry = videos?.[this.id] ?? {}
+    console.log({ entry })
 
     this._metadata = {
       ...this._metadata,
-      bpm: entry.bpm ?? this._metadata.bpm,
-      beatsPerMeasure: entry.beatsPerMeasure ?? this._metadata.beatsPerMeasure,
-      loops: entry.loops ?? this._metadata.loops,
-      title: entry.title ?? this._metadata.title,
-      lastLoopSelected:
-        entry.lastLoopSelected ?? this._metadata.lastLoopSelected,
-      lastPlaybackRate:
-        entry.lastPlaybackRate ?? this._metadata.lastPlaybackRate,
-      lastLoopStartPosition:
-        entry.lastLoopStartPosition ?? this._metadata.lastLoopStartPosition,
-      lastLoopEndPosition:
-        entry.lastLoopEndPosition ?? this._metadata.lastLoopEndPosition,
-      lastPlaybackPosition:
-        entry.lastPlaybackPosition ?? this._metadata.lastPlaybackPosition,
+      ...entry,
     }
 
     this.callbacks.onMetadataChange(this._metadata)
@@ -98,6 +91,8 @@ export class MediaPlayer {
       ...videos,
       [this.id]: nextEntry,
     })
+
+    console.log({ patch })
 
     this._metadata = {
       ...this._metadata,
