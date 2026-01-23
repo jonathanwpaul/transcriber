@@ -1,10 +1,9 @@
 import _ from 'lodash'
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ArrowBigLeftDash, ArrowBigRightDash, Pencil, X } from 'lucide-react'
 
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter, round } from '@utils/video'
-import { videoSources } from '@utils/constants'
 import { YouTubePlayer, LocalFilePlayer } from '../../lib/media'
 
 import {
@@ -50,19 +49,7 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
   }
   const measures = appSettings['measures']
 
-  console.log(playerMetadata)
-
-  const rawBpm = playerMetadata.bpm
-  const rawBeatsPerMeasure = playerMetadata.beatsPerMeasure
-
-  // Effective rhythm values with sensible defaults
-  const effectiveBeatsPerMeasure = rawBeatsPerMeasure
-  const effectiveBpm = rawBpm
-
-  // UI-only state: whether we're showing traversal controls vs BPM editor
-  const [isRhythmLocked, setIsRhythmLocked] = useState(
-    () => !(effectiveBpm !== null && effectiveBeatsPerMeasure !== null),
-  )
+  const [isRhythmLocked, setIsRhythmLocked] = useState(false)
 
   const mediaPlayerRef = useRef(null)
   const loopStartRef = useRef()
@@ -144,12 +131,18 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
     }
 
     const callbacks = {
-      onReady: ({ duration: d, currentTime: ct, playbackRate: pr }) => {
+      onReady: ({
+        duration: d,
+        currentTime: ct,
+        playbackRate: pr,
+        rhythmLocked,
+      }) => {
         setDuration(d)
         setCurrentTime(ct)
         setPlaybackRate(pr)
         setLoopStart(0)
         setLoopEnd(d)
+        setIsRhythmLocked(rhythmLocked)
       },
       onDuration: d => setDuration(d),
       onTimeUpdate: t => {
@@ -247,7 +240,6 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
   }
 
   const saveLoop = () => {
-    const key = `${loopStart}-${loopEnd}`
     const currentLoops = playerMetadata.loops || {}
     const nextLoops = _.cloneDeep(currentLoops)
 
@@ -265,7 +257,6 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
       loopEnd,
     })
 
-    console.log({ nextLoops })
     mediaPlayerRef.current.setLoops(nextLoops)
   }
 
@@ -366,13 +357,11 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
   }
 
   const handleBpmChange = newBpm => {
-    mediaPlayerRef.current.setBpm(newBpm).catch(() => {})
+    mediaPlayerRef.current.setBpm(newBpm)
   }
 
   const handleBeatsPerMeasureChange = newBeatsPerMeasure => {
-    mediaPlayerRef.current
-      .setBeatsPerMeasure(newBeatsPerMeasure)
-      .catch(() => {})
+    mediaPlayerRef.current.setBeatsPerMeasure(newBeatsPerMeasure)
   }
 
   const handleMeasuresChange = newMeasures => {
@@ -446,12 +435,15 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
               <div className='flex-1 grid gap-4 items-start md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]'>
                 {!isRhythmLocked ? (
                   <BPMInput
-                    value={effectiveBpm ?? ''}
+                    value={playerMetadata.bpm}
                     onChange={handleBpmChange}
-                    beatsPerMeasure={effectiveBeatsPerMeasure}
+                    beatsPerMeasure={playerMetadata.beatsPerMeasure}
                     onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
                     onSubmit={() => {
-                      if (!effectiveBpm || !effectiveBeatsPerMeasure) {
+                      if (
+                        !playerMetadata.bpm ||
+                        !playerMetadata.beatsPerMeasure
+                      ) {
                         showToast(
                           'provide both BPM and beats/measure to use this function',
                         )
@@ -466,8 +458,8 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
                       <div className='flex flex-col justify-end gap-1 text-xs text-muted-foreground'>
                         <div className='font-medium'>Rhythm locked</div>
                         <div>
-                          BPM: {effectiveBpm ?? '—'} • beats/measure:{' '}
-                          {effectiveBeatsPerMeasure ?? '—'}
+                          BPM: {playerMetadata.bpm ?? '—'} • beats/measure:{' '}
+                          {playerMetadata.beatsPerMeasure ?? '—'}
                         </div>
                       </div>
 
@@ -497,7 +489,10 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
                             variant='outline'
                             size='lg'
                             onClick={() => {
-                              if (!effectiveBpm || !effectiveBeatsPerMeasure) {
+                              if (
+                                !playerMetadata.bpm ||
+                                !playerMetadata.beatsPerMeasure
+                              ) {
                                 showToast(
                                   'provide both BPM and beats/measure to use this function',
                                 )
@@ -505,8 +500,8 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
                               }
                               const newStart = Math.round(
                                 loopStart -
-                                  (measures * effectiveBeatsPerMeasure) /
-                                    (effectiveBpm / 60),
+                                  (measures * playerMetadata.beatsPerMeasure) /
+                                    (playerMetadata.bpm / 60),
                               )
                               setLoopEnd(loopStart)
                               setLoopStart(newStart)
@@ -539,7 +534,10 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
                             variant='outline'
                             size='lg'
                             onClick={() => {
-                              if (!effectiveBpm || !effectiveBeatsPerMeasure) {
+                              if (
+                                !playerMetadata.bpm ||
+                                !playerMetadata.beatsPerMeasure
+                              ) {
                                 showToast(
                                   'provide both BPM and beats/measure to use this function',
                                 )
@@ -547,8 +545,8 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
                               }
                               const newEnd = Math.round(
                                 loopEnd +
-                                  (measures * effectiveBeatsPerMeasure) /
-                                    (effectiveBpm / 60),
+                                  (measures * playerMetadata.beatsPerMeasure) /
+                                    (playerMetadata.bpm / 60),
                               )
                               setLoopStart(loopEnd)
                               setLoopEnd(newEnd)

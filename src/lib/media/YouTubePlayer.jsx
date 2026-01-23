@@ -12,8 +12,6 @@ export class YouTubePlayer extends MediaPlayer {
     super(args)
     this._player = null
     this._timeInterval = null
-
-    console.log('constructing youtube player instance')
   }
 
   // ----- Internal helpers -----
@@ -71,6 +69,7 @@ export class YouTubePlayer extends MediaPlayer {
       duration,
       currentTime: current,
       playbackRate: rate,
+      rhythmLocked: this._metadata.bpm && this._metadata.beatsPerMeasure,
     })
   }
 

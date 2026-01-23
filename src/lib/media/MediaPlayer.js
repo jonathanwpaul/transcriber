@@ -59,14 +59,13 @@ export class MediaPlayer {
 
     const videos = await getVideos()
     const entry = videos?.[this.id] ?? {}
-    console.log({ entry })
 
     this._metadata = {
       ...this._metadata,
       ...entry,
     }
 
-    this.callbacks.onMetadataChange(this._metadata)
+    this._saveMetadata(this._metadata)
   }
 
   /**
@@ -91,8 +90,6 @@ export class MediaPlayer {
       ...videos,
       [this.id]: nextEntry,
     })
-
-    console.log({ patch })
 
     this._metadata = {
       ...this._metadata,
