@@ -1,20 +1,30 @@
 import _ from 'lodash'
 import { useState, useRef, useEffect } from 'react'
-import { ArrowBigLeftDash, ArrowBigRightDash, Pencil, X } from 'lucide-react'
+import {
+  ArrowBigLeftDash,
+  ArrowBigRightDash,
+  Flag,
+  Pause,
+  Pencil,
+  Play,
+  RotateCcw,
+  Save,
+  SkipBack,
+  X,
+} from 'lucide-react'
 
 import { usePreferenceValue } from '@hooks/usePreferenceValue'
 import { timestampFormatter, round } from '@utils/video'
 import { YouTubePlayer, LocalFilePlayer } from '../../lib/media'
 
 import {
-  Bar,
   BPMInput,
   TimeTextInput,
   SavedSection,
   ScrubbableNumberInput,
 } from './components'
 
-import { Button, Card } from '../ui'
+import { Button, Card, Slider } from '../ui'
 import {
   Tooltip,
   TooltipContent,
@@ -29,6 +39,8 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
   const [playbackRate, setPlaybackRate] = useState(1)
   const [loopStart, setLoopStart] = useState(0)
   const [loopEnd, setLoopEnd] = useState(0)
+  const [isScrubbing, setIsScrubbing] = useState(false)
+  const [scrubTime, setScrubTime] = useState(currentTime)
 
   // collapse state for loop tree nodes, keyed by a stable path string
   const [collapsedLoops, setCollapsedLoops] = useState({})
@@ -50,6 +62,12 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
   const measures = appSettings['measures']
 
   const [isRhythmLocked, setIsRhythmLocked] = useState(false)
+
+  useEffect(() => {
+    if (!isScrubbing) {
+      setScrubTime(currentTime)
+    }
+  }, [currentTime, isScrubbing])
 
   const mediaPlayerRef = useRef(null)
   const loopStartRef = useRef()
@@ -393,11 +411,194 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
           </Tooltip>
         </div>
 
-        <div className='mx-auto flex overflow-y-auto snap-y snap-mandatory h-full w-full max-w-6xl flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr] lg:p-4'>
+        <div className='mx-auto flex flex-1 overflow-y-auto snap-y snap-mandatory w-full max-w-6xl flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr] lg:p-4'>
           <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
             <Card className='flex h-full flex-col gap-6 p-4'>
               {mediaPlayerRef.current &&
                 mediaPlayerRef.current.renderComponent()}
+
+              <div className='w-full flex flex-col gap-2'>
+                <div className='flex flex-wrap items-center gap-6'>
+                  <div className='flex flex-col md:flex-row md:justify-end md:items-center w-full items-end gap-3'>
+                    <div className='order-2 flex items-center gap-5'>
+                      <div className='flex gap-2'>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type='button'
+                              variant='outline'
+                              size='icon'
+                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                              onClick={markLoopStart}
+                            >
+                              <Flag className='text-emerald-500' />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Mark loop start</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type='button'
+                              variant='outline'
+                              size='icon'
+                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                              onClick={markLoopEnd}
+                            >
+                              <Flag className='text-red-500' />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Mark loop end</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type='button'
+                              variant='secondary'
+                              size='icon'
+                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                              onClick={saveLoop}
+                            >
+                              <Save />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Save loop</TooltipContent>
+                        </Tooltip>
+                      </div>
+
+                      <div className='w-[2px] bg-muted self-stretch' />
+
+                      <div className='flex items-center gap-2'>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type='button'
+                              variant='outline'
+                              size='icon'
+                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                              onClick={restartPlayer}
+                            >
+                              <SkipBack />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Restart player</TooltipContent>
+                        </Tooltip>
+                        <Button
+                          type='button'
+                          size='icon'
+                          className='h-12 w-12 rounded-full'
+                          onClick={isPlaying ? handlePause : handlePlay}
+                          disabled={controlsDisabled}
+                          aria-label={isPlaying ? 'Pause' : 'Play'}
+                        >
+                          {isPlaying ? (
+                            <Pause className='h-7 w-7' />
+                          ) : (
+                            <Play className='h-7 w-7' />
+                          )}
+                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type='button'
+                              variant='outline'
+                              size='icon'
+                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                              onClick={restartLoop}
+                            >
+                              <RotateCcw />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Jump to loop start</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </div>
+
+                    {/* Playback rate slider (second on all layouts) */}
+                    <div className='order-1 flex items-center gap-2 w-full max-w-[12rem]'>
+                      <div className='text-xs text-muted-foreground'>
+                        {playbackRate?.toFixed(2)}x
+                      </div>
+                      <Slider
+                        min={0.125}
+                        max={2}
+                        step={0.125}
+                        value={[playbackRate]}
+                        onValueChange={val => handlePlaybackRateChange(val[0])}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Track sliders (loop + playback position) */}
+                  <div className='order-3 basis-full w-full'>
+                    <div className='relative w-full'>
+                      {/* loop region highlight behind sliders */}
+                      {duration > 0 && loopEnd > loopStart && (
+                        <div
+                          className='pointer-events-none absolute top-1/2 -translate-y-1/2 h-8 bg-muted z-0'
+                          style={{
+                            left: `${(Math.max(0, loopStart) / duration) * 100}%`,
+                            width: `${
+                              ((Math.min(duration, loopEnd) -
+                                Math.max(0, loopStart)) /
+                                duration) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      )}
+
+                      {/* loop range thumbs (transparent track, on top of highlight) */}
+                      <div className='absolute inset-0 flex items-center z-10'>
+                        <Slider
+                          min={0}
+                          max={duration}
+                          step={0.1}
+                          value={[loopStart, loopEnd]}
+                          onValueChange={handleIntervalChange}
+                          className='relative opacity-80'
+                          rangeClassName='bg-muted'
+                          thumbClassNames={[
+                            // Start thumb: rectangle extending to the left, with its
+                            // right edge (and right border) aligned exactly on the
+                            // track position.
+                            'relative rounded-full border-r-2 border-r-emerald-500 border-l-0 -translate-x-1/2 h-12 w-[10px] before:block before:absolute before:-bottom-6 before:-left-2 before:h-8 before:w-3 before:rounded-full before:bg-emerald-500',
+                            // End thumb: rectangle extending to the right, with its
+                            // left edge (and left border) aligned exactly on the
+                            // track position.
+                            'relative rounded-full border-l-2 border-l-red-500 border-r-0 translate-x-1/2 h-12 w-[10px] before:block before:absolute before:-bottom-6 before:-right-2 before:h-8 before:w-3 before:rounded-full before:bg-red-500',
+                          ]}
+                        />
+                      </div>
+
+                      {/* playback position (thin bar + thumb, above everything) */}
+                      <Slider
+                        min={0}
+                        max={duration}
+                        step={0.1}
+                        value={[isScrubbing ? scrubTime : currentTime]}
+                        onValueChange={val => {
+                          setIsScrubbing(true)
+                          setScrubTime(val[0])
+                        }}
+                        onValueCommit={val => {
+                          setIsScrubbing(false)
+                          handleSeek(val[0])
+                        }}
+                        className='relative z-20'
+                      />
+                    </div>
+                  </div>
+
+                  {/* Timestamps (always last on small screens) */}
+                  <div className='order-4 flex w-full justify-between text-xs text-muted-foreground'>
+                    <span>{timestampFormatter(currentTime)}</span>
+                    <span>{timestampFormatter(duration)}</span>
+                  </div>
+                </div>
+              </div>
 
               <div className='flex-1 grid gap-3 sm:grid-cols-3'>
                 <TimeTextInput
@@ -583,30 +784,6 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
               )}
             </Card>
           </section>
-        </div>
-
-        <div className='flex flex-none h-[20vh] md:h-unset items-center w-full border-t bg-card px-4 py-2'>
-          <Bar
-            title={playerMetadata.title}
-            currentTime={currentTime}
-            duration={duration}
-            handleSeek={handleSeek}
-            handleIntervalChange={handleIntervalChange}
-            loopStart={loopStart}
-            loopEnd={loopEnd}
-            timestampFormatter={timestampFormatter}
-            isPlaying={isPlaying}
-            onPlay={handlePlay}
-            onPause={handlePause}
-            restartPlayer={restartPlayer}
-            playbackRate={playbackRate}
-            handlePlaybackRateChange={handlePlaybackRateChange}
-            markLoopStart={markLoopStart}
-            markLoopEnd={markLoopEnd}
-            saveLoop={saveLoop}
-            restartLoop={restartLoop}
-            controlsDisabled={controlsDisabled}
-          />
         </div>
       </div>
     </TooltipProvider>

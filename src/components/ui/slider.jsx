@@ -38,7 +38,7 @@ export const Slider = React.forwardRef(
       >
         <SliderPrimitive.Track
           className={cn(
-            'relative grow overflow-hidden rounded-full bg-muted',
+            'relative grow overflow-hidden rounded-full bg-muted-foreground',
             orientation === 'vertical' ? 'h-full w-2' : 'h-2 w-full',
           )}
         >
@@ -52,7 +52,6 @@ export const Slider = React.forwardRef(
         </SliderPrimitive.Track>
         {Array.from({ length: thumbCount }).map((_, i) => (
           <SliderPrimitive.Thumb
-            // Radix wants a stable key per thumb index
             key={i}
             className={cn(
               baseThumbClass,
