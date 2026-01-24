@@ -32,7 +32,7 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip'
 
-export const Player = ({ id, setShowPlayer, showToast, type }) => {
+export const Player = ({ id, setShowPlayer, showToast }) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -411,361 +411,377 @@ export const Player = ({ id, setShowPlayer, showToast, type }) => {
           </Tooltip>
         </div>
 
-        <div className='mx-auto flex flex-1 overflow-y-auto snap-y snap-mandatory w-full max-w-6xl flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr] lg:p-4'>
-          <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
-            <Card className='flex h-full flex-col gap-6 p-4'>
+        <div className='mx-auto flex flex-1 overflow-y-auto snap-y snap-mandatory gap-4 w-full max-w-6xl flex-col lg:flex-row lg:items-stretch lg:snap-none lg:p-4'>
+          {/* LEFT PANE: player on top, then start/current/end + measure traversal */}
+          <section className='snap-start lg:snap-none flex-1 p-2 md:p-0 flex flex-col gap-2'>
+            {/* Card 1: player + transport + playback rate */}
+            <Card className='flex flex-col gap-6 p-4'>
               {mediaPlayerRef.current &&
                 mediaPlayerRef.current.renderComponent()}
 
-              <div className='w-full flex flex-col gap-2'>
-                <div className='flex flex-wrap items-center gap-6'>
-                  <div className='flex flex-col md:flex-row md:justify-end md:items-center w-full items-end gap-3'>
-                    <div className='order-2 flex items-center gap-5'>
-                      <div className='flex gap-2'>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type='button'
-                              variant='outline'
-                              size='icon'
-                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
-                              onClick={markLoopStart}
-                            >
-                              <Flag className='text-emerald-500' />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Mark loop start</TooltipContent>
-                        </Tooltip>
+              {/* Track sliders (loop + playback position) */}
+              <div className='w-full'>
+                <div className='relative w-full'>
+                  {/* loop region highlight behind sliders */}
+                  {duration > 0 && loopEnd > loopStart && (
+                    <div
+                      className='pointer-events-none absolute top-1/2 -translate-y-1/2 h-8 bg-muted z-0'
+                      style={{
+                        left: `${(Math.max(0, loopStart) / duration) * 100}%`,
+                        width: `${
+                          ((Math.min(duration, loopEnd) -
+                            Math.max(0, loopStart)) /
+                            duration) *
+                          100
+                        }%`,
+                      }}
+                    />
+                  )}
 
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type='button'
-                              variant='outline'
-                              size='icon'
-                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
-                              onClick={markLoopEnd}
-                            >
-                              <Flag className='text-red-500' />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Mark loop end</TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type='button'
-                              variant='secondary'
-                              size='icon'
-                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
-                              onClick={saveLoop}
-                            >
-                              <Save />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Save loop</TooltipContent>
-                        </Tooltip>
-                      </div>
-
-                      <div className='w-[2px] bg-muted self-stretch' />
-
-                      <div className='flex items-center gap-2'>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type='button'
-                              variant='outline'
-                              size='icon'
-                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
-                              onClick={restartPlayer}
-                            >
-                              <SkipBack />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Restart player</TooltipContent>
-                        </Tooltip>
-                        <Button
-                          type='button'
-                          size='icon'
-                          className='h-12 w-12 rounded-full'
-                          onClick={isPlaying ? handlePause : handlePlay}
-                          disabled={controlsDisabled}
-                          aria-label={isPlaying ? 'Pause' : 'Play'}
-                        >
-                          {isPlaying ? (
-                            <Pause className='h-7 w-7' />
-                          ) : (
-                            <Play className='h-7 w-7' />
-                          )}
-                        </Button>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type='button'
-                              variant='outline'
-                              size='icon'
-                              className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
-                              onClick={restartLoop}
-                            >
-                              <RotateCcw />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Jump to loop start</TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </div>
-
-                    {/* Playback rate slider (second on all layouts) */}
-                    <div className='order-1 flex items-center gap-2 w-full max-w-[12rem]'>
-                      <div className='text-xs text-muted-foreground'>
-                        {playbackRate?.toFixed(2)}x
-                      </div>
-                      <Slider
-                        min={0.125}
-                        max={2}
-                        step={0.125}
-                        value={[playbackRate]}
-                        onValueChange={val => handlePlaybackRateChange(val[0])}
-                      />
-                    </div>
+                  {/* loop range thumbs (transparent track, on top of highlight) */}
+                  <div className='absolute inset-0 flex items-center z-10'>
+                    <Slider
+                      min={0}
+                      max={duration}
+                      step={0.1}
+                      value={[loopStart, loopEnd]}
+                      onValueChange={handleIntervalChange}
+                      className='relative opacity-80'
+                      rangeClassName='bg-muted'
+                      thumbClassNames={[
+                        'relative rounded-none border-0 border-l-2 border-l-emerald-500 before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full before:bg-emerald-500',
+                        'relative before:-translate-x-full rounded-none border-0 border-r-2 border-r-red-500 before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full before:bg-red-500',
+                      ]}
+                    />
                   </div>
 
-                  {/* Track sliders (loop + playback position) */}
-                  <div className='order-3 basis-full w-full'>
-                    <div className='relative w-full'>
-                      {/* loop region highlight behind sliders */}
-                      {duration > 0 && loopEnd > loopStart && (
-                        <div
-                          className='pointer-events-none absolute top-1/2 -translate-y-1/2 h-8 bg-muted z-0'
-                          style={{
-                            left: `${(Math.max(0, loopStart) / duration) * 100}%`,
-                            width: `${
-                              ((Math.min(duration, loopEnd) -
-                                Math.max(0, loopStart)) /
-                                duration) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      )}
+                  {/* playback position (thin bar + thumb, above everything) */}
+                  <Slider
+                    min={0}
+                    max={duration}
+                    step={0.1}
+                    value={[isScrubbing ? scrubTime : currentTime]}
+                    onValueChange={val => {
+                      setIsScrubbing(true)
+                      setScrubTime(val[0])
+                    }}
+                    onValueCommit={val => {
+                      setIsScrubbing(false)
+                      handleSeek(val[0])
+                    }}
+                    className='relative z-20'
+                  />
+                </div>
 
-                      {/* loop range thumbs (transparent track, on top of highlight) */}
-                      <div className='absolute inset-0 flex items-center z-10'>
-                        <Slider
-                          min={0}
-                          max={duration}
-                          step={0.1}
-                          value={[loopStart, loopEnd]}
-                          onValueChange={handleIntervalChange}
-                          className='relative opacity-80'
-                          rangeClassName='bg-muted'
-                          thumbClassNames={[
-                            // Start thumb: rectangle extending to the left, with its
-                            // right edge (and right border) aligned exactly on the
-                            // track position.
-                            'relative rounded-full border-r-2 border-r-emerald-500 border-l-0 -translate-x-1/2 h-12 w-[10px] before:block before:absolute before:-bottom-6 before:-left-2 before:h-8 before:w-3 before:rounded-full before:bg-emerald-500',
-                            // End thumb: rectangle extending to the right, with its
-                            // left edge (and left border) aligned exactly on the
-                            // track position.
-                            'relative rounded-full border-l-2 border-l-red-500 border-r-0 translate-x-1/2 h-12 w-[10px] before:block before:absolute before:-bottom-6 before:-right-2 before:h-8 before:w-3 before:rounded-full before:bg-red-500',
-                          ]}
-                        />
-                      </div>
-
-                      {/* playback position (thin bar + thumb, above everything) */}
-                      <Slider
-                        min={0}
-                        max={duration}
-                        step={0.1}
-                        value={[isScrubbing ? scrubTime : currentTime]}
-                        onValueChange={val => {
-                          setIsScrubbing(true)
-                          setScrubTime(val[0])
-                        }}
-                        onValueCommit={val => {
-                          setIsScrubbing(false)
-                          handleSeek(val[0])
-                        }}
-                        className='relative z-20'
-                      />
-                    </div>
-                  </div>
-
-                  {/* Timestamps (always last on small screens) */}
-                  <div className='order-4 flex w-full justify-between text-xs text-muted-foreground'>
-                    <span>{timestampFormatter(currentTime)}</span>
-                    <span>{timestampFormatter(duration)}</span>
-                  </div>
+                {/* Timestamps */}
+                <div className='mt-2 flex w-full justify-between text-xs text-muted-foreground'>
+                  <span>{timestampFormatter(currentTime)}</span>
+                  <span>{timestampFormatter(duration)}</span>
                 </div>
               </div>
 
-              <div className='flex-1 grid gap-3 sm:grid-cols-3'>
-                <TimeTextInput
-                  onChange={value => setLoopStart(value)}
-                  changeAmount={0.1}
-                  disabled={controlsDisabled}
-                  label='start'
-                  min={0}
-                  max={duration}
-                  value={loopStart}
-                />
-                <TimeTextInput
-                  value={currentTime}
-                  disabled={controlsDisabled}
-                  onChange={value => {
-                    setCurrentTime(value)
-                    mediaPlayerRef.current?.seekTo(value)
-                  }}
-                  label='current'
-                  changeAmount={0.1}
-                  min={0}
-                  max={duration}
-                />
-                <TimeTextInput
-                  value={loopEnd}
-                  disabled={controlsDisabled}
-                  onChange={value => setLoopEnd(value)}
-                  changeAmount={0.1}
-                  label='end'
-                  min={0}
-                  max={duration}
-                />
-              </div>
+              {/* Primary transport controls */}
+              <div className='flex flex-col items-center gap-4'>
+                <div className='flex w-full items-center justify-center gap-6'>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='icon'
+                        className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                        onClick={restartPlayer}
+                      >
+                        <SkipBack />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Restart player</TooltipContent>
+                  </Tooltip>
 
-              <div className='flex-1 grid gap-4 items-start md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]'>
-                {!isRhythmLocked ? (
-                  <BPMInput
-                    value={playerMetadata.bpm}
-                    onChange={handleBpmChange}
-                    beatsPerMeasure={playerMetadata.beatsPerMeasure}
-                    onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
-                    onSubmit={() => {
-                      if (
-                        !playerMetadata.bpm ||
-                        !playerMetadata.beatsPerMeasure
-                      ) {
-                        showToast(
-                          'provide both BPM and beats/measure to use this function',
-                        )
-                        return
-                      }
-                      setIsRhythmLocked(true)
-                    }}
-                  />
-                ) : (
-                  <>
-                    <div className='flex items-center gap-3 md:items-end'>
-                      <div className='flex flex-col justify-end gap-1 text-xs text-muted-foreground'>
-                        <div className='font-medium'>Rhythm locked</div>
-                        <div>
-                          BPM: {playerMetadata.bpm ?? '—'} • beats/measure:{' '}
-                          {playerMetadata.beatsPerMeasure ?? '—'}
-                        </div>
-                      </div>
+                  <Button
+                    type='button'
+                    size='icon'
+                    className='h-12 w-12 rounded-full'
+                    onClick={isPlaying ? handlePause : handlePlay}
+                    disabled={controlsDisabled}
+                    aria-label={isPlaying ? 'Pause' : 'Play'}
+                  >
+                    {isPlaying ? (
+                      <Pause className='h-7 w-7' />
+                    ) : (
+                      <Play className='h-7 w-7' />
+                    )}
+                  </Button>
 
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            type='button'
-                            variant='ghost'
-                            size='icon'
-                            onClick={() => setIsRhythmLocked(false)}
-                            aria-label='Edit BPM and beats/measure'
-                          >
-                            <Pencil />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          Edit BPM &amp; beats/measure
-                        </TooltipContent>
-                      </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='icon'
+                        className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                        onClick={restartLoop}
+                      >
+                        <RotateCcw />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Jump to loop start</TooltipContent>
+                  </Tooltip>
+                </div>
+
+                {/* Playback rate slider, centered under buttons */}
+                <div className='flex w-full justify-center'>
+                  <div className='flex items-center gap-2 w-full max-w-[12rem]'>
+                    <div className='text-xs text-muted-foreground'>
+                      {playbackRate?.toFixed(2)}x
                     </div>
-
-                    <div className='flex items-end gap-3 lg:items-end'>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            type='button'
-                            variant='outline'
-                            size='lg'
-                            onClick={() => {
-                              if (
-                                !playerMetadata.bpm ||
-                                !playerMetadata.beatsPerMeasure
-                              ) {
-                                showToast(
-                                  'provide both BPM and beats/measure to use this function',
-                                )
-                                return
-                              }
-                              const newStart = Math.round(
-                                loopStart -
-                                  (measures * playerMetadata.beatsPerMeasure) /
-                                    (playerMetadata.bpm / 60),
-                              )
-                              setLoopEnd(loopStart)
-                              setLoopStart(newStart)
-                            }}
-                          >
-                            <ArrowBigLeftDash />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{`Previous ${measures} measures`}</TooltipContent>
-                      </Tooltip>
-
-                      <div className='w-full'>
-                        <div className='mb-1 text-xs font-medium text-muted-foreground'>
-                          measures
-                        </div>
-                        <ScrubbableNumberInput
-                          value={measures}
-                          onChange={val =>
-                            handleMeasuresChange(parseInt(val, 10) || 0)
-                          }
-                          step={1}
-                          min={1}
-                        />
-                      </div>
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            type='button'
-                            variant='outline'
-                            size='lg'
-                            onClick={() => {
-                              if (
-                                !playerMetadata.bpm ||
-                                !playerMetadata.beatsPerMeasure
-                              ) {
-                                showToast(
-                                  'provide both BPM and beats/measure to use this function',
-                                )
-                                return
-                              }
-                              const newEnd = Math.round(
-                                loopEnd +
-                                  (measures * playerMetadata.beatsPerMeasure) /
-                                    (playerMetadata.bpm / 60),
-                              )
-                              setLoopStart(loopEnd)
-                              setLoopEnd(newEnd)
-                            }}
-                          >
-                            <ArrowBigRightDash />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{`Next ${measures} measures`}</TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </>
-                )}
+                    <Slider
+                      min={0.125}
+                      max={2}
+                      step={0.125}
+                      value={[playbackRate]}
+                      onValueChange={val => handlePlaybackRateChange(val[0])}
+                    />
+                  </div>
+                </div>
               </div>
             </Card>
+
+            {/* Below the player: start/current/end on the left, measure traversal on the right (desktop) */}
+            <div className='flex flex-col gap-2 lg:grid lg:grid-cols-2'>
+              {/* Card 2: time inputs + flag/save controls */}
+              <section className='snap-start lg:snap-none'>
+                <Card className='flex flex-col gap-2 p-4'>
+                  <div className='flex flex-col gap-3'>
+                    <div className='flex items-center gap-3'>
+                      <div className='flex-1'>
+                        <TimeTextInput
+                          onChange={value => setLoopStart(value)}
+                          changeAmount={0.1}
+                          disabled={controlsDisabled}
+                          label='start'
+                          min={0}
+                          max={duration}
+                          value={loopStart}
+                        />
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='icon'
+                            className='h-10 w-10 rounded-md'
+                            onClick={markLoopStart}
+                          >
+                            <Flag className='text-emerald-500' />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Mark loop start</TooltipContent>
+                      </Tooltip>
+                    </div>
+
+                    <div className='flex items-center gap-3'>
+                      <div className='flex-1'>
+                        <TimeTextInput
+                          value={currentTime}
+                          disabled={controlsDisabled}
+                          onChange={value => {
+                            setCurrentTime(value)
+                            mediaPlayerRef.current?.seekTo(value)
+                          }}
+                          label='current'
+                          changeAmount={0.1}
+                          min={0}
+                          max={duration}
+                        />
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type='button'
+                            variant='secondary'
+                            size='icon'
+                            className='h-10 w-10 rounded-md'
+                            onClick={saveLoop}
+                          >
+                            <Save />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Save loop</TooltipContent>
+                      </Tooltip>
+                    </div>
+
+                    <div className='flex items-center gap-3'>
+                      <div className='flex-1'>
+                        <TimeTextInput
+                          value={loopEnd}
+                          disabled={controlsDisabled}
+                          onChange={value => setLoopEnd(value)}
+                          changeAmount={0.1}
+                          label='end'
+                          min={0}
+                          max={duration}
+                        />
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='icon'
+                            className='h-10 w-10 rounded-md'
+                            onClick={markLoopEnd}
+                          >
+                            <Flag className='text-red-500' />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Mark loop end</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </div>
+                </Card>
+              </section>
+
+              {/* Card 3: measure traversal controls */}
+              <section className='snap-start lg:snap-none'>
+                <Card className='flex flex-col gap-4 p-4'>
+                  {!isRhythmLocked ? (
+                    <BPMInput
+                      value={playerMetadata.bpm}
+                      onChange={handleBpmChange}
+                      beatsPerMeasure={playerMetadata.beatsPerMeasure}
+                      onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
+                      onSubmit={() => {
+                        if (
+                          !playerMetadata.bpm ||
+                          !playerMetadata.beatsPerMeasure
+                        ) {
+                          showToast(
+                            'provide both BPM and beats/measure to use this function',
+                          )
+                          return
+                        }
+                        setIsRhythmLocked(true)
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <div className='flex items-center gap-3 md:items-end'>
+                        <div className='flex flex-col justify-end gap-1 text-xs text-muted-foreground'>
+                          <div className='font-medium'>Rhythm locked</div>
+                          <div>
+                            BPM: {playerMetadata.bpm ?? '—'} • beats/measure:{' '}
+                            {playerMetadata.beatsPerMeasure ?? '—'}
+                          </div>
+                        </div>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type='button'
+                              variant='ghost'
+                              size='icon'
+                              onClick={() => setIsRhythmLocked(false)}
+                              aria-label='Edit BPM and beats/measure'
+                            >
+                              <Pencil />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Edit BPM &amp; beats/measure
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+
+                      <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4'>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type='button'
+                              variant='outline'
+                              size='lg'
+                              onClick={() => {
+                                if (
+                                  !playerMetadata.bpm ||
+                                  !playerMetadata.beatsPerMeasure
+                                ) {
+                                  showToast(
+                                    'provide both BPM and beats/measure to use this function',
+                                  )
+                                  return
+                                }
+                                const newStart = Math.round(
+                                  loopStart -
+                                    (measures *
+                                      playerMetadata.beatsPerMeasure) /
+                                      (playerMetadata.bpm / 60),
+                                )
+                                setLoopEnd(loopStart)
+                                setLoopStart(newStart)
+                              }}
+                            >
+                              <ArrowBigLeftDash />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{`Previous ${measures} measures`}</TooltipContent>
+                        </Tooltip>
+
+                        <div className='w-full'>
+                          <div className='mb-1 text-xs font-medium text-muted-foreground'>
+                            measures
+                          </div>
+                          <ScrubbableNumberInput
+                            value={measures}
+                            onChange={val =>
+                              handleMeasuresChange(parseInt(val, 10) || 0)
+                            }
+                            step={1}
+                            min={1}
+                          />
+                        </div>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type='button'
+                              variant='outline'
+                              size='lg'
+                              onClick={() => {
+                                if (
+                                  !playerMetadata.bpm ||
+                                  !playerMetadata.beatsPerMeasure
+                                ) {
+                                  showToast(
+                                    'provide both BPM and beats/measure to use this function',
+                                  )
+                                  return
+                                }
+                                const newEnd = Math.round(
+                                  loopEnd +
+                                    (measures *
+                                      playerMetadata.beatsPerMeasure) /
+                                      (playerMetadata.bpm / 60),
+                                )
+                                setLoopStart(loopEnd)
+                                setLoopEnd(newEnd)
+                              }}
+                            >
+                              <ArrowBigRightDash />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{`Next ${measures} measures`}</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </>
+                  )}
+                </Card>
+              </section>
+            </div>
           </section>
 
-          <section className='flex flex-col p-2 md:p-0 gap-4 min-h-full snap-start lg:snap-none'>
+          {/* RIGHT PANE: loop list, full height */}
+          <section className='snap-start lg:snap-none w-full lg:w-[40%] p-2 md:p-0 min-h-full lg:h-full'>
             <Card className='flex h-full flex-col overflow-hidden p-2 pb-6'>
               {playerMetadata.loops &&
               Object.keys(playerMetadata.loops).length > 0 ? (

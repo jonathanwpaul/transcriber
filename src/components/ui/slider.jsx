@@ -19,7 +19,7 @@ export const Slider = React.forwardRef(
     const thumbCount = Array.isArray(values) ? Math.max(values.length, 1) : 1
 
     const baseThumbClass =
-      'block h-7 w-7 sm:h-5 sm:w-5 rounded-full border border-border bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50'
+      'block h-8 w-8 sm:h-5 sm:w-5 rounded-full border border-border bg-secondary ring-offset-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50'
 
     const perThumbClasses = Array.isArray(thumbClassNames)
       ? thumbClassNames
@@ -54,7 +54,6 @@ export const Slider = React.forwardRef(
           <SliderPrimitive.Thumb
             key={i}
             className={cn(
-              baseThumbClass,
               perThumbClasses ? perThumbClasses[i] : thumbClassName,
             )}
           />
