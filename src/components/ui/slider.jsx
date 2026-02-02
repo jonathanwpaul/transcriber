@@ -18,9 +18,6 @@ export const Slider = React.forwardRef(
     const values = props.value ?? props.defaultValue ?? []
     const thumbCount = Array.isArray(values) ? Math.max(values.length, 1) : 1
 
-    const baseThumbClass =
-      'block h-8 w-8 sm:h-5 sm:w-5 rounded-full border border-border bg-secondary ring-offset-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50'
-
     const perThumbClasses = Array.isArray(thumbClassNames)
       ? thumbClassNames
       : null
