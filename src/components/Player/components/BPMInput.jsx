@@ -32,14 +32,9 @@ export const BPMInput = ({
   const handleTap = () => {
     const now = Date.now()
 
-    // If the last tap was within the last 10s, include this interval in the
-    // running average; otherwise start fresh.
     if (lastTap && lastTap > now - 10000) {
       const interval = now - lastTap
 
-      // Mobile can sometimes fire duplicate click/tap events very close
-      // together; ignore anything unrealistically fast so it doesn't
-      // double the detected BPM.
       const MIN_INTERVAL_MS = 150
       if (interval < MIN_INTERVAL_MS) {
         setLastTap(now)
@@ -59,8 +54,6 @@ export const BPMInput = ({
         onChange(newBpm)
       }
     } else {
-      // First tap or after a long pause: reset intervals so the next tap sets
-      // a clean starting point for averaging.
       setTapIntervals([])
     }
 
@@ -109,9 +102,7 @@ export const BPMInput = ({
             <Button
               type='button'
               variant='secondary'
-              className={`h-full w-24 p-0 flex items-center justify-center ${
-                bpm ? 'bpm-button-pulse' : ''
-              }`}
+              className={`self-stretch h-auto w-24 p-0 ${bpm ? 'bpm-button-pulse' : ''}`}
               style={
                 bpm
                   ? {

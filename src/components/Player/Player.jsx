@@ -694,7 +694,7 @@ export const Player = ({ id, setShowPlayer, showToast }) => {
                         </Tooltip>
                       </div>
 
-                      <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4'>
+                      <div className='flex gap-3 items-end sm:gap-4'>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
