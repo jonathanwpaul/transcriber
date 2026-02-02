@@ -88,7 +88,23 @@ export class LocalFilePlayer extends MediaPlayer {
 function LocalFileMediaElement({ player }) {
   const mediaRef = useRef(null)
 
-  const { sourceUrl, mimeType, filePath, fileDirectory } = player.source || {}
+  const metadata = player._metadata || {}
+  const mergedSource = {
+    sourceUrl:
+      metadata.sourceUrl != null
+        ? metadata.sourceUrl
+        : player.source?.sourceUrl,
+    mimeType:
+      metadata.mimeType != null ? metadata.mimeType : player.source?.mimeType,
+    filePath:
+      metadata.filePath != null ? metadata.filePath : player.source?.filePath,
+    fileDirectory:
+      metadata.fileDirectory != null
+        ? metadata.fileDirectory
+        : player.source?.fileDirectory,
+  }
+
+  const { sourceUrl, mimeType, filePath, fileDirectory } = mergedSource
   const [resolvedSourceUrl, setResolvedSourceUrl] = useState(sourceUrl || null)
 
   const isVideo = mimeType?.startsWith('video')
