@@ -19,6 +19,11 @@ jobs:
         with:
           node-version: 18
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Build env
         env:
           CI: ''
@@ -85,11 +90,16 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build React app
-        run: npm run build
+        run: pnpm run build
         env:
           DISABLE_ESLINT_PLUGIN: true
 
@@ -97,11 +107,11 @@ jobs:
         run: npx cap copy @capacitor-community/electron
 
       - name: Install Electron packages
-        run: npm install
+        run: pnpm install
         working-directory: electron
 
       - name: Build Electron app
-        run: npm run electron:make
+        run: pnpm run electron:make
         working-directory: electron
 
       - name: Upload Electron artifact
@@ -123,11 +133,16 @@ jobs:
         with:
           node-version: 18
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build the React app
-        run: npm run build
+        run: pnpm run build
 
       - name: Sync with Capacitor
         run: npx cap sync ios

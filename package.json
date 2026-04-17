@@ -2,6 +2,7 @@
   "name": "transcriber",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.18.3",
   "dependencies": {
     "@capacitor-community/electron": "^5.0.1",
     "@capacitor/android": "^5.7.0",
@@ -55,6 +56,13 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js",
+      "core-js-pure",
+      "electron"
     ]
   },
   "devDependencies": {
