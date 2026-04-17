@@ -6,9 +6,12 @@ import { initDB } from '@lib/storage/dbService'
 function App() {
   const [toastMessage, setToastMessage] = useState()
   const [toastOpen, setToastOpen] = useState(false)
+  const [dbReady, setDbReady] = useState(false)
 
   useEffect(() => {
-    initDB().catch(err => console.error('DB init failed', err))
+    initDB()
+      .then(() => setDbReady(true))
+      .catch(err => console.error('DB init failed', err))
   }, [])
 
   const [themeMode, setThemeMode] = useState(() => {
@@ -43,11 +46,13 @@ function App() {
         </div>
       )}
 
-      <Home
-        showToast={showToast}
-        themeMode={themeMode}
-        setThemeMode={setThemeMode}
-      />
+      {dbReady && (
+        <Home
+          showToast={showToast}
+          themeMode={themeMode}
+          setThemeMode={setThemeMode}
+        />
+      )}
     </div>
   )
 }

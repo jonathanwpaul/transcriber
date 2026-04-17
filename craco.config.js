@@ -14,7 +14,10 @@ module.exports = {
     },
   },
   webpack: {
-    alias,
+    alias: {
+      ...alias,
+      'react-native-sqlite-storage': false,
+    },
   },
 }
 
