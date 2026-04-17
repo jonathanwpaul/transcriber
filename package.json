@@ -22,7 +22,6 @@
     "electron": "^34.3.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.561.0",
-    "patch-package": "^8.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.6",
@@ -37,7 +36,6 @@
     "build": "craco build",
     "test": "craco test",
     "eject": "craco eject",
-    "postinstall": "patch-package",
     "prepare": "husky"
   },
   "eslintConfig": {
