@@ -1,18 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Filesystem, Directory } from '@capacitor/filesystem'
-import { Code2, Moon, Sun } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
 
 import { Player } from './Player/Player'
-import { usePreferenceValue } from 'hooks/usePreferenceValue'
-import { videoSources } from 'utils/constants'
+import { SONG_TYPE } from 'utils/constants'
+import { getSongs, upsertSong, patchSong } from '@lib/storage/dbService'
 
 import FileUpload from './FileUpload'
 
 import { Button } from './ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Input } from './ui/input'
-import { Textarea } from './ui/textarea'
 import {
   Tooltip,
   TooltipContent,
@@ -46,46 +44,33 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [showPlayer, setShowPlayer] = useState()
   const [inputText, setInputText] = useState()
   const [error, setError] = useState(false)
-  const {
-    preference: videosString,
-    loading,
-    setValue: setVideos,
-    reload: reloadVideos,
-  } = usePreferenceValue({
-    key: 'videos',
-  })
-  const videos = JSON.parse(videosString) || {}
-  const [showJSON, setShowJSON] = useState(false)
-  const [JSONText, setJSONText] = useState(videosString)
-  const JSONInputRef = useRef()
+  const [songs, setSongs] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const loadSongs = async () => {
+    const rows = await getSongs()
+    setSongs(rows)
+  }
 
   useEffect(() => {
-    try {
-      const parsed = JSON.parse(videosString || '{}')
-      setJSONText(JSON.stringify(parsed || {}, null, 2))
-    } catch {
-      setJSONText(videosString || '{}')
-    }
-  }, [videosString])
+    loadSongs().finally(() => setLoading(false))
+  }, [])
 
-  // When we return from the Player view back to the Home view, reload the
-  // latest videos from storage so that metadata written by MediaPlayer
-  // subclasses (e.g. YouTube titles) is reflected in the Recents list.
+  // Reload songs when returning from Player so metadata updates are reflected.
   useEffect(() => {
-    if (!showPlayer && reloadVideos) {
-      reloadVideos()
+    if (!showPlayer) {
+      loadSongs()
     }
-  }, [showPlayer, reloadVideos])
+  }, [showPlayer])
 
-  if (loading) return
+  if (loading) return null
 
-  const getId = url => {
+  const getYoutubeId = url => {
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
     const match = url.match(regExp)
     const videoId = match && match[2].length === 11 ? match[2] : null
     videoId ? setError(null) : setError('invalid URL')
-
     return videoId
   }
 
@@ -94,12 +79,10 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     setError(null)
   }
 
-  const showVideoId = id => {
-    videos[id].last_accessed = new Date()
-    setVideos('videos', videos).then(() => {
-      setId(id)
-      setShowPlayer(true)
-    })
+  const openSong = async songId => {
+    await patchSong(songId, { last_accessed: new Date().toISOString() })
+    setId(songId)
+    setShowPlayer(true)
   }
 
   const handleLocalFileSelect = async file => {
@@ -108,15 +91,11 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     const id = makeLocalFileId(file)
     const mimeType = file.type || ''
 
-    // Only allow audio/video MIME types.
     if (!mimeType.startsWith('audio/') && !mimeType.startsWith('video/')) {
       showToast?.('Unsupported file type')
       return
     }
 
-    // Persist the file with Capacitor Filesystem using a deterministic path
-    // derived from the local file id. This avoids relying on blob: URLs, which
-    // are not stable across reloads.
     const safeId = id.replace(/[^a-zA-Z0-9-_]/g, '_')
     const filePath = `media/${safeId}`
 
@@ -129,63 +108,33 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
         directory: Directory.Data,
       })
 
-      const existing = videos[id]
-
-      videos[id] = {
-        ...(existing || {}),
-        type: videoSources.FILE,
-        title: file.name,
+      await upsertSong({
+        id,
+        name: file.name,
+        type: SONG_TYPE.FILE,
+        content: filePath,
+        mimeType,
         fileName: file.name,
         fileSize: file.size,
         lastModified: file.lastModified,
-        mimeType,
-        filePath,
-        fileDirectory: Directory.Data,
-        // Do not persist blob: URLs – they are not stable across reloads.
-        sourceUrl: null,
-      }
+      })
 
-      showVideoId(id)
+      await openSong(id)
     } catch (err) {
       console.error('Failed to save file to Capacitor Filesystem', err)
       showToast?.('Error saving local file')
     }
   }
 
-  const handleSubmit = () => {
-    const id = getId(inputText)
-    if (!id) return
-    if (!videos[id]) videos[id] = { type: videoSources.YOUTUBE }
-    showVideoId(id)
+  const handleSubmit = async () => {
+    const ytId = getYoutubeId(inputText)
+    if (!ytId) return
+
+    await upsertSong({ id: ytId, name: ytId, type: SONG_TYPE.YOUTUBE, link: ytId })
+    await openSong(ytId)
   }
 
   const formatTimeString = timeString => new Date(timeString).toLocaleString()
-
-  const videoList = Object.keys(videos)
-    .filter(key => {
-      const entry = videos[key]
-      if (!entry) return false
-
-      if (entry.type === videoSources.FILE) {
-        // Hide legacy local-file entries that only have blob: URLs persisted.
-        if (!entry.filePath) {
-          const src = entry.sourceUrl
-          if (!src || typeof src !== 'string') return false
-          if (src.startsWith('blob:')) return false
-        }
-      }
-
-      return true
-    })
-    .sort((a, b) =>
-      videos[a]['last_accessed'] > videos[b]['last_accessed'] ? -1 : 1,
-    )
-
-  // if there's a cached entry and not one already selected, use that
-  // if (videoList.length > 0 && !showPlayer && !id) {
-  //   setId(videoList[0])
-  //   setShowPlayer(true)
-  // }
 
   return !showPlayer ? (
     <TooltipProvider>
@@ -207,37 +156,6 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
             <TooltipContent>Toggle light/dark</TooltipContent>
           </Tooltip>
         </div>
-
-        <Dialog open={showJSON} onOpenChange={open => setShowJSON(open)}>
-          <DialogContent className='max-w-3xl'>
-            <DialogHeader>
-              <DialogTitle>videos JSON</DialogTitle>
-            </DialogHeader>
-            <div className='flex flex-col gap-3'>
-              <Textarea
-                ref={JSONInputRef}
-                value={JSONText}
-                onChange={e => setJSONText(e.target.value)}
-                rows={18}
-              />
-              <div className='flex justify-end'>
-                <Button
-                  onClick={() => {
-                    try {
-                      const parsed = JSON.parse(JSONText)
-                      setVideos('videos', parsed)
-                      setShowJSON(false)
-                    } catch {
-                      showToast('Invalid JSON')
-                    }
-                  }}
-                >
-                  Update
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
 
         <Card>
           <CardHeader className='pb-2'>
@@ -270,45 +188,30 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
               </div>
             </div>
 
-            <div className='grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center'>
-              <FileUpload
-                accept='audio/*,video/*'
-                onFileSelect={handleLocalFileSelect}
-              />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant='outline'
-                    className='w-full sm:w-auto'
-                    onClick={() => setShowJSON(true)}
-                  >
-                    <Code2 className='mr-2' />
-                    show code
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Show raw saved data</TooltipContent>
-              </Tooltip>
-            </div>
+            <FileUpload
+              accept='audio/*,video/*'
+              onFileSelect={handleLocalFileSelect}
+            />
           </CardContent>
         </Card>
 
-        {videos && videoList.length > 0 && (
+        {songs.length > 0 && (
           <Card>
             <CardHeader className='pb-2'>
               <CardTitle>Recents</CardTitle>
             </CardHeader>
             <CardContent className='flex flex-col gap-1'>
-              {videoList.map(e => (
+              {songs.map(song => (
                 <button
-                  key={e}
-                  onClick={() => showVideoId(e)}
+                  key={song.id}
+                  onClick={() => openSong(song.id)}
                   className='flex flex-col md:flex-row w-full items-start md:items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-accent'
                 >
                   <div className='min-w-0 flex-1 w-full font-medium text-primary'>
-                    {videos[e].title ?? e}
+                    {song.title ?? song.name ?? song.id}
                   </div>
                   <div className='shrink-0 text-xs text-muted-foreground'>
-                    {formatTimeString(videos[e]['last_accessed'])}
+                    {song.last_accessed ? formatTimeString(song.last_accessed) : ''}
                   </div>
                 </button>
               ))}

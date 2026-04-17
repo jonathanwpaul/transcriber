@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { Home } from './components/Home'
+import { initDB } from '@lib/storage/dbService'
 
 function App() {
   const [toastMessage, setToastMessage] = useState()
   const [toastOpen, setToastOpen] = useState(false)
+
+  useEffect(() => {
+    initDB().catch(err => console.error('DB init failed', err))
+  }, [])
 
   const [themeMode, setThemeMode] = useState(() => {
     const stored = window.localStorage.getItem('themeMode')
