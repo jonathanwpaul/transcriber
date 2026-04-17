@@ -94,6 +94,11 @@ async function insertLoopTree(mgr, songId, loops, parentId) {
 
 export async function initDB() {
   if (!AppDataSource.isInitialized) {
+    if (!document.querySelector('jeep-sqlite')) {
+      const el = document.createElement('jeep-sqlite')
+      document.body.appendChild(el)
+      await customElements.whenDefined('jeep-sqlite')
+    }
     await sqlite.initWebStore()
     await AppDataSource.initialize()
   }

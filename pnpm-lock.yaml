@@ -87,14 +87,14 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
       sql.js:
-        specifier: ^1.14.1
-        version: 1.14.1
+        specifier: 1.12.0
+        version: 1.12.0
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
       typeorm:
         specifier: ^0.3.28
-        version: 0.3.28(babel-plugin-macros@3.1.0)(sql.js@1.14.1)(ts-node@10.9.2(@types/node@25.6.0)(typescript@4.9.5))
+        version: 0.3.28(babel-plugin-macros@3.1.0)(sql.js@1.12.0)(ts-node@10.9.2(@types/node@25.6.0)(typescript@4.9.5))
       web-vitals:
         specifier: ^2.1.4
         version: 2.1.4
@@ -6002,8 +6002,8 @@ packages:
     resolution: {integrity: sha512-ed7OK4e9ywpE7pgRMkMQmZDPKSVdm0oX5IEtZiKnFucSF0zu6c80GZBe38UqHuVhTWJ9xsKgSMjCG2bml86KvA==}
     engines: {node: '>=14'}
 
-  sql.js@1.14.1:
-    resolution: {integrity: sha512-gcj8zBWU5cFsi9WUP+4bFNXAyF1iRpA3LLyS/DP5xlrNzGmPIizUeBggKa8DbDwdqaKwUcTEnChtd2grWo/x/A==}
+  sql.js@1.12.0:
+    resolution: {integrity: sha512-Bi+43yMx/tUFZVYD4AUscmdL6NHn3gYQ+CM+YheFWLftOmrEC/Mz6Yh7E96Y2WDHYz3COSqT+LP6Z79zgrwJlA==}
 
   stable@0.1.8:
     resolution: {integrity: sha512-ji9qxRnOVfcuLDySj9qzhGSEFVobyt1kIOSkj1qZzYLzq7Tos/oUUWvotUPQLlrsidqsK6tBH89Bc9kL5zHA6w==}
@@ -11617,7 +11617,7 @@ snapshots:
       browser-fs-access: 0.35.0
       jszip: 3.10.1
       localforage: 1.10.0
-      sql.js: 1.14.1
+      sql.js: 1.12.0
 
   jest-changed-files@27.5.1:
     dependencies:
@@ -13892,7 +13892,7 @@ snapshots:
 
   sql-highlight@6.1.0: {}
 
-  sql.js@1.14.1: {}
+  sql.js@1.12.0: {}
 
   stable@0.1.8: {}
 
@@ -14327,7 +14327,7 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typeorm@0.3.28(babel-plugin-macros@3.1.0)(sql.js@1.14.1)(ts-node@10.9.2(@types/node@25.6.0)(typescript@4.9.5)):
+  typeorm@0.3.28(babel-plugin-macros@3.1.0)(sql.js@1.12.0)(ts-node@10.9.2(@types/node@25.6.0)(typescript@4.9.5)):
     dependencies:
       '@sqltools/formatter': 1.2.5
       ansis: 4.2.0
@@ -14345,7 +14345,7 @@ snapshots:
       uuid: 11.1.0
       yargs: 17.7.2
     optionalDependencies:
-      sql.js: 1.14.1
+      sql.js: 1.12.0
       ts-node: 10.9.2(@types/node@25.6.0)(typescript@4.9.5)
     transitivePeerDependencies:
       - babel-plugin-macros
