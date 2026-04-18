@@ -1,7 +1,7 @@
 // Abstract base class for all media players.
 // Handles shared metadata, playback state, storage integration, and callback wiring.
 
-import { getVideos, setVideos } from '@lib/storage/mediaPreferencesService'
+import { getSong, patchSong, syncLoops } from '@lib/storage/dbService'
 
 export class MediaPlayer {
   constructor({ id, callbacks = {}, source = {} } = {}) {
@@ -38,7 +38,7 @@ export class MediaPlayer {
       filePath: null,
       fileDirectory: null,
       bpm: null,
-      beatsPerMeasure: 4,
+      beatsPerMeasure: null,
       loops: {},
       title: null,
       lastLoopSelected: null,
@@ -57,15 +57,10 @@ export class MediaPlayer {
   async _loadInitialMetadata() {
     if (!this.id) return
 
-    const videos = await getVideos()
-    const entry = videos?.[this.id] ?? {}
-
-    this._metadata = {
-      ...this._metadata,
-      ...entry,
+    const entry = await getSong(this.id)
+    if (entry) {
+      this._metadata = { ...this._metadata, ...entry }
     }
-
-    this._saveMetadata(this._metadata)
   }
 
   /**
@@ -78,24 +73,20 @@ export class MediaPlayer {
   async _saveMetadata(patch) {
     if (!this.id) return
 
-    const videos = await getVideos()
-    const entry = videos?.[this.id] ?? {}
-
-    const nextEntry = {
-      ...entry,
-      ...patch,
+    // Loops are synced separately via syncLoops to maintain relational structure.
+    if ('loops' in patch) {
+      await syncLoops(this.id, patch.loops)
     }
 
-    await setVideos({
-      ...videos,
-      [this.id]: nextEntry,
-    })
+    const nonLoopPatch = Object.fromEntries(
+      Object.entries(patch).filter(([k]) => k !== 'loops'),
+    )
 
-    this._metadata = {
-      ...this._metadata,
-      ...patch,
+    if (Object.keys(nonLoopPatch).length > 0) {
+      await patchSong(this.id, nonLoopPatch)
     }
 
+    this._metadata = { ...this._metadata, ...patch }
     this.callbacks.onMetadataChange(this._metadata)
   }
 
@@ -134,7 +125,8 @@ export class MediaPlayer {
   }
 
   async setLastLoopSelected(lastLoopSelected) {
-    await this._saveMetadata({ lastLoopSelected })
+    this._metadata = { ...this._metadata, lastLoopSelected }
+    this.callbacks.onMetadataChange(this._metadata)
   }
 
   async setLastPlaybackRate(lastPlaybackRate) {

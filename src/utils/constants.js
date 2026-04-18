@@ -1,4 +1,4 @@
-export const videoSources = {
-  FILE: 1,
-  YOUTUBE: 2,
+export const SONG_TYPE = {
+  FILE: 'file',
+  YOUTUBE: 'youtube',
 }

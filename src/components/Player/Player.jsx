@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react'
 
-import { usePreferenceValue } from '@hooks/usePreferenceValue'
+import { getAppSetting, setAppSetting } from '@lib/storage/dbService'
 import { timestampFormatter, round } from '@utils/video'
 import { YouTubePlayer, LocalFilePlayer } from '../../lib/media'
 
@@ -32,7 +32,7 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip'
 
-export const Player = ({ id, setShowPlayer, showToast }) => {
+export const Player = ({ id, type, setShowPlayer, showToast }) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -47,18 +47,19 @@ export const Player = ({ id, setShowPlayer, showToast }) => {
   // metadata emitted by the MediaPlayer (BPM, beats/measure, loops, etc.)
   const [playerMetadata, setPlayerMetadata] = useState({})
 
-  const {
-    preference: appSettingsString,
-    loading: appSettingsLoading,
-    setValue: setAppSettings,
-  } = usePreferenceValue({
-    key: 'appSettings',
-  })
+  const [appSettings, setAppSettingsState] = useState({ measures: 4, useSelectedAsParent: true })
+  const [appSettingsLoading, setAppSettingsLoading] = useState(true)
 
-  const appSettings = JSON.parse(appSettingsString) || {
-    measures: 4,
-    useSelectedAsParent: true,
-  }
+  useEffect(() => {
+    Promise.all([
+      getAppSetting('measures', 4),
+      getAppSetting('useSelectedAsParent', true),
+    ]).then(([measures, useSelectedAsParent]) => {
+      setAppSettingsState({ measures, useSelectedAsParent })
+      setAppSettingsLoading(false)
+    })
+  }, [])
+
   const measures = appSettings['measures']
 
   const [isRhythmLocked, setIsRhythmLocked] = useState(false)
@@ -127,7 +128,7 @@ export const Player = ({ id, setShowPlayer, showToast }) => {
     }
 
     let PlayerClass = null
-    if (id.startsWith('file')) {
+    if (type === 'file') {
       PlayerClass = LocalFilePlayer
     } else {
       PlayerClass = YouTubePlayer
@@ -188,7 +189,7 @@ export const Player = ({ id, setShowPlayer, showToast }) => {
         mediaPlayerRef.current = null
       }
     }
-  }, [id])
+  }, [id, type])
 
   const handleIntervalChange = newValue => {
     const minTime = 1
@@ -383,7 +384,9 @@ export const Player = ({ id, setShowPlayer, showToast }) => {
   }
 
   const handleMeasuresChange = newMeasures => {
-    setAppSettings('appSettings', { ...appSettings, measures: newMeasures })
+    const next = { ...appSettings, measures: newMeasures }
+    setAppSettingsState(next)
+    setAppSetting('measures', newMeasures).catch(() => {})
   }
 
   if (!mediaPlayerRef.current || appSettingsLoading) return <p>loading...</p>
