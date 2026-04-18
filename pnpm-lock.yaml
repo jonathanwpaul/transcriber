@@ -47,6 +47,9 @@ importers:
       abcjs:
         specifier: ^6.6.2
         version: 6.6.2
+      capacitor-voice-recorder:
+        specifier: ^7.0.6
+        version: 7.0.6(@capacitor/core@5.7.8)(@capacitor/filesystem@5.2.2(@capacitor/core@5.7.8))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -826,6 +829,9 @@ packages:
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
+
+  '@babel/runtime@7.11.2':
+    resolution: {integrity: sha512-TeWkU52so0mPtDcaCTxNBI/IHiz0pZgr8VEFqXFtZWpYD08ZB6FaSwVAS8MKRQAP3bYKiVjwysOJgMFY28o6Tw==}
 
   '@babel/runtime@7.29.2':
     resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
@@ -2520,6 +2526,17 @@ packages:
   caniuse-lite@1.0.30001788:
     resolution: {integrity: sha512-6q8HFp+lOQtcf7wBK+uEenxymVWkGKkjFpCvw5W25cmMwEDU45p1xQFBQv8JDlMMry7eNxyBaR+qxgmTUZkIRQ==}
 
+  capacitor-blob-writer@1.1.20:
+    resolution: {integrity: sha512-SxYR64Zzb4MB2Ntb0IXJFWlhX6YPTlHiOjXWLqv/pVpa6fU+xFwmGp8+KdDsWRzLAAF71QmTkpMoV0PcT3LgTw==}
+    peerDependencies:
+      '@capacitor/core': '>=3.0.0'
+      '@capacitor/filesystem': '>=1.0.0'
+
+  capacitor-voice-recorder@7.0.6:
+    resolution: {integrity: sha512-WdFFzv5B++FhTifb+/NzYnup7NvTHLZxP8D20qtolr2lLgxnwI5aNSKc3r8HpVlZn04b+GWrmnLIJ6q5JU3h8w==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
   case-sensitive-paths-webpack-plugin@2.4.0:
     resolution: {integrity: sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==}
     engines: {node: '>=4'}
@@ -3599,6 +3616,9 @@ packages:
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
+
+  get-blob-duration@1.2.0:
+    resolution: {integrity: sha512-2xNJa+oKznR21eC2ThMzw4a1931a3ogA8aHoY92xruZufc/02G7pl/P793GJZytkyI8xMJ2DepEQ7MWvg/tn/Q==}
 
   get-caller-file@2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
@@ -7735,6 +7755,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@babel/runtime@7.11.2':
+    dependencies:
+      regenerator-runtime: 0.13.11
+
   '@babel/runtime@7.29.2': {}
 
   '@babel/template@7.28.6':
@@ -9795,6 +9819,19 @@ snapshots:
 
   caniuse-lite@1.0.30001788: {}
 
+  capacitor-blob-writer@1.1.20(@capacitor/core@5.7.8)(@capacitor/filesystem@5.2.2(@capacitor/core@5.7.8)):
+    dependencies:
+      '@capacitor/core': 5.7.8
+      '@capacitor/filesystem': 5.2.2(@capacitor/core@5.7.8)
+
+  capacitor-voice-recorder@7.0.6(@capacitor/core@5.7.8)(@capacitor/filesystem@5.2.2(@capacitor/core@5.7.8)):
+    dependencies:
+      '@capacitor/core': 5.7.8
+      capacitor-blob-writer: 1.1.20(@capacitor/core@5.7.8)(@capacitor/filesystem@5.2.2(@capacitor/core@5.7.8))
+      get-blob-duration: 1.2.0
+    transitivePeerDependencies:
+      - '@capacitor/filesystem'
+
   case-sensitive-paths-webpack-plugin@2.4.0: {}
 
   chalk@2.4.2:
@@ -11059,6 +11096,10 @@ snapshots:
   generator-function@2.0.1: {}
 
   gensync@1.0.0-beta.2: {}
+
+  get-blob-duration@1.2.0:
+    dependencies:
+      '@babel/runtime': 7.11.2
 
   get-caller-file@2.0.5: {}
 

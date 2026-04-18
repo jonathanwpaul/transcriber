@@ -31,6 +31,7 @@ function rowToMetadata(row) {
   if (!row) return null
   return {
     type: row.type,
+    link: row.link ?? null,
     mimeType: row.mime_type ?? null,
     filePath: row.content ?? null,
     fileDirectory: Directory.Data,
@@ -67,6 +68,7 @@ function flatToTree(rows) {
       childrenObj[`${child.start_time}-${child.end_time}`] = buildNode(child)
     }
     return {
+      id: row.id,
       loopStart: row.start_time,
       loopEnd: row.end_time,
       title: row.name ?? undefined,
@@ -81,18 +83,6 @@ function flatToTree(rows) {
     }
   }
   return root
-}
-
-// Recursively insert the loop tree, preserving parent_id relationships.
-async function insertLoopTree(mgr, songId, loops, parentId) {
-  for (const loop of Object.values(loops || {})) {
-    await mgr.query(
-      'INSERT INTO loop (song_id, parent_id, name, start_time, end_time) VALUES (?, ?, ?, ?, ?)',
-      [songId, parentId ?? null, loop.title ?? null, loop.loopStart, loop.loopEnd],
-    )
-    const [{ id }] = await mgr.query('SELECT last_insert_rowid() as id')
-    await insertLoopTree(mgr, songId, loop.children || {}, id)
-  }
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────
@@ -175,11 +165,71 @@ export async function patchSong(id, patch) {
 
 export async function syncLoops(songId, loopsTree) {
   const mgr = AppDataSource.manager
+  const seenIds = new Set()
+
+  async function syncLevel(mgr, loops, parentId) {
+    for (const loop of Object.values(loops || {})) {
+      if (loop.id != null) {
+        await mgr.query(
+          'UPDATE loop SET name = ?, parent_id = ? WHERE id = ?',
+          [loop.title ?? null, parentId ?? null, loop.id],
+        )
+        seenIds.add(loop.id)
+        await syncLevel(mgr, loop.children || {}, loop.id)
+      } else {
+        await mgr.query(
+          'INSERT INTO loop (song_id, parent_id, name, start_time, end_time) VALUES (?, ?, ?, ?, ?)',
+          [songId, parentId ?? null, loop.title ?? null, loop.loopStart, loop.loopEnd],
+        )
+        const [{ id }] = await mgr.query('SELECT last_insert_rowid() as id')
+        seenIds.add(id)
+        await syncLevel(mgr, loop.children || {}, id)
+      }
+    }
+  }
+
   await mgr.transaction(async tx => {
-    await tx.query('DELETE FROM loop WHERE song_id = ?', [songId])
-    await insertLoopTree(tx, songId, loopsTree || {}, null)
+    await syncLevel(tx, loopsTree || {}, null)
+    const existingRows = await tx.query(
+      'SELECT id FROM loop WHERE song_id = ?',
+      [songId],
+    )
+    for (const row of existingRows) {
+      if (!seenIds.has(row.id)) {
+        await tx.query('DELETE FROM loop WHERE id = ?', [row.id])
+      }
+    }
   })
+
   await saveToStore()
+}
+
+export async function getRecordingsByLoop(loopId) {
+  const mgr = AppDataSource.manager
+  return mgr.query(
+    'SELECT * FROM recording WHERE loop_id = ? ORDER BY created_on ASC',
+    [loopId],
+  )
+}
+
+export async function addRecording({ loopId, filePath, name }) {
+  const mgr = AppDataSource.manager
+  const createdOn = new Date().toISOString()
+  await mgr.query(
+    'INSERT INTO recording (loop_id, file_path, name, created_on) VALUES (?, ?, ?, ?)',
+    [loopId, filePath, name ?? null, createdOn],
+  )
+  const [{ id }] = await mgr.query('SELECT last_insert_rowid() as id')
+  await saveToStore()
+  return { id, loopId, filePath, name: name ?? null, createdOn }
+}
+
+export async function deleteRecording(id) {
+  const mgr = AppDataSource.manager
+  const rows = await mgr.query('SELECT file_path FROM recording WHERE id = ?', [id])
+  await mgr.query('DELETE FROM recording WHERE id = ?', [id])
+  await saveToStore()
+  return rows[0]?.file_path ?? null
 }
 
 export async function getAppSetting(key, defaultValue = null) {

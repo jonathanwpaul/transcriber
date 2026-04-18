@@ -60,6 +60,7 @@ export class MediaPlayer {
     const entry = await getSong(this.id)
     if (entry) {
       this._metadata = { ...this._metadata, ...entry }
+      this.callbacks.onMetadataChange(this._metadata)
     }
   }
 
