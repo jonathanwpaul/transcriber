@@ -38,7 +38,7 @@ export class MediaPlayer {
       filePath: null,
       fileDirectory: null,
       bpm: null,
-      beatsPerMeasure: 4,
+      beatsPerMeasure: null,
       loops: {},
       title: null,
       lastLoopSelected: null,

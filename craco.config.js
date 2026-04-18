@@ -18,6 +18,13 @@ module.exports = {
       ...alias,
       'react-native-sqlite-storage': false,
     },
+    configure: {
+      resolve: {
+        fallback: {
+          crypto: false,
+        },
+      },
+    },
   },
 }
 

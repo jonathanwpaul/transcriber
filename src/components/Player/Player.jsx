@@ -32,7 +32,7 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip'
 
-export const Player = ({ id, setShowPlayer, showToast }) => {
+export const Player = ({ id, type, setShowPlayer, showToast }) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -128,7 +128,7 @@ export const Player = ({ id, setShowPlayer, showToast }) => {
     }
 
     let PlayerClass = null
-    if (id.startsWith('file')) {
+    if (type === 'file') {
       PlayerClass = LocalFilePlayer
     } else {
       PlayerClass = YouTubePlayer
@@ -189,7 +189,7 @@ export const Player = ({ id, setShowPlayer, showToast }) => {
         mediaPlayerRef.current = null
       }
     }
-  }, [id])
+  }, [id, type])
 
   const handleIntervalChange = newValue => {
     const minTime = 1

@@ -41,6 +41,7 @@ function fileToBase64(file) {
 
 export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [id, setId] = useState()
+  const [songType, setSongType] = useState()
   const [showPlayer, setShowPlayer] = useState()
   const [inputText, setInputText] = useState()
   const [error, setError] = useState(false)
@@ -79,16 +80,16 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     setError(null)
   }
 
-  const openSong = async songId => {
+  const openSong = async (songId, songType) => {
     await patchSong(songId, { last_accessed: new Date().toISOString() })
     setId(songId)
+    setSongType(songType)
     setShowPlayer(true)
   }
 
   const handleLocalFileSelect = async file => {
     if (!file) return
 
-    const id = makeLocalFileId(file)
     const mimeType = file.type || ''
 
     if (!mimeType.startsWith('audio/') && !mimeType.startsWith('video/')) {
@@ -96,8 +97,8 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       return
     }
 
-    const safeId = id.replace(/[^a-zA-Z0-9-_]/g, '_')
-    const filePath = `media/${safeId}`
+    const sourceKey = makeLocalFileId(file)
+    const filePath = `media/${sourceKey.replace(/[^a-zA-Z0-9-_]/g, '_')}`
 
     try {
       const base64Data = await fileToBase64(file)
@@ -108,8 +109,8 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
         directory: Directory.Data,
       })
 
-      await upsertSong({
-        id,
+      const { id } = await upsertSong({
+        sourceKey,
         name: file.name,
         type: SONG_TYPE.FILE,
         content: filePath,
@@ -119,9 +120,9 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
         lastModified: file.lastModified,
       })
 
-      await openSong(id)
+      await openSong(id, SONG_TYPE.FILE)
     } catch (err) {
-      console.error('Failed to save file to Capacitor Filesystem', err)
+      console.error('Failed to save local file', err)
       showToast?.('Error saving local file')
     }
   }
@@ -130,8 +131,8 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     const ytId = getYoutubeId(inputText)
     if (!ytId) return
 
-    await upsertSong({ id: ytId, name: ytId, type: SONG_TYPE.YOUTUBE, link: ytId })
-    await openSong(ytId)
+    const { id } = await upsertSong({ sourceKey: ytId, name: ytId, type: SONG_TYPE.YOUTUBE, link: ytId })
+    await openSong(id, SONG_TYPE.YOUTUBE)
   }
 
   const formatTimeString = timeString => new Date(timeString).toLocaleString()
@@ -204,7 +205,7 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
               {songs.map(song => (
                 <button
                   key={song.id}
-                  onClick={() => openSong(song.id)}
+                  onClick={() => openSong(song.id, song.type)}
                   className='flex flex-col md:flex-row w-full items-start md:items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-accent'
                 >
                   <div className='min-w-0 flex-1 w-full font-medium text-primary'>
@@ -221,6 +222,6 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       </div>
     </TooltipProvider>
   ) : (
-    <Player id={id} setShowPlayer={setShowPlayer} showToast={showToast} />
+    <Player id={id} type={songType} setShowPlayer={setShowPlayer} showToast={showToast} />
   )
 }

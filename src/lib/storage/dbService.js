@@ -1,5 +1,12 @@
 import { Directory } from '@capacitor/filesystem'
+import { Capacitor } from '@capacitor/core'
 import { AppDataSource, sqlite } from './dataSource'
+
+async function saveToStore() {
+  if (Capacitor.getPlatform() === 'web') {
+    await sqlite.saveToStore('transcriber')
+  }
+}
 
 // Mapping from MediaPlayer._metadata camelCase keys → DB column names
 const META_TO_COL = {
@@ -7,7 +14,6 @@ const META_TO_COL = {
   beatsPerMeasure: 'beats_per_measure',
   title: 'title',
   mimeType: 'mime_type',
-  filePath: 'content',
   lastPlaybackRate: 'last_playback_rate',
   lastLoopStartPosition: 'last_loop_start_position',
   lastLoopEndPosition: 'last_loop_end_position',
@@ -16,7 +22,6 @@ const META_TO_COL = {
   name: 'name',
   type: 'type',
   link: 'link',
-  content: 'content',
   fileName: 'file_name',
   fileSize: 'file_size',
   lastModified: 'last_modified',
@@ -30,7 +35,7 @@ function rowToMetadata(row) {
     filePath: row.content ?? null,
     fileDirectory: Directory.Data,
     bpm: row.beats_per_minute ?? null,
-    beatsPerMeasure: row.beats_per_measure ?? 4,
+    beatsPerMeasure: row.beats_per_measure ?? null,
     loops: {},
     title: row.title ?? null,
     lastPlaybackRate: row.last_playback_rate ?? null,
@@ -107,7 +112,7 @@ export async function initDB() {
 export async function getSongs() {
   const mgr = AppDataSource.manager
   return mgr.query(
-    'SELECT id, name, type, title, last_accessed, content, mime_type FROM song ORDER BY last_accessed DESC NULLS LAST',
+    'SELECT id, name, type, title, last_accessed, mime_type FROM song ORDER BY last_accessed DESC NULLS LAST',
   )
 }
 
@@ -125,15 +130,15 @@ export async function getSong(id) {
   return metadata
 }
 
-export async function upsertSong({ id, name, type, link, content, mimeType, fileName, fileSize, lastModified, lastAccessed }) {
+export async function upsertSong({ sourceKey, name, type, link, content, mimeType, fileName, fileSize, lastModified, lastAccessed }) {
   const mgr = AppDataSource.manager
   await mgr.query(
-    `INSERT OR REPLACE INTO song
-       (id, name, type, link, content, mime_type, file_name, file_size, last_modified, last_accessed)
+    `INSERT OR IGNORE INTO song
+       (source_key, name, type, link, content, mime_type, file_name, file_size, last_modified, last_accessed)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      id,
-      name ?? id,
+      sourceKey,
+      name ?? sourceKey,
       type,
       link ?? null,
       content ?? null,
@@ -144,6 +149,9 @@ export async function upsertSong({ id, name, type, link, content, mimeType, file
       lastAccessed ?? new Date().toISOString(),
     ],
   )
+  const rows = await mgr.query('SELECT id FROM song WHERE source_key = ?', [sourceKey])
+  await saveToStore()
+  return { id: rows[0].id }
 }
 
 export async function patchSong(id, patch) {
@@ -162,6 +170,7 @@ export async function patchSong(id, patch) {
   if (!setClauses.length) return
   values.push(id)
   await mgr.query(`UPDATE song SET ${setClauses.join(', ')} WHERE id = ?`, values)
+  await saveToStore()
 }
 
 export async function syncLoops(songId, loopsTree) {
@@ -170,6 +179,7 @@ export async function syncLoops(songId, loopsTree) {
     await tx.query('DELETE FROM loop WHERE song_id = ?', [songId])
     await insertLoopTree(tx, songId, loopsTree || {}, null)
   })
+  await saveToStore()
 }
 
 export async function getAppSetting(key, defaultValue = null) {
@@ -189,4 +199,5 @@ export async function setAppSetting(key, value) {
     key,
     JSON.stringify(value),
   ])
+  await saveToStore()
 }

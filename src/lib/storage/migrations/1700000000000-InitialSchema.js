@@ -4,14 +4,15 @@ export class InitialSchema1700000000000 {
   async up(queryRunner) {
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS song (
-        id                       TEXT PRIMARY KEY,
-        name                     TEXT NOT NULL DEFAULT '',
-        type                     TEXT NOT NULL DEFAULT 'youtube'
+        id                       INTEGER PRIMARY KEY AUTOINCREMENT,
+        source_key               TEXT    UNIQUE NOT NULL,
+        name                     TEXT    NOT NULL DEFAULT '',
+        type                     TEXT    NOT NULL DEFAULT 'youtube'
                                    CHECK(type IN ('file', 'youtube')),
         link                     TEXT,
         content                  TEXT,
-        beats_per_minute         INTEGER NOT NULL DEFAULT 120,
-        beats_per_measure        INTEGER NOT NULL DEFAULT 4,
+        beats_per_minute         INTEGER,
+        beats_per_measure        INTEGER,
         last_accessed            TEXT,
         last_playback_rate       REAL,
         last_loop_start_position REAL,
@@ -28,7 +29,7 @@ export class InitialSchema1700000000000 {
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS loop (
         id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        song_id    TEXT    NOT NULL REFERENCES song(id) ON DELETE CASCADE,
+        song_id    INTEGER NOT NULL REFERENCES song(id) ON DELETE CASCADE,
         parent_id  INTEGER REFERENCES loop(id) ON DELETE CASCADE,
         name       TEXT,
         start_time REAL    NOT NULL,

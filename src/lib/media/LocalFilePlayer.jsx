@@ -123,29 +123,22 @@ function LocalFileMediaElement({ player }) {
     let canceled = false
 
     async function resolveSource() {
-      // If we have a persistent Capacitor file path, load it as a data URL.
-      if (filePath) {
+      if (sourceUrl) {
+        // Data URL built from DB blob content — use directly.
+        if (!canceled) setResolvedSourceUrl(sourceUrl)
+      } else if (filePath) {
+        // Legacy: read from Capacitor Filesystem path.
         try {
           const directory = fileDirectory || Directory.Data
-          const result = await Filesystem.readFile({
-            path: filePath,
-            directory,
-          })
-          const base64Data = result.data
+          const result = await Filesystem.readFile({ path: filePath, directory })
           const mime = mimeType || 'application/octet-stream'
-          const dataUrl = `data:${mime};base64,${base64Data}`
-          if (!canceled) {
-            setResolvedSourceUrl(dataUrl)
-          }
+          if (!canceled) setResolvedSourceUrl(`data:${mime};base64,${result.data}`)
         } catch (err) {
           console.error('Failed to read local media from Filesystem', err)
-          if (!canceled) {
-            // Fallback to whatever sourceUrl was provided (might be null/invalid).
-            setResolvedSourceUrl(sourceUrl || null)
-          }
+          if (!canceled) setResolvedSourceUrl(null)
         }
       } else {
-        setResolvedSourceUrl(sourceUrl || null)
+        setResolvedSourceUrl(null)
       }
     }
 
@@ -154,7 +147,7 @@ function LocalFileMediaElement({ player }) {
     return () => {
       canceled = true
     }
-  }, [filePath, fileDirectory, mimeType, sourceUrl])
+  }, [sourceUrl, filePath, fileDirectory, mimeType])
 
   useEffect(() => {
     const el = mediaRef.current
