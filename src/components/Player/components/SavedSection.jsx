@@ -6,6 +6,14 @@ import { timestampFormatter } from '@utils/video'
 import { Button } from '@components/ui/button'
 import { Card } from '@components/ui/card'
 import { Input } from '@components/ui/input'
+import { Separator } from '@components/ui/separator'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@components/ui/dialog'
+import { RecordingItem } from './RecordingItem'
 
 export const SavedSection = ({
   onClick,
@@ -18,8 +26,11 @@ export const SavedSection = ({
   hasChildren,
   isCollapsed,
   onToggleCollapse,
+  recordings = [],
+  onRecordingDeleted,
 }) => {
   const [currentTitle, setCurrentTitle] = useState(title || '')
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const handleTitleChange = e => {
     const newTitle = e.target.value
@@ -82,13 +93,53 @@ export const SavedSection = ({
           variant='ghost'
           onClick={e => {
             e.stopPropagation()
-            onDelete()
+            setConfirmOpen(true)
           }}
           aria-label='Delete loop'
         >
           <Trash2 />
         </Button>
       </button>
+
+      {recordings.length > 0 && (
+        <>
+          <Separator />
+          <div className='flex flex-col py-1'>
+            {recordings.map(rec => (
+              <RecordingItem
+                key={rec.id}
+                recording={rec}
+                onDeleted={onRecordingDeleted}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className='max-w-sm'>
+          <DialogHeader>
+            <DialogTitle>Delete loop?</DialogTitle>
+          </DialogHeader>
+          <p className='text-sm text-muted-foreground'>
+            This will also delete all recordings for this loop and cannot be undone.
+          </p>
+          <div className='flex justify-end gap-2 pt-2'>
+            <Button variant='outline' onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant='destructive'
+              onClick={() => {
+                setConfirmOpen(false)
+                onDelete()
+              }}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

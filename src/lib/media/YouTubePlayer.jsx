@@ -135,7 +135,9 @@ export class YouTubePlayer extends MediaPlayer {
       },
     }
 
-    const videoId = this.id
+    const videoId = this._metadata?.link
+
+    if (!videoId) return null
 
     return (
       <div className='w-full overflow-hidden rounded-lg border bg-card flex-none'>
