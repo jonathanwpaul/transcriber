@@ -10,7 +10,8 @@
     "app/**/*"
   ],
   "publish": {
-    "provider": "github"
+    "provider": "github",
+    "publishAutoUpdate": false
   },
   "nsis": {
     "allowElevation": true,
