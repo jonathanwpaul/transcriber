@@ -11,6 +11,7 @@ export class InitialSchema1700000000000 {
                                    CHECK(type IN ('file', 'youtube')),
         link                     TEXT,
         content                  TEXT,
+        file_directory           TEXT    NOT NULL DEFAULT 'DATA',
         beats_per_minute         INTEGER,
         beats_per_measure        INTEGER,
         last_accessed            TEXT,
@@ -39,10 +40,12 @@ export class InitialSchema1700000000000 {
 
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS recording (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        name       TEXT,
-        loop_id    INTEGER NOT NULL REFERENCES loop(id) ON DELETE CASCADE,
-        created_on TEXT    NOT NULL
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        name           TEXT,
+        loop_id        INTEGER NOT NULL REFERENCES loop(id) ON DELETE CASCADE,
+        created_on     TEXT    NOT NULL,
+        file_path      TEXT    NOT NULL DEFAULT '',
+        file_directory TEXT    NOT NULL DEFAULT 'DATA'
       )
     `)
 

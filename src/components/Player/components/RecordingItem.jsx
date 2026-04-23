@@ -86,7 +86,7 @@ export function RecordingItem({ recording, onDeleted }) {
 
   useEffect(() => {
     let cancelled = false
-    getAudioSrc(recording.file_path).then(url => {
+    getAudioSrc(recording.file_path, null, recording.file_directory).then(url => {
       if (!cancelled) setSrc(url)
     })
     return () => {
