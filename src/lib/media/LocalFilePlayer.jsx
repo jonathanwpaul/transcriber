@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Filesystem, Directory } from '@capacitor/filesystem'
+import { Capacitor } from '@capacitor/core'
 
 import { MediaPlayer } from './MediaPlayer'
 
@@ -127,12 +128,18 @@ function LocalFileMediaElement({ player }) {
         // Data URL built from DB blob content — use directly.
         if (!canceled) setResolvedSourceUrl(sourceUrl)
       } else if (filePath) {
-        // Legacy: read from Capacitor Filesystem path.
         try {
           const directory = fileDirectory || Directory.Data
-          const result = await Filesystem.readFile({ path: filePath, directory })
-          const mime = mimeType || 'application/octet-stream'
-          if (!canceled) setResolvedSourceUrl(`data:${mime};base64,${result.data}`)
+          let url
+          if (Capacitor.isNativePlatform()) {
+            const { uri } = await Filesystem.getUri({ path: filePath, directory })
+            url = Capacitor.convertFileSrc(uri)
+          } else {
+            const result = await Filesystem.readFile({ path: filePath, directory })
+            const mime = mimeType || 'application/octet-stream'
+            url = `data:${mime};base64,${result.data}`
+          }
+          if (!canceled) setResolvedSourceUrl(url)
         } catch (err) {
           console.error('Failed to read local media from Filesystem', err)
           if (!canceled) setResolvedSourceUrl(null)

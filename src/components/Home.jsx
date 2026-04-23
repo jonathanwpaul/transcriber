@@ -106,7 +106,8 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       await Filesystem.writeFile({
         path: filePath,
         data: base64Data,
-        directory: Directory.Data,
+        directory: Directory.Documents,
+        recursive: true,
       })
 
       const { id } = await upsertSong({
@@ -114,6 +115,7 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
         name: file.name,
         type: SONG_TYPE.FILE,
         content: filePath,
+        fileDirectory: 'DOCUMENTS',
         mimeType,
         fileName: file.name,
         fileSize: file.size,

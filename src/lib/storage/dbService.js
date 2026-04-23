@@ -34,7 +34,7 @@ function rowToMetadata(row) {
     link: row.link ?? null,
     mimeType: row.mime_type ?? null,
     filePath: row.content ?? null,
-    fileDirectory: Directory.Data,
+    fileDirectory: row.file_directory === 'DOCUMENTS' ? Directory.Documents : Directory.Data,
     bpm: row.beats_per_minute ?? null,
     beatsPerMeasure: row.beats_per_measure ?? null,
     loops: {},
@@ -120,18 +120,19 @@ export async function getSong(id) {
   return metadata
 }
 
-export async function upsertSong({ sourceKey, name, type, link, content, mimeType, fileName, fileSize, lastModified, lastAccessed }) {
+export async function upsertSong({ sourceKey, name, type, link, content, fileDirectory, mimeType, fileName, fileSize, lastModified, lastAccessed }) {
   const mgr = AppDataSource.manager
   await mgr.query(
     `INSERT OR IGNORE INTO song
-       (source_key, name, type, link, content, mime_type, file_name, file_size, last_modified, last_accessed)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (source_key, name, type, link, content, file_directory, mime_type, file_name, file_size, last_modified, last_accessed)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       sourceKey,
       name ?? sourceKey,
       type,
       link ?? null,
       content ?? null,
+      fileDirectory ?? 'DATA',
       mimeType ?? null,
       fileName ?? null,
       fileSize ?? null,
@@ -212,24 +213,26 @@ export async function getRecordingsByLoop(loopId) {
   )
 }
 
-export async function addRecording({ loopId, filePath, name }) {
+export async function addRecording({ loopId, filePath, fileDirectory, name }) {
   const mgr = AppDataSource.manager
   const createdOn = new Date().toISOString()
+  const dir = fileDirectory ?? 'DATA'
   await mgr.query(
-    'INSERT INTO recording (loop_id, file_path, name, created_on) VALUES (?, ?, ?, ?)',
-    [loopId, filePath, name ?? null, createdOn],
+    'INSERT INTO recording (loop_id, file_path, file_directory, name, created_on) VALUES (?, ?, ?, ?, ?)',
+    [loopId, filePath, dir, name ?? null, createdOn],
   )
   const [{ id }] = await mgr.query('SELECT last_insert_rowid() as id')
   await saveToStore()
-  return { id, loopId, filePath, name: name ?? null, createdOn }
+  return { id, loopId, filePath, fileDirectory: dir, name: name ?? null, createdOn }
 }
 
 export async function deleteRecording(id) {
   const mgr = AppDataSource.manager
-  const rows = await mgr.query('SELECT file_path FROM recording WHERE id = ?', [id])
+  const rows = await mgr.query('SELECT file_path, file_directory FROM recording WHERE id = ?', [id])
   await mgr.query('DELETE FROM recording WHERE id = ?', [id])
   await saveToStore()
-  return rows[0]?.file_path ?? null
+  const row = rows[0]
+  return row ? { filePath: row.file_path, fileDirectory: row.file_directory ?? 'DATA' } : null
 }
 
 export async function getAppSetting(key, defaultValue = null) {
