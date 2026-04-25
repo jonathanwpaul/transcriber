@@ -3,7 +3,6 @@ import { useState, useRef, useEffect } from 'react'
 import {
   ArrowBigLeftDash,
   ArrowBigRightDash,
-  Circle,
   Flag,
   Pause,
   Pencil,
@@ -14,13 +13,7 @@ import {
   X,
 } from 'lucide-react'
 
-import { getAppSetting, setAppSetting, getRecordingsByLoop } from '@lib/storage/dbService'
-import {
-  requestRecordingPermission,
-  hasRecordingPermission,
-  startRecording,
-  stopAndSaveRecording,
-} from '@lib/media/RecordingService'
+import { getAppSetting, setAppSetting } from '@lib/storage/dbService'
 import { timestampFormatter, round } from '@utils/video'
 import { YouTubePlayer, LocalFilePlayer } from '../../lib/media'
 
@@ -57,10 +50,6 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
   const [appSettings, setAppSettingsState] = useState({ measures: 4, useSelectedAsParent: true })
   const [appSettingsLoading, setAppSettingsLoading] = useState(true)
 
-  // recordings keyed by "loopStart-loopEnd"
-  const [recordings, setRecordings] = useState({})
-  const [isRecording, setIsRecording] = useState(false)
-
   useEffect(() => {
     Promise.all([
       getAppSetting('measures', 4),
@@ -80,14 +69,6 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
       setScrubTime(currentTime)
     }
   }, [currentTime, isScrubbing])
-
-  // load recordings whenever the loop tree changes
-  useEffect(() => {
-    if (playerMetadata.loops) {
-      loadRecordingsForLoops(playerMetadata.loops)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerMetadata.loops])
 
   const mediaPlayerRef = useRef(null)
   const loopStartRef = useRef()
@@ -347,49 +328,6 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
     mediaPlayerRef.current.seekTo(loopStart)
   }
 
-  const loadRecordingsForLoops = async loops => {
-    const flat = []
-    const collect = obj => {
-      for (const loop of Object.values(obj || {})) {
-        if (loop.id != null) flat.push(loop)
-        collect(loop.children || {})
-      }
-    }
-    collect(loops)
-
-    const next = {}
-    await Promise.all(
-      flat.map(async loop => {
-        const key = `${loop.loopStart}-${loop.loopEnd}`
-        next[key] = await getRecordingsByLoop(loop.id)
-      }),
-    )
-    setRecordings(next)
-  }
-
-  const handleRecordToggle = async () => {
-    if (isRecording) {
-      setIsRecording(false)
-      const loops = playerMetadata.loops || {}
-      const selectedLoop = Object.values(loops).find(
-        l => l.loopStart === loopStart && l.loopEnd === loopEnd,
-      )
-      if (!selectedLoop?.id) return
-      const key = `${loopStart}-${loopEnd}`
-      await stopAndSaveRecording({ loopId: selectedLoop.id })
-      const updated = await getRecordingsByLoop(selectedLoop.id)
-      setRecordings(prev => ({ ...prev, [key]: updated }))
-    } else {
-      const permitted = await hasRecordingPermission()
-      if (!permitted) {
-        const granted = await requestRecordingPermission()
-        if (!granted) return
-      }
-      await startRecording()
-      setIsRecording(true)
-    }
-  }
-
   const renderLoop = (loop, pathKey) => {
     const hasChildren = !!(
       loop.children && Object.keys(loop.children).length > 0
@@ -403,13 +341,6 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           isSelected={loop.loopStart === loopStart && loop.loopEnd === loopEnd}
           onClick={() => loadLoop(loop)}
           onDelete={() => deleteLoop(loop)}
-          recordings={recordings[pathKey] ?? []}
-          onRecordingDeleted={deletedId => {
-            setRecordings(prev => ({
-              ...prev,
-              [pathKey]: (prev[pathKey] ?? []).filter(r => r.id !== deletedId),
-            }))
-          }}
           onTitleChange={title => {
             if (!mediaPlayerRef.current) return
             const currentLoops = playerMetadata.loops
@@ -855,37 +786,6 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           {/* RIGHT PANE: loop list, full height */}
           <section className='snap-start lg:snap-none w-full lg:w-[40%] p-2 md:p-0 min-h-full lg:h-full'>
             <Card className='flex h-full flex-col overflow-hidden p-2 pb-6'>
-              {/* Record button row */}
-              {(() => {
-                const loops = playerMetadata.loops || {}
-                const isSelectedLoopSaved = Object.values(loops).some(
-                  l => l.loopStart === loopStart && l.loopEnd === loopEnd,
-                )
-                return (
-                  <div className='flex items-center justify-end px-2 pb-1 pt-1'>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type='button'
-                          size='icon'
-                          disabled={!isSelectedLoopSaved || controlsDisabled}
-                          onClick={handleRecordToggle}
-                          className={
-                            'h-9 w-9 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 ' +
-                            (isRecording ? 'ring-2 ring-destructive ring-offset-2 animate-pulse' : '')
-                          }
-                          aria-label={isRecording ? 'Stop recording' : 'Record'}
-                        >
-                          <Circle className='h-4 w-4' fill='currentColor' />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {isRecording ? 'Stop recording' : 'Record for selected loop'}
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                )
-              })()}
               {playerMetadata.loops &&
               Object.keys(playerMetadata.loops).length > 0 ? (
                 <div className='flex flex-col'>

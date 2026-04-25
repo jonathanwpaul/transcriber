@@ -1,5 +1,4 @@
 export { BPMInput } from './BPMInput'
-export { RecordingItem } from './RecordingItem'
 export { SavedSection } from './SavedSection'
 export { ScrubbableNumberInput } from './ScrubbableNumberInput'
 export { TimeTextInput } from './TimeTextInput'
