@@ -43,7 +43,7 @@
     "eject": "craco eject",
     "prepare": "husky",
     "electron:dev": "electron .",
-    "electron:build": "craco build && electron-builder",
+    "electron:build": "craco build && electron-builder --publish never",
     "electron:pack": "craco build && electron-builder --dir",
     "postinstall": "electron-builder install-app-deps"
   },
