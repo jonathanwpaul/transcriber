@@ -94,27 +94,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build React app
-        run: pnpm run build
-        env:
-          DISABLE_ESLINT_PLUGIN: true
-
-      - name: Copy build to Electron
-        run: npx cap copy @capacitor-community/electron
-
-      - name: Install Electron packages
-        run: pnpm install
-        working-directory: electron
-
       - name: Build Electron app
-        run: pnpm run electron:make
-        working-directory: electron
+        run: pnpm run electron:build
+        env:
+          CI: ''
+          DISABLE_ESLINT_PLUGIN: true
 
       - name: Upload Electron artifact
         uses: actions/upload-artifact@v4
         with:
           name: electron-app-${{ matrix.os }}
-          path: electron/dist/
+          path: electron-dist/
 
   ios:
     name: iOS
