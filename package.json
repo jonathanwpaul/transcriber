@@ -2,9 +2,10 @@
   "name": "transcriber",
   "version": "0.1.0",
   "private": true,
+  "main": "public/electron.js",
+  "homepage": "./",
   "packageManager": "pnpm@10.18.3",
   "dependencies": {
-    "@capacitor-community/electron": "^5.0.1",
     "@capacitor-community/sqlite": "^5.7.4",
     "@capacitor/android": "^5.7.8",
     "@capacitor/core": "^5.7.8",
@@ -40,7 +41,33 @@
     "build": "craco build",
     "test": "craco test",
     "eject": "craco eject",
-    "prepare": "husky"
+    "prepare": "husky",
+    "electron:dev": "electron .",
+    "electron:build": "craco build && electron-builder",
+    "electron:pack": "craco build && electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.transcriber.app",
+    "productName": "Transcriber",
+    "directories": {
+      "output": "electron-dist"
+    },
+    "files": [
+      "build/**/*"
+    ],
+    "extraMetadata": {
+      "main": "build/electron.js"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -71,7 +98,6 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@capacitor/cli": "^5.7.8",
     "@craco/craco": "^7.1.0",
-    "@electron/rebuild": "^4.0.3",
     "autoprefixer": "^10.5.0",
     "electron": "^25.8.4",
     "electron-builder": "24.6.4",
