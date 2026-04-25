@@ -10,6 +10,7 @@
 
 # dist
 /build
+/electron-dist
 
 # misc
 .DS_Store
