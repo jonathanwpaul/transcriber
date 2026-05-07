@@ -30,7 +30,7 @@ export class MediaPlayer {
     this._isPlaying = false
     this._playbackRate = 1
 
-    // Persisted metadata for this media id.
+    // Persisted metadata for this song id.
     this._metadata = {
       type: null,
       sourceUrl: null,
@@ -40,7 +40,7 @@ export class MediaPlayer {
       bpm: null,
       beatsPerMeasure: null,
       loops: {},
-      title: null,
+      name: null,
       lastLoopSelected: null,
       lastPlaybackRate: null,
       lastLoopStartPosition: null,
@@ -117,12 +117,13 @@ export class MediaPlayer {
     await this._saveMetadata({ loops })
   }
 
-  get title() {
-    return this._metadata.title
+  get name() {
+    return this._metadata.name
   }
 
-  async setTitle(title) {
-    await this._saveMetadata({ title })
+  async setName(name) {
+    await this._saveMetadata({ name })
+    this.callbacks.onMetadataChange(this._metadata)
   }
 
   async setLastLoopSelected(lastLoopSelected) {

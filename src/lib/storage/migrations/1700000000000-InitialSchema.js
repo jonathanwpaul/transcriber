@@ -22,8 +22,7 @@ export class InitialSchema1700000000000 {
         mime_type                TEXT,
         file_name                TEXT,
         file_size                INTEGER,
-        last_modified            INTEGER,
-        title                    TEXT
+        last_modified            INTEGER
       )
     `)
 

@@ -34,11 +34,12 @@ function rowToMetadata(row) {
     link: row.link ?? null,
     mimeType: row.mime_type ?? null,
     filePath: row.content ?? null,
-    fileDirectory: row.file_directory === 'DOCUMENTS' ? Directory.Documents : Directory.Data,
+    fileDirectory:
+      row.file_directory === 'DOCUMENTS' ? Directory.Documents : Directory.Data,
     bpm: row.beats_per_minute ?? null,
     beatsPerMeasure: row.beats_per_measure ?? null,
     loops: {},
-    title: row.title ?? null,
+    name: row.name ?? null,
     lastPlaybackRate: row.last_playback_rate ?? null,
     lastLoopStartPosition: row.last_loop_start_position ?? null,
     lastLoopEndPosition: row.last_loop_end_position ?? null,
@@ -102,7 +103,7 @@ export async function initDB() {
 export async function getSongs() {
   const mgr = AppDataSource.manager
   return mgr.query(
-    'SELECT id, name, type, title, last_accessed, mime_type FROM song ORDER BY last_accessed DESC NULLS LAST',
+    'SELECT id, name, type, last_accessed, mime_type FROM song ORDER BY last_accessed DESC NULLS LAST',
   )
 }
 
@@ -120,7 +121,19 @@ export async function getSong(id) {
   return metadata
 }
 
-export async function upsertSong({ sourceKey, name, type, link, content, fileDirectory, mimeType, fileName, fileSize, lastModified, lastAccessed }) {
+export async function upsertSong({
+  sourceKey,
+  name,
+  type,
+  link,
+  content,
+  fileDirectory,
+  mimeType,
+  fileName,
+  fileSize,
+  lastModified,
+  lastAccessed,
+}) {
   const mgr = AppDataSource.manager
   await mgr.query(
     `INSERT OR IGNORE INTO song
@@ -140,7 +153,9 @@ export async function upsertSong({ sourceKey, name, type, link, content, fileDir
       lastAccessed ?? new Date().toISOString(),
     ],
   )
-  const rows = await mgr.query('SELECT id FROM song WHERE source_key = ?', [sourceKey])
+  const rows = await mgr.query('SELECT id FROM song WHERE source_key = ?', [
+    sourceKey,
+  ])
   await saveToStore()
   return { id: rows[0].id }
 }
@@ -151,7 +166,8 @@ export async function patchSong(id, patch) {
   const values = []
 
   for (const [key, value] of Object.entries(patch)) {
-    if (key === 'loops' || key === 'sourceUrl' || key === 'fileDirectory') continue
+    if (key === 'loops' || key === 'sourceUrl' || key === 'fileDirectory')
+      continue
     const col = META_TO_COL[key]
     if (!col) continue
     setClauses.push(`${col} = ?`)
@@ -160,7 +176,10 @@ export async function patchSong(id, patch) {
 
   if (!setClauses.length) return
   values.push(id)
-  await mgr.query(`UPDATE song SET ${setClauses.join(', ')} WHERE id = ?`, values)
+  await mgr.query(
+    `UPDATE song SET ${setClauses.join(', ')} WHERE id = ?`,
+    values,
+  )
   await saveToStore()
 }
 
@@ -180,7 +199,13 @@ export async function syncLoops(songId, loopsTree) {
       } else {
         await mgr.query(
           'INSERT INTO loop (song_id, parent_id, name, start_time, end_time) VALUES (?, ?, ?, ?, ?)',
-          [songId, parentId ?? null, loop.title ?? null, loop.loopStart, loop.loopEnd],
+          [
+            songId,
+            parentId ?? null,
+            loop.title ?? null,
+            loop.loopStart,
+            loop.loopEnd,
+          ],
         )
         const [{ id }] = await mgr.query('SELECT last_insert_rowid() as id')
         seenIds.add(id)
@@ -223,21 +248,35 @@ export async function addRecording({ loopId, filePath, fileDirectory, name }) {
   )
   const [{ id }] = await mgr.query('SELECT last_insert_rowid() as id')
   await saveToStore()
-  return { id, loopId, filePath, fileDirectory: dir, name: name ?? null, createdOn }
+  return {
+    id,
+    loopId,
+    filePath,
+    fileDirectory: dir,
+    name: name ?? null,
+    createdOn,
+  }
 }
 
 export async function deleteRecording(id) {
   const mgr = AppDataSource.manager
-  const rows = await mgr.query('SELECT file_path, file_directory FROM recording WHERE id = ?', [id])
+  const rows = await mgr.query(
+    'SELECT file_path, file_directory FROM recording WHERE id = ?',
+    [id],
+  )
   await mgr.query('DELETE FROM recording WHERE id = ?', [id])
   await saveToStore()
   const row = rows[0]
-  return row ? { filePath: row.file_path, fileDirectory: row.file_directory ?? 'DATA' } : null
+  return row
+    ? { filePath: row.file_path, fileDirectory: row.file_directory ?? 'DATA' }
+    : null
 }
 
 export async function getAppSetting(key, defaultValue = null) {
   const mgr = AppDataSource.manager
-  const rows = await mgr.query('SELECT value FROM settings WHERE key = ?', [key])
+  const rows = await mgr.query('SELECT value FROM settings WHERE key = ?', [
+    key,
+  ])
   if (!rows.length) return defaultValue
   try {
     return JSON.parse(rows[0].value)
@@ -248,9 +287,9 @@ export async function getAppSetting(key, defaultValue = null) {
 
 export async function setAppSetting(key, value) {
   const mgr = AppDataSource.manager
-  await mgr.query('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [
-    key,
-    JSON.stringify(value),
-  ])
+  await mgr.query(
+    'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
+    [key, JSON.stringify(value)],
+  )
   await saveToStore()
 }

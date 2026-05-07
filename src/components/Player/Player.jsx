@@ -399,7 +399,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
       <div className='flex h-full w-full flex-col'>
         <div className='flex h-[5vh] flex-none items-center justify-between px-4'>
           <div className='max-w-[80%] truncate text-sm font-medium'>
-            {playerMetadata.title}
+            {playerMetadata.name}
           </div>
           <Tooltip>
             <TooltipTrigger asChild>

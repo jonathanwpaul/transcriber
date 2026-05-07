@@ -52,8 +52,7 @@ export class YouTubePlayer extends MediaPlayer {
     this._updatePlaybackRate(rate)
 
     if (videoData.title) {
-      // Persist the title via MediaPlayer base logic.
-      this.setTitle(videoData.title)
+      this.setName(videoData.title)
     }
 
     // If we have a lastPlaybackPosition persisted, seek to it.

@@ -133,7 +133,12 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     const ytId = getYoutubeId(inputText)
     if (!ytId) return
 
-    const { id } = await upsertSong({ sourceKey: ytId, name: ytId, type: SONG_TYPE.YOUTUBE, link: ytId })
+    const { id } = await upsertSong({
+      sourceKey: ytId,
+      name: ytId,
+      type: SONG_TYPE.YOUTUBE,
+      link: ytId,
+    })
     await openSong(id, SONG_TYPE.YOUTUBE)
   }
 
@@ -214,7 +219,9 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
                     {song.title ?? song.name ?? song.id}
                   </div>
                   <div className='shrink-0 text-xs text-muted-foreground'>
-                    {song.last_accessed ? formatTimeString(song.last_accessed) : ''}
+                    {song.last_accessed
+                      ? formatTimeString(song.last_accessed)
+                      : ''}
                   </div>
                 </button>
               ))}
@@ -224,6 +231,11 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       </div>
     </TooltipProvider>
   ) : (
-    <Player id={id} type={songType} setShowPlayer={setShowPlayer} showToast={showToast} />
+    <Player
+      id={id}
+      type={songType}
+      setShowPlayer={setShowPlayer}
+      showToast={showToast}
+    />
   )
 }
