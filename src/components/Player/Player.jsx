@@ -47,7 +47,10 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
   // metadata emitted by the MediaPlayer (BPM, beats/measure, loops, etc.)
   const [playerMetadata, setPlayerMetadata] = useState({})
 
-  const [appSettings, setAppSettingsState] = useState({ measures: 4, useSelectedAsParent: true })
+  const [appSettings, setAppSettingsState] = useState({
+    measures: 4,
+    useSelectedAsParent: true,
+  })
   const [appSettingsLoading, setAppSettingsLoading] = useState(true)
 
   useEffect(() => {
@@ -394,7 +397,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
   return (
     <TooltipProvider>
       <div className='flex h-full w-full flex-col'>
-        <div className='flex h-[5vh] flex-none items-center justify-between border-b bg-card px-4'>
+        <div className='flex h-[5vh] flex-none items-center justify-between px-4'>
           <div className='max-w-[80%] truncate text-sm font-medium'>
             {playerMetadata.title}
           </div>
