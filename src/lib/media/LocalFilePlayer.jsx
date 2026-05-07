@@ -15,6 +15,23 @@ export class LocalFilePlayer extends MediaPlayer {
     this._audioSourceNode = null
   }
 
+  _startTimeUpdates() {
+    if (!this._mediaElement) return
+
+    this._timeInterval = setInterval(() => {
+      const current = this._mediaElement.currentTime
+      if (typeof current === 'number') {
+        this._updateCurrentTime(current)
+      }
+    }, 100)
+  }
+
+  _stopTimeUpdates() {
+    if (this._timeInterval) {
+      clearInterval(this._timeInterval)
+      this._timeInterval = null
+    }
+  }
   // Called by the React wrapper when the underlying media element mounts.
   _attachMediaElement(el) {
     this._mediaElement = el
@@ -41,7 +58,6 @@ export class LocalFilePlayer extends MediaPlayer {
   seekTo(seconds) {
     if (!this._mediaElement) return
     this._mediaElement.currentTime = seconds
-    this._updateCurrentTime(seconds)
   }
 
   setPlaybackRate(rate) {
@@ -132,10 +148,16 @@ function LocalFileMediaElement({ player }) {
           const directory = fileDirectory || Directory.Data
           let url
           if (Capacitor.isNativePlatform()) {
-            const { uri } = await Filesystem.getUri({ path: filePath, directory })
+            const { uri } = await Filesystem.getUri({
+              path: filePath,
+              directory,
+            })
             url = Capacitor.convertFileSrc(uri)
           } else {
-            const result = await Filesystem.readFile({ path: filePath, directory })
+            const result = await Filesystem.readFile({
+              path: filePath,
+              directory,
+            })
             const mime = mimeType || 'application/octet-stream'
             url = `data:${mime};base64,${result.data}`
           }
@@ -196,16 +218,14 @@ function LocalFileMediaElement({ player }) {
       })
     }
 
-    const handleTimeUpdate = () => {
-      player._updateCurrentTime(el.currentTime ?? 0)
-    }
-
     const handlePlay = () => {
       player._updateIsPlaying(true)
+      player._startTimeUpdates()
     }
 
     const handlePause = () => {
       player._updateIsPlaying(false)
+      player._stopTimeUpdates()
     }
 
     const handleRateChange = () => {
@@ -213,7 +233,6 @@ function LocalFileMediaElement({ player }) {
     }
 
     el.addEventListener('loadedmetadata', handleLoadedMetadata)
-    el.addEventListener('timeupdate', handleTimeUpdate)
     el.addEventListener('play', handlePlay)
     el.addEventListener('pause', handlePause)
     el.addEventListener('ratechange', handleRateChange)
@@ -238,7 +257,6 @@ function LocalFileMediaElement({ player }) {
 
     return () => {
       el.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      el.removeEventListener('timeupdate', handleTimeUpdate)
       el.removeEventListener('play', handlePlay)
       el.removeEventListener('pause', handlePause)
       el.removeEventListener('ratechange', handleRateChange)
