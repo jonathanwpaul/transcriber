@@ -509,6 +509,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
 
                   <Button
                     type='button'
+                    variant='outline'
                     size='icon'
                     className='h-12 w-12 rounded-full'
                     onClick={isPlaying ? handlePause : handlePlay}
@@ -612,12 +613,12 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                         <TooltipTrigger asChild>
                           <Button
                             type='button'
-                            variant='secondary'
+                            variant='outline'
                             size='icon'
                             className='h-10 w-10 rounded-md'
                             onClick={saveLoop}
                           >
-                            <Save />
+                            <Save className='text-muted-foreground' />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Save loop</TooltipContent>

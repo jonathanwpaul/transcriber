@@ -101,7 +101,7 @@ export const BPMInput = ({
           <TooltipTrigger asChild>
             <Button
               type='button'
-              variant='secondary'
+              variant='outline'
               className={`self-stretch h-auto w-24 p-0 ${bpm ? 'bpm-button-pulse' : ''}`}
               style={
                 bpm
