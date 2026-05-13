@@ -300,7 +300,7 @@ function LocalFileMediaElement({ player }) {
   }
 
   return (
-    <div className='w-full overflow-hidden rounded-lg border bg-card flex-none p-3'>
+    <div className='hidden w-full overflow-hidden rounded-lg border bg-card flex-none p-3'>
       <audio {...commonProps} />
     </div>
   )
