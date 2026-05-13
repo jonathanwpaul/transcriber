@@ -421,11 +421,16 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           {/* LEFT PANE: player on top, then start/current/end + measure traversal */}
           <section className='snap-start lg:snap-none flex-1 p-2 md:p-0 flex flex-col gap-2'>
             {/* Card 1: player + transport + playback rate */}
-            <Card className='flex flex-col gap-6 p-4'>
+            <Card className='flex flex-col gap-4 p-4'>
               {mediaPlayerRef.current &&
                 mediaPlayerRef.current.renderComponent()}
 
               {/* Track sliders (loop + playback position) */}
+              {/* Timestamps */}
+              <div className='flex w-full justify-between text-xs text-muted-foreground'>
+                <span>{timestampFormatter(currentTime)}</span>
+                <span>{timestampFormatter(duration)}</span>
+              </div>
               <div className='w-full'>
                 <div className='relative w-full'>
                   {/* loop region highlight behind sliders */}
@@ -476,21 +481,12 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                       handleSeek(val[0])
                     }}
                     className='relative z-20'
-                    thumbClassNames={[
-                      'relative rounded-none border-0 border-l-2 border-l-emerald-500',
-                    ]}
                   />
-                </div>
-
-                {/* Timestamps */}
-                <div className='mt-8 flex w-full justify-between text-xs text-muted-foreground'>
-                  <span>{timestampFormatter(currentTime)}</span>
-                  <span>{timestampFormatter(duration)}</span>
                 </div>
               </div>
 
               {/* Primary transport controls */}
-              <div className='flex flex-col items-center gap-4'>
+              <div className='mt-4 flex flex-col items-center gap-4'>
                 <div className='flex w-full items-center justify-center gap-6'>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -551,9 +547,6 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                       step={0.125}
                       value={[playbackRate]}
                       onValueChange={val => handlePlaybackRateChange(val[0])}
-                      thumbClassNames={[
-                        'relative rounded-none border-0 border-l-2 border-l-emerald-500',
-                      ]}
                     />
                   </div>
                 </div>
@@ -618,7 +611,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                             className='h-10 w-10 rounded-md'
                             onClick={saveLoop}
                           >
-                            <Save className='text-muted-foreground' />
+                            <Save />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Save loop</TooltipContent>

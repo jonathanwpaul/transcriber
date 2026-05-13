@@ -8,6 +8,11 @@ export const Slider = React.forwardRef(
     { className, thumbClassNames, orientation, rangeClassName, ...props },
     ref,
   ) => {
+    if (!thumbClassNames || thumbClassNames.length == 0)
+      thumbClassNames = [
+        'relative rounded-none border-0 border-l-2 border-l-foreground',
+      ]
+
     return (
       <SliderPrimitive.Root
         ref={ref}
@@ -21,13 +26,13 @@ export const Slider = React.forwardRef(
       >
         <SliderPrimitive.Track
           className={cn(
-            'relative grow overflow-hidden rounded-full bg-muted-foreground',
+            'relative grow overflow-hidden rounded-full bg-background',
             orientation === 'vertical' ? 'h-full w-2' : 'h-2 w-full',
           )}
         >
           <SliderPrimitive.Range
             className={cn(
-              'absolute bg-primary',
+              'absolute bg-muted-foreground',
               orientation === 'vertical' ? 'w-full' : 'h-full',
               rangeClassName && orientation !== 'vertical' && rangeClassName,
             )}
