@@ -5,23 +5,9 @@ import { cn } from '../../lib/utils'
 
 export const Slider = React.forwardRef(
   (
-    {
-      className,
-      thumbClassName,
-      thumbClassNames,
-      orientation,
-      rangeClassName,
-      ...props
-    },
+    { className, thumbClassNames, orientation, rangeClassName, ...props },
     ref,
   ) => {
-    const values = props.value ?? props.defaultValue ?? []
-    const thumbCount = Array.isArray(values) ? Math.max(values.length, 1) : 1
-
-    const perThumbClasses = Array.isArray(thumbClassNames)
-      ? thumbClassNames
-      : null
-
     return (
       <SliderPrimitive.Root
         ref={ref}
@@ -47,12 +33,10 @@ export const Slider = React.forwardRef(
             )}
           />
         </SliderPrimitive.Track>
-        {Array.from({ length: thumbCount }).map((_, i) => (
+        {props.value?.map((_, i) => (
           <SliderPrimitive.Thumb
             key={i}
-            className={cn(
-              perThumbClasses ? perThumbClasses[i] : thumbClassName,
-            )}
+            className={cn(thumbClassNames?.[i] ?? '')}
           />
         ))}
       </SliderPrimitive.Root>

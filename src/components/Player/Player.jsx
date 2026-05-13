@@ -476,11 +476,14 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                       handleSeek(val[0])
                     }}
                     className='relative z-20'
+                    thumbClassNames={[
+                      'relative rounded-none border-0 border-l-2 border-l-emerald-500',
+                    ]}
                   />
                 </div>
 
                 {/* Timestamps */}
-                <div className='mt-2 flex w-full justify-between text-xs text-muted-foreground'>
+                <div className='mt-8 flex w-full justify-between text-xs text-muted-foreground'>
                   <span>{timestampFormatter(currentTime)}</span>
                   <span>{timestampFormatter(duration)}</span>
                 </div>
@@ -547,6 +550,9 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                       step={0.125}
                       value={[playbackRate]}
                       onValueChange={val => handlePlaybackRateChange(val[0])}
+                      thumbClassNames={[
+                        'relative rounded-none border-0 border-l-2 border-l-emerald-500',
+                      ]}
                     />
                   </div>
                 </div>
