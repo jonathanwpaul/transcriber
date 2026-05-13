@@ -396,7 +396,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
 
   return (
     <TooltipProvider>
-      <div className='flex h-full w-full flex-col'>
+      <div className='h-full w-full flex flex-col'>
         <div className='flex h-[5vh] flex-none items-center justify-between px-4'>
           <div className='max-w-[80%] truncate text-sm font-medium'>
             {playerMetadata.name}
@@ -404,7 +404,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant='destructive'
+                variant='outline'
                 size='xs'
                 disabled={controlsDisabled}
                 onClick={handleCloseVideo}
@@ -417,7 +417,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           </Tooltip>
         </div>
 
-        <div className='mx-auto flex flex-1 overflow-y-auto snap-y snap-mandatory gap-4 w-full max-w-6xl flex-col lg:flex-row lg:items-stretch lg:snap-none lg:p-4'>
+        <div className='mx-auto flex flex-1 overflow-y-auto snap-y snap-mandatory gap-4 w-full flex-col lg:flex-row lg:items-stretch lg:snap-none lg:p-4'>
           {/* LEFT PANE: player on top, then start/current/end + measure traversal */}
           <section className='snap-start lg:snap-none flex-1 p-2 md:p-0 flex flex-col gap-2'>
             {/* Card 1: player + transport + playback rate */}
