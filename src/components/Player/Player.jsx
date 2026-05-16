@@ -486,95 +486,100 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
 
               {/* Primary transport controls */}
               <div className='mt-4 flex flex-col items-center gap-4'>
-                <div className='flex w-full items-center justify-center gap-6'>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        className='h-10 w-10 rounded-md'
-                        onClick={markLoopStart}
-                      >
-                        <Flag className='text-emerald-500' />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Mark loop start</TooltipContent>
-                  </Tooltip>
+                <div className='flex w-full items-center justify-around'>
+                  <div className='flex gap-3 items-center'>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                          onClick={restartPlayer}
+                        >
+                          <SkipBack />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Restart player</TooltipContent>
+                    </Tooltip>
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
-                        onClick={restartPlayer}
-                      >
-                        <SkipBack />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Restart player</TooltipContent>
-                  </Tooltip>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      size='icon'
+                      className='h-12 w-12 rounded-full'
+                      onClick={isPlaying ? handlePause : handlePlay}
+                      disabled={controlsDisabled}
+                      aria-label={isPlaying ? 'Pause' : 'Play'}
+                    >
+                      {isPlaying ? (
+                        <Pause className='h-7 w-7' />
+                      ) : (
+                        <Play className='h-7 w-7' />
+                      )}
+                    </Button>
 
-                  <Button
-                    type='button'
-                    variant='outline'
-                    size='icon'
-                    className='h-12 w-12 rounded-full'
-                    onClick={isPlaying ? handlePause : handlePlay}
-                    disabled={controlsDisabled}
-                    aria-label={isPlaying ? 'Pause' : 'Play'}
-                  >
-                    {isPlaying ? (
-                      <Pause className='h-7 w-7' />
-                    ) : (
-                      <Play className='h-7 w-7' />
-                    )}
-                  </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                          onClick={restartLoop}
+                        >
+                          <RotateCcw />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Jump to loop start</TooltipContent>
+                    </Tooltip>
+                  </div>
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
-                        onClick={restartLoop}
-                      >
-                        <RotateCcw />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Jump to loop start</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        className='h-10 w-10 rounded-md'
-                        onClick={saveLoop}
-                      >
-                        <Save />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Save loop</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='icon'
-                        className='h-10 w-10 rounded-md'
-                        onClick={markLoopEnd}
-                      >
-                        <Flag className='text-red-500' />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Mark loop end</TooltipContent>
-                  </Tooltip>
+                  <div className='flex gap-3 items-center'>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          className='h-10 w-10 rounded-md'
+                          onClick={markLoopStart}
+                        >
+                          <Flag className='text-emerald-500' />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Mark loop start</TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          className='h-10 w-10 rounded-md'
+                          onClick={saveLoop}
+                        >
+                          <Save />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Save loop</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='icon'
+                          className='h-10 w-10 rounded-md'
+                          onClick={markLoopEnd}
+                        >
+                          <Flag className='text-red-500' />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Mark loop end</TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
 
                 {/* Playback rate slider, centered under buttons */}
