@@ -435,7 +435,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                   {/* loop region highlight behind sliders */}
                   {duration > 0 && loopEnd > loopStart && (
                     <div
-                      className='pointer-events-none absolute top-1/2 -translate-y-1/2 h-8 bg-muted z-0'
+                      className='pointer-events-none absolute top-1/2 -translate-y-1/2 h-5 bg-muted-foreground/20 z-0'
                       style={{
                         left: `${(Math.max(0, loopStart) / duration) * 100}%`,
                         width: `${
@@ -456,8 +456,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                       step={0.1}
                       value={[loopStart, loopEnd]}
                       onValueChange={handleIntervalChange}
-                      className='relative opacity-80'
-                      rangeClassName='bg-muted'
+                      className='relative'
                       thumbClassNames={[
                         'relative rounded-none border-0 border-l-2 border-l-emerald-500 before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full before:bg-emerald-500',
                         'relative before:-translate-x-full rounded-none border-0 border-r-2 border-r-red-500 before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full before:bg-red-500',

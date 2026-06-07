@@ -39,10 +39,7 @@ export const Slider = React.forwardRef(
           />
         </SliderPrimitive.Track>
         {props.value?.map((_, i) => (
-          <SliderPrimitive.Thumb
-            key={i}
-            className={cn(thumbClassNames?.[i] ?? '')}
-          />
+          <SliderPrimitive.Thumb key={i} className={cn(thumbClassNames?.[i])} />
         ))}
       </SliderPrimitive.Root>
     )
