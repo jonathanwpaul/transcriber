@@ -175,6 +175,14 @@ jobs:
           path: dist
           if-no-files-found: ignore
 
+      - name: Delete prior releases and tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release list --limit 100 --json tagName -q '.[].tagName' | while read tag; do
+            gh release delete "$tag" --cleanup-tag --yes
+          done
+
       - name: Generate release tag
         id: tag
         run: |
