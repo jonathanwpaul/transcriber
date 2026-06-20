@@ -650,24 +650,6 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
               </div>
             </Card>
 
-            <Card className='flex h-full flex-col overflow-hidden p-2 pb-6 row-span-2'>
-              {playerMetadata.loops &&
-              Object.keys(playerMetadata.loops).length > 0 ? (
-                <div className='flex flex-col'>
-                  {Object.values(playerMetadata.loops)
-                    .sort((a, b) => a.loopStart - b.loopStart)
-                    .map(loop => {
-                      const key = `${loop.loopStart}-${loop.loopEnd}`
-                      return renderLoop(loop, key)
-                    })}
-                </div>
-              ) : (
-                <div className='p-3 text-sm text-muted-foreground'>
-                  Save a loop to see it here
-                </div>
-              )}
-            </Card>
-
             <Card className='h-min flex flex-col gap-4 p-4'>
               {!isRhythmLocked ? (
                 <BPMInput
@@ -795,6 +777,24 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                     </Tooltip>
                   </div>
                 </>
+              )}
+            </Card>
+
+            <Card className='flex h-full flex-col overflow-hidden p-2 pb-6 row-span-2'>
+              {playerMetadata.loops &&
+              Object.keys(playerMetadata.loops).length > 0 ? (
+                <div className='flex flex-col'>
+                  {Object.values(playerMetadata.loops)
+                    .sort((a, b) => a.loopStart - b.loopStart)
+                    .map(loop => {
+                      const key = `${loop.loopStart}-${loop.loopEnd}`
+                      return renderLoop(loop, key)
+                    })}
+                </div>
+              ) : (
+                <div className='p-3 text-sm text-muted-foreground'>
+                  Save a loop to see it here
+                </div>
               )}
             </Card>
           </section>
