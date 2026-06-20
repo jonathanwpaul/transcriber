@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip'
+import { Separator } from './ui'
 
 function makeLocalFileId(file) {
   return `file:${file.name}:${file.size}:${file.lastModified}`
@@ -146,8 +147,9 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
 
   return !showPlayer ? (
     <TooltipProvider>
-      <div className='mx-auto flex h-full w-full max-w-5xl flex-col gap-4 p-4 sm:p-6'>
-        <div className='flex items-center justify-end gap-2'>
+      <div className='mx-auto flex h-full w-full max-w-5xl flex-col gap-6 p-4 sm:p-6'>
+        <div className='flex items-center justify-between gap-2'>
+          <h1 className='text-3xl font-bold'>Transcriber!</h1>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -165,13 +167,15 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
           </Tooltip>
         </div>
 
-        <Card>
-          <CardHeader className='pb-2'>
-            <CardTitle>Load a source</CardTitle>
-          </CardHeader>
-          <CardContent className='flex flex-col gap-4'>
-            <div className='flex flex-col gap-2'>
-              <div className='text-sm font-medium'>YouTube URL</div>
+        <CardTitle className='mt-4'>Load a source</CardTitle>
+
+        <div className='flex flex-col gap-3 sm:flex-row'>
+          <Card className='flex-1'>
+            <CardHeader>
+              <CardTitle>YouTube Video URL</CardTitle>
+            </CardHeader>
+
+            <CardContent>
               <div className='flex flex-col gap-2 sm:flex-row'>
                 <div className='flex-1'>
                   <Input
@@ -194,20 +198,26 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
                   go
                 </Button>
               </div>
-            </div>
+            </CardContent>
+          </Card>
+          <Separator className='hidden sm:block' orientation='vertical' />
+          <Card className='flex-1'>
+            <CardHeader>
+              <CardTitle>Local file</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FileUpload
+                accept='audio/*,video/*'
+                onFileSelect={handleLocalFileSelect}
+              />
+            </CardContent>
+          </Card>
+        </div>
 
-            <FileUpload
-              accept='audio/*,video/*'
-              onFileSelect={handleLocalFileSelect}
-            />
-          </CardContent>
-        </Card>
+        <CardTitle className='mt-4'>Recents</CardTitle>
 
         {songs.length > 0 && (
           <Card>
-            <CardHeader className='pb-2'>
-              <CardTitle>Recents</CardTitle>
-            </CardHeader>
             <CardContent className='flex flex-col gap-1'>
               {songs.map(song => (
                 <button

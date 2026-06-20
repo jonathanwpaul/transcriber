@@ -41,7 +41,7 @@ export default function FileUpload({ onFileSelect, accept = '*', className }) {
     <div className={cn('flex flex-col gap-2', className)}>
       <div
         className={cn(
-          'flex min-h-28 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 transition-colors',
+          'flex gap-3 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed p-4 transition-colors',
           dragActive ? 'border-primary bg-accent' : 'border-border bg-card',
         )}
         tabIndex={0}
@@ -58,8 +58,8 @@ export default function FileUpload({ onFileSelect, accept = '*', className }) {
           className='hidden'
           onChange={handleInputChange}
         />
-        <div className='flex flex-col items-center gap-2 text-center'>
-          <Upload className='h-10 w-10 text-muted-foreground' />
+        <Upload className='h-8 w-8 text-muted-foreground' />
+        <div className='flex flex-col '>
           <div className='text-sm font-medium'>Upload media file</div>
           <div className='text-xs text-muted-foreground'>
             Tap to browse or drag & drop
