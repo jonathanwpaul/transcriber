@@ -24,13 +24,14 @@ import {
   ScrubbableNumberInput,
 } from './components'
 
-import { Button, Card, Slider } from '../ui'
+import { Button, Card, Separator, Slider } from '../ui'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '../ui/tooltip'
+import { SeparatorVertical } from 'lucide-react'
 
 export const Player = ({ id, type, setShowPlayer, showToast }) => {
   const [currentTime, setCurrentTime] = useState(0)
@@ -484,9 +485,9 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
               </div>
 
               {/* Primary transport controls */}
-              <div className='mt-4 flex flex-col items-center gap-4'>
-                <div className='flex w-full items-center justify-around'>
-                  <div className='flex gap-3 items-center'>
+              <div className='mt-8 flex flex-col items-center gap-6'>
+                <div className='flex flex-col sm:flex-row w-full items-center justify-center gap-6'>
+                  <div className='flex gap-5 sm:gap-3 items-center'>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -506,7 +507,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                       type='button'
                       variant='outline'
                       size='icon'
-                      className='h-10 w-10 rounded-full'
+                      className='h-14 w-14 rounded-full'
                       onClick={isPlaying ? handlePause : handlePlay}
                       disabled={controlsDisabled}
                       aria-label={isPlaying ? 'Pause' : 'Play'}
@@ -534,7 +535,12 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                     </Tooltip>
                   </div>
 
-                  <div className='flex gap-3 items-center'>
+                  <Separator
+                    className='hidden sm:block'
+                    orientation='vertical'
+                  />
+
+                  <div className='flex gap-5 sm:gap-3 items-center'>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
