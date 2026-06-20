@@ -8,7 +8,7 @@ export const Slider = React.forwardRef(
     { className, thumbClassNames, orientation, rangeClassName, ...props },
     ref,
   ) => {
-    if (!thumbClassNames || thumbClassNames.length == 0)
+    if (!thumbClassNames || thumbClassNames.length === 0)
       thumbClassNames = [
         'relative rounded-none border-0 border-l-2 border-l-foreground',
       ]
