@@ -38,10 +38,9 @@ jobs:
 
       # Set up Android SDK
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3.2.1
+        uses: android-actions/setup-android@v4
         with:
-          api-level: 33
-          build-tools-version: 33.0.2
+          packages: 'platforms;android-36 build-tools;36.0.0'
 
       - name: Decode Android keystore
         run: |
