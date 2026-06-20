@@ -86,8 +86,6 @@ function flatToTree(rows) {
   return root
 }
 
-// ─── Public API ──────────────────────────────────────────────────────────────
-
 export async function initDB() {
   if (!AppDataSource.isInitialized) {
     if (!document.querySelector('jeep-sqlite')) {
@@ -95,7 +93,13 @@ export async function initDB() {
       document.body.appendChild(el)
       await customElements.whenDefined('jeep-sqlite')
     }
-    await sqlite.initWebStore()
+
+    try {
+      await sqlite.initWebStore()
+    } catch (e) {
+      console.warn(e)
+    }
+
     await AppDataSource.initialize()
   }
 }
