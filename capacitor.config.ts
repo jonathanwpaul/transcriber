@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'transcriber',
   webDir: 'build',
   server: {
-    androidScheme: 'https',
+    androidScheme: 'http',
   },
   plugins: {
     Electron: {
