@@ -493,7 +493,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                           type='button'
                           variant='outline'
                           size='icon'
-                          className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                          className='h-10 w-10 rounded-md sm:h-10 sm:w-10'
                           onClick={restartPlayer}
                         >
                           <SkipBack />
@@ -506,7 +506,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                       type='button'
                       variant='outline'
                       size='icon'
-                      className='h-12 w-12 rounded-full'
+                      className='h-10 w-10 rounded-full'
                       onClick={isPlaying ? handlePause : handlePlay}
                       disabled={controlsDisabled}
                       aria-label={isPlaying ? 'Pause' : 'Play'}
@@ -524,7 +524,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                           type='button'
                           variant='outline'
                           size='icon'
-                          className='h-12 w-12 rounded-md sm:h-10 sm:w-10'
+                          className='h-10 w-10 rounded-md sm:h-10 sm:w-10'
                           onClick={restartLoop}
                         >
                           <RotateCcw />
