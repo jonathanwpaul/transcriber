@@ -440,8 +440,8 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           </Tooltip>
         </div>
 
-        <div className='h-full w-full px-2 overflow-y-auto snap-y snap-mandatory grid lg:grid-cols-[2fr_1fr] lg:snap-none lg:overflow-hidden'>
-          <section className='snap-start lg:snap-none p-2'>
+        <div className='h-full w-full px-2 pb-6 overflow-y-auto snap-y snap-mandatory grid lg:grid-cols-[2fr_1fr] lg:snap-none lg:overflow-hidden'>
+          <section className='md:p-2'>
             {/* Card 1: player + transport + playback rate */}
             <Card className='flex flex-col gap-4 p-4'>
               {isLoading && <LoaderCircle className='animate-spin' />}
@@ -629,7 +629,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
             </Card>
           </section>
 
-          <section className='snap-start lg:snap-none p-2 flex flex-col gap-2 lg:overflow-y-auto'>
+          <section className='pt-6 pb-6 md:p-2 flex flex-col gap-2 lg:overflow-y-auto'>
             <Card className='flex flex-col gap-2 p-4'>
               <div className='flex flex-col gap-3'>
                 <div className='flex items-center gap-3'>
