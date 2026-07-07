@@ -236,13 +236,14 @@ function LocalFileMediaElement({ player }) {
     el.addEventListener('play', handlePlay)
     el.addEventListener('pause', handlePause)
     el.addEventListener('ratechange', handleRateChange)
+    console.log(el)
 
     // Optional Web Audio wiring for audio sources.
     const AudioCtx =
       typeof window !== 'undefined' &&
       (window.AudioContext || window.webkitAudioContext)
 
-    if (!isVideo && AudioCtx && !player._audioContext) {
+    if (AudioCtx && !player._audioContext) {
       try {
         audioContext = new AudioCtx()
         sourceNode = audioContext.createMediaElementSource(el)
@@ -250,7 +251,10 @@ function LocalFileMediaElement({ player }) {
 
         player._audioContext = audioContext
         player._audioSourceNode = sourceNode
+
+        console.log(audioContext)
       } catch {
+        console.log('could not create Audio Context')
         // If Web Audio setup fails, fall back to plain HTMLMediaElement audio.
       }
     }
