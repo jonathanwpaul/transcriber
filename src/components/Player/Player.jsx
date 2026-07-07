@@ -31,7 +31,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../ui/tooltip'
-import { SeparatorVertical } from 'lucide-react'
 
 export const Player = ({ id, type, setShowPlayer, showToast }) => {
   const [currentTime, setCurrentTime] = useState(0)
