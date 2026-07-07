@@ -31,11 +31,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../ui/tooltip'
+import { LoaderCircle } from 'lucide-react'
 
 export const Player = ({ id, type, setShowPlayer, showToast }) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [playbackRate, setPlaybackRate] = useState(1)
   const [loopStart, setLoopStart] = useState(0)
   const [loopEnd, setLoopEnd] = useState(0)
@@ -165,6 +167,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
         setLoopStart(0)
         setLoopEnd(d)
         setIsRhythmLocked(rhythmLocked)
+        setIsLoading(false)
       },
       onDuration: d => setDuration(d),
       onTimeUpdate: t => {
@@ -421,6 +424,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           <section className='snap-start lg:snap-none p-2 gap-2'>
             {/* Card 1: player + transport + playback rate */}
             <Card className='flex flex-col h-full gap-4 p-4'>
+              {isLoading && <LoaderCircle className='animate-spin' />}
               {mediaPlayerRef.current &&
                 mediaPlayerRef.current.renderComponent()}
 
@@ -655,7 +659,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
               </div>
             </Card>
 
-            <Card className='h-min flex flex-col gap-4 p-4'>
+            <Card className='flex flex-col gap-4 p-4'>
               {!isRhythmLocked ? (
                 <BPMInput
                   value={playerMetadata.bpm}
@@ -728,6 +732,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                             )
                             setLoopEnd(loopStart)
                             setLoopStart(newStart)
+                            handleSeek(newStart)
                           }}
                         >
                           <ArrowBigLeftDash />
@@ -772,6 +777,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                                   (playerMetadata.bpm / 60),
                             )
                             setLoopStart(loopEnd)
+                            handleSeek(loopEnd)
                             setLoopEnd(newEnd)
                           }}
                         >
