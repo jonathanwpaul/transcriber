@@ -13,6 +13,15 @@ export class LocalFilePlayer extends MediaPlayer {
     this._mediaElement = null
     this._audioContext = null
     this._audioSourceNode = null
+    this._eqFilterNodes = null
+    this._analyserNode = null
+  }
+
+  setEqGains(gains) {
+    if (!this._eqFilterNodes) return
+    gains.forEach((gain, i) => {
+      if (this._eqFilterNodes[i]) this._eqFilterNodes[i].gain.value = gain
+    })
   }
 
   _startTimeUpdates() {
@@ -187,6 +196,7 @@ function LocalFileMediaElement({ player }) {
 
     let audioContext = null
     let sourceNode = null
+    let filterNodes = null
 
     const handleLoadedMetadata = async () => {
       const duration = el.duration ?? 0
@@ -239,22 +249,47 @@ function LocalFileMediaElement({ player }) {
     console.log(el)
 
     // Optional Web Audio wiring for audio sources.
-    const AudioCtx =
-      typeof window !== 'undefined' &&
-      (window.AudioContext || window.webkitAudioContext)
+    const AudioCtx = typeof window !== 'undefined' && window.AudioContext
 
     if (AudioCtx && !player._audioContext) {
       try {
         audioContext = new AudioCtx()
         sourceNode = audioContext.createMediaElementSource(el)
-        sourceNode.connect(audioContext.destination)
+
+        const EQ_BAND_DEFS = [
+          { frequency: 60, Q: 1.0 },
+          { frequency: 200, Q: 1.4 },
+          { frequency: 500, Q: 1.4 },
+          { frequency: 1500, Q: 1.4 },
+          { frequency: 4000, Q: 1.4 },
+          { frequency: 8000, Q: 1.4 },
+          { frequency: 16000, Q: 1.4 },
+        ]
+        filterNodes = EQ_BAND_DEFS.map(b => {
+          const f = audioContext.createBiquadFilter()
+          f.type = 'peaking'
+          f.frequency.value = b.frequency
+          f.Q.value = b.Q
+          f.gain.value = 0
+          return f
+        })
+        const analyserNode = audioContext.createAnalyser()
+        analyserNode.fftSize = 2048
+        analyserNode.smoothingTimeConstant = 0.8
+
+        filterNodes
+          .reduce((prev, curr) => {
+            prev.connect(curr)
+            return curr
+          }, sourceNode)
+          .connect(analyserNode)
+        analyserNode.connect(audioContext.destination)
 
         player._audioContext = audioContext
         player._audioSourceNode = sourceNode
-
-        console.log(audioContext)
+        player._eqFilterNodes = filterNodes
+        player._analyserNode = analyserNode
       } catch {
-        console.log('could not create Audio Context')
         // If Web Audio setup fails, fall back to plain HTMLMediaElement audio.
       }
     }
@@ -265,6 +300,13 @@ function LocalFileMediaElement({ player }) {
       el.removeEventListener('pause', handlePause)
       el.removeEventListener('ratechange', handleRateChange)
 
+      if (filterNodes) {
+        filterNodes.forEach(f => {
+          try {
+            f.disconnect()
+          } catch {}
+        })
+      }
       if (sourceNode) {
         try {
           sourceNode.disconnect()
@@ -279,6 +321,8 @@ function LocalFileMediaElement({ player }) {
       // disconnect/close them a second time.
       player._audioSourceNode = null
       player._audioContext = null
+      player._eqFilterNodes = null
+      player._analyserNode = null
     }
   }, [player, isVideo, resolvedSourceUrl])
 

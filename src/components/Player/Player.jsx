@@ -19,6 +19,8 @@ import { YouTubePlayer, LocalFilePlayer } from '../../lib/media'
 
 import {
   BPMInput,
+  EqualizerCard,
+  EQ_PRESETS,
   TimeTextInput,
   SavedSection,
   ScrubbableNumberInput,
@@ -68,6 +70,9 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
   const measures = appSettings['measures']
 
   const [isRhythmLocked, setIsRhythmLocked] = useState(false)
+
+  const [eqGains, setEqGains] = useState([0, 0, 0, 0, 0, 0, 0])
+  const [eqPreset, setEqPreset] = useState('flat')
 
   useEffect(() => {
     if (!isScrubbing) {
@@ -381,6 +386,21 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
     )
   }
 
+  const handleEqBandChange = (index, gain) => {
+    const next = [...eqGains]
+    next[index] = gain
+    setEqGains(next)
+    setEqPreset(null)
+    mediaPlayerRef.current?.setEqGains?.(next)
+  }
+
+  const handleEqPresetChange = preset => {
+    const next = EQ_PRESETS[preset]
+    setEqGains(next)
+    setEqPreset(preset)
+    mediaPlayerRef.current?.setEqGains?.(next)
+  }
+
   const handleBpmChange = newBpm => {
     mediaPlayerRef.current.setBpm(newBpm)
   }
@@ -420,10 +440,10 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           </Tooltip>
         </div>
 
-        <div className='h-full w-full px-2 overflow-y-auto snap-y snap-mandatory grid lg:grid-cols-[2fr_1fr] lg:snap-none'>
-          <section className='snap-start lg:snap-none p-2 gap-2'>
+        <div className='h-full w-full px-2 overflow-y-auto snap-y snap-mandatory grid lg:grid-cols-[2fr_1fr] lg:snap-none lg:overflow-hidden'>
+          <section className='snap-start lg:snap-none p-2'>
             {/* Card 1: player + transport + playback rate */}
-            <Card className='flex flex-col h-full gap-4 p-4'>
+            <Card className='flex flex-col gap-4 p-4'>
               {isLoading && <LoaderCircle className='animate-spin' />}
               {mediaPlayerRef.current &&
                 mediaPlayerRef.current.renderComponent()}
@@ -609,7 +629,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
             </Card>
           </section>
 
-          <section className='snap-start lg:snap-none p-2 grid grid-rows-4 gap-2'>
+          <section className='snap-start lg:snap-none p-2 flex flex-col gap-2 lg:overflow-y-auto'>
             <Card className='flex flex-col gap-2 p-4'>
               <div className='flex flex-col gap-3'>
                 <div className='flex items-center gap-3'>
@@ -791,7 +811,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
               )}
             </Card>
 
-            <Card className='flex h-full flex-col overflow-hidden p-2 pb-6 row-span-2'>
+            <Card className='flex flex-col overflow-hidden min-h-[50%] p-2 pb-6'>
               {playerMetadata.loops &&
               Object.keys(playerMetadata.loops).length > 0 ? (
                 <div className='flex flex-col'>
@@ -808,6 +828,16 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                 </div>
               )}
             </Card>
+
+            {type === 'file' && (
+              <EqualizerCard
+                gains={eqGains}
+                onBandChange={handleEqBandChange}
+                activePreset={eqPreset}
+                onPresetChange={handleEqPresetChange}
+                playerRef={mediaPlayerRef}
+              />
+            )}
           </section>
         </div>
       </div>

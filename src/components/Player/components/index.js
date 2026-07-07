@@ -1,4 +1,5 @@
 export { BPMInput } from './BPMInput'
+export { EqualizerCard, EQ_BANDS, EQ_PRESETS } from './EqualizerCard'
 export { SavedSection } from './SavedSection'
 export { ScrubbableNumberInput } from './ScrubbableNumberInput'
 export { TimeTextInput } from './TimeTextInput'
