@@ -4,26 +4,34 @@ import { Button } from '../../ui/button'
 import { Slider } from '../../ui/slider'
 
 export const EQ_BANDS = [
-  { frequency: 60, Q: 1.0, label: '60' },
-  { frequency: 200, Q: 1.4, label: '200' },
-  { frequency: 500, Q: 1.4, label: '500' },
-  { frequency: 1500, Q: 1.4, label: '1.5k' },
-  { frequency: 4000, Q: 1.4, label: '4k' },
-  { frequency: 8000, Q: 1.4, label: '8k' },
-  { frequency: 16000, Q: 1.4, label: '16k' },
+  { frequency: 20,    type: 'highpass', Q: 0.707, label: 'HP' },
+  { frequency: 200,   type: 'peaking',  Q: 1.4,   label: '200' },
+  { frequency: 500,   type: 'peaking',  Q: 1.4,   label: '500' },
+  { frequency: 1500,  type: 'peaking',  Q: 1.4,   label: '1.5k' },
+  { frequency: 4000,  type: 'peaking',  Q: 1.4,   label: '4k' },
+  { frequency: 8000,  type: 'peaking',  Q: 1.4,   label: '8k' },
+  { frequency: 20000, type: 'lowpass',  Q: 0.707, label: 'LP' },
 ]
 
 export const EQ_PRESETS = {
-  flat:  [ 0,  0,  0,  0,  0,  0,  0],
-  voice: [-6, -2,  3,  5,  3, -2, -3],
-  keys:  [ 0,  2,  2,  2,  0,  0,  0],
-  horns: [-8,  2,  3,  4,  2,  0, -3],
-  bass:  [ 6,  4,  0, -3, -5, -6, -8],
-  drums: [ 5,  2, -2,  0,  3, -1,  0],
+  flat:  [20,   0,  0,  0,  0,  0, 20000],
+  voice: [80,  -2,  3,  5,  3, -2, 12000],
+  keys:  [20,   2,  2,  2,  0,  0, 20000],
+  horns: [60,   2,  3,  4,  2,  0, 18000],
+  bass:  [20,   4,  0, -3, -5, -6,  8000],
+  drums: [40,   2, -2,  0,  3, -1, 20000],
 }
 
 function eqResponseAt(f, gains) {
   return EQ_BANDS.reduce((sum, band, i) => {
+    if (band.type === 'highpass') {
+      const ratio = gains[i] / f
+      return sum + 20 * Math.log10(1 / Math.sqrt(1 + Math.pow(ratio, 4)))
+    }
+    if (band.type === 'lowpass') {
+      const ratio = f / gains[i]
+      return sum + 20 * Math.log10(1 / Math.sqrt(1 + Math.pow(ratio, 4)))
+    }
     const lf = Math.log10(f)
     const lf0 = Math.log10(band.frequency)
     const bw = 1 / (band.Q * 2.8)
@@ -159,27 +167,39 @@ export function EqualizerCard({
       />
 
       <div className='flex justify-around items-end gap-1'>
-        {EQ_BANDS.map((band, i) => (
-          <div
-            key={band.frequency}
-            className='flex flex-col items-center gap-1'
-          >
-            <div className='text-xs tabular-nums text-muted-foreground w-6 text-center'>
-              {gains[i] > 0 ? '+' : ''}
-              {gains[i]}
+        {EQ_BANDS.map((band, i) => {
+          const isHP = band.type === 'highpass'
+          const isLP = band.type === 'lowpass'
+          const isFilter = isHP || isLP
+          const sliderMin = isHP ? 20 : isLP ? 2000 : -12
+          const sliderMax = isHP ? 800 : isLP ? 20000 : 12
+          const sliderStep = isHP ? 10 : isLP ? 100 : 1
+          const valueLabel = isHP
+            ? `${gains[i]}Hz`
+            : isLP
+            ? `${(gains[i] / 1000).toFixed(0)}k`
+            : `${gains[i] > 0 ? '+' : ''}${gains[i]}`
+          return (
+            <div
+              key={band.frequency}
+              className='flex flex-col items-center gap-1'
+            >
+              <div className='text-xs tabular-nums text-muted-foreground text-center' style={{ minWidth: isFilter ? '2.5rem' : '1.5rem' }}>
+                {valueLabel}
+              </div>
+              <Slider
+                orientation='vertical'
+                min={sliderMin}
+                max={sliderMax}
+                step={sliderStep}
+                value={[gains[i]]}
+                onValueChange={val => onBandChange(i, val[0])}
+                className='h-24'
+              />
+              <div className='text-xs text-muted-foreground'>{band.label}</div>
             </div>
-            <Slider
-              orientation='vertical'
-              min={-12}
-              max={12}
-              step={1}
-              value={[gains[i]]}
-              onValueChange={val => onBandChange(i, val[0])}
-              className='h-24'
-            />
-            <div className='text-xs text-muted-foreground'>{band.label}</div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </Card>
   )

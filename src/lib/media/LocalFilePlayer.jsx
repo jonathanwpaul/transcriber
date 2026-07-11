@@ -19,8 +19,14 @@ export class LocalFilePlayer extends MediaPlayer {
 
   setEqGains(gains) {
     if (!this._eqFilterNodes) return
-    gains.forEach((gain, i) => {
-      if (this._eqFilterNodes[i]) this._eqFilterNodes[i].gain.value = gain
+    gains.forEach((v, i) => {
+      const node = this._eqFilterNodes[i]
+      if (!node) return
+      if (node.type === 'highpass' || node.type === 'lowpass') {
+        node.frequency.value = v
+      } else {
+        node.gain.value = v
+      }
     })
   }
 
@@ -257,20 +263,20 @@ function LocalFileMediaElement({ player }) {
         sourceNode = audioContext.createMediaElementSource(el)
 
         const EQ_BAND_DEFS = [
-          { frequency: 60, Q: 1.0 },
-          { frequency: 200, Q: 1.4 },
-          { frequency: 500, Q: 1.4 },
-          { frequency: 1500, Q: 1.4 },
-          { frequency: 4000, Q: 1.4 },
-          { frequency: 8000, Q: 1.4 },
-          { frequency: 16000, Q: 1.4 },
+          { frequency: 20,    type: 'highpass', Q: 0.707 },
+          { frequency: 200,   type: 'peaking',  Q: 1.4 },
+          { frequency: 500,   type: 'peaking',  Q: 1.4 },
+          { frequency: 1500,  type: 'peaking',  Q: 1.4 },
+          { frequency: 4000,  type: 'peaking',  Q: 1.4 },
+          { frequency: 8000,  type: 'peaking',  Q: 1.4 },
+          { frequency: 20000, type: 'lowpass',  Q: 0.707 },
         ]
         filterNodes = EQ_BAND_DEFS.map(b => {
           const f = audioContext.createBiquadFilter()
-          f.type = 'peaking'
+          f.type = b.type
           f.frequency.value = b.frequency
           f.Q.value = b.Q
-          f.gain.value = 0
+          if (b.type === 'peaking') f.gain.value = 0
           return f
         })
         const analyserNode = audioContext.createAnalyser()

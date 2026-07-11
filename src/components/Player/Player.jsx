@@ -70,7 +70,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
 
   const [showSettings, setShowSettings] = useState(false)
 
-  const [eqGains, setEqGains] = useState([0, 0, 0, 0, 0, 0, 0])
+  const [eqGains, setEqGains] = useState([20, 0, 0, 0, 0, 0, 20000])
   const [eqPreset, setEqPreset] = useState('flat')
 
   useEffect(() => {
