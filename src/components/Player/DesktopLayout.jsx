@@ -25,6 +25,8 @@ export function DesktopLayout({
   eqGains,
   eqPreset,
   type,
+  isVideo,
+  name,
   showSettings,
   onToggleSettings,
   onIntervalChange,
@@ -66,6 +68,8 @@ export function DesktopLayout({
           isScrubbing={isScrubbing}
           scrubTime={scrubTime}
           controlsDisabled={controlsDisabled}
+          isVideo={isVideo}
+          name={name}
           onIntervalChange={onIntervalChange}
           onSeek={onSeek}
           onScrubStart={onScrubStart}

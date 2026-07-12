@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ListMusic, Settings2, Timer } from 'lucide-react'
+import { Home, ListMusic, Settings2, Timer } from 'lucide-react'
 import {
   PlayerCard,
   TimeInputsCard,
@@ -9,6 +9,7 @@ import {
 } from './components'
 
 const TABS = [
+  { icon: Home, label: 'Home', isHome: true },
   { icon: Timer, label: 'Times' },
   { icon: ListMusic, label: 'Loops' },
   { icon: Settings2, label: 'Settings' },
@@ -33,6 +34,8 @@ export function MobileLayout({
   eqGains,
   eqPreset,
   type,
+  isVideo,
+  name,
   onIntervalChange,
   onSeek,
   onScrubStart,
@@ -56,8 +59,9 @@ export function MobileLayout({
   onBeatsPerMeasureChange,
   onEqBandChange,
   onEqPresetChange,
+  onClose,
 }) {
-  const [activeTab, setActiveTab] = useState(0)
+  const [activeTab, setActiveTab] = useState(1)
 
   return (
     <div className='flex flex-col h-full w-full'>
@@ -74,6 +78,8 @@ export function MobileLayout({
           isScrubbing={isScrubbing}
           scrubTime={scrubTime}
           controlsDisabled={controlsDisabled}
+          isVideo={isVideo}
+          name={name}
           onIntervalChange={onIntervalChange}
           onSeek={onSeek}
           onScrubStart={onScrubStart}
@@ -90,7 +96,7 @@ export function MobileLayout({
       </div>
 
       <div className='flex-1 overflow-y-auto px-2 py-2 flex flex-col gap-2'>
-        {activeTab === 0 && (
+        {activeTab === 1 && (
           <>
             <TimeInputsCard
               loopStart={loopStart}
@@ -116,7 +122,7 @@ export function MobileLayout({
           </>
         )}
 
-        {activeTab === 1 && (
+        {activeTab === 2 && (
           <LoopListCard
             loops={playerMetadata.loops}
             loopStart={loopStart}
@@ -126,12 +132,14 @@ export function MobileLayout({
             onLoadLoop={onLoadLoop}
             onDeleteLoop={onDeleteLoop}
             onTitleChange={onTitleChange}
+            className='flex-1'
           />
         )}
 
-        {activeTab === 2 && (
+        {activeTab === 3 && (
           <SongSettings
-            onClose={() => setActiveTab(0)}
+            hideHeader
+            onClose={() => setActiveTab(1)}
             type={type}
             bpm={playerMetadata.bpm}
             beatsPerMeasure={playerMetadata.beatsPerMeasure}
@@ -148,19 +156,19 @@ export function MobileLayout({
 
       <nav className='flex-none border-t bg-background'>
         <div className='flex'>
-          {TABS.map(({ icon: Icon, label }, index) => (
+          {TABS.map(({ icon: Icon, label, isHome }, index) => (
             <button
               key={index}
               className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs transition-colors ${
-                activeTab === index
+                !isHome && activeTab === index
                   ? 'text-foreground'
                   : 'text-muted-foreground'
               }`}
-              onClick={() => setActiveTab(index)}
+              onClick={() => (isHome ? onClose() : setActiveTab(index))}
               aria-label={label}
             >
               <Icon
-                className={`h-5 w-5 ${activeTab === index ? 'stroke-[2.5]' : ''}`}
+                className={`h-5 w-5 ${!isHome && activeTab === index ? 'stroke-[2.5]' : ''}`}
               />
               <span>{label}</span>
             </button>

@@ -16,15 +16,18 @@ export function SongSettings({
   activePreset,
   onPresetChange,
   playerRef,
+  hideHeader = false,
 }) {
   return (
     <div className='flex flex-col gap-2'>
-      <div className='flex items-center gap-2 py-1'>
-        <Button variant='ghost' size='icon' onClick={onClose} aria-label='Back'>
-          <ChevronLeft />
-        </Button>
-        <span className='text-sm font-semibold'>Song Settings</span>
-      </div>
+      {!hideHeader && (
+        <div className='flex items-center gap-2 py-1'>
+          <Button variant='ghost' size='icon' onClick={onClose} aria-label='Back'>
+            <ChevronLeft />
+          </Button>
+          <span className='text-sm font-semibold'>Song Settings</span>
+        </div>
+      )}
 
       <Card className='flex flex-col gap-3 p-4'>
         <div className='text-xs font-medium text-muted-foreground'>Rhythm</div>

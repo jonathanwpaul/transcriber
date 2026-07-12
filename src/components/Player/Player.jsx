@@ -329,6 +329,9 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
 
   if (!mediaPlayerRef.current || appSettingsLoading) return <p>loading...</p>
 
+  const isVideo =
+    type !== 'file' || playerMetadata.mimeType?.startsWith('video')
+
   const layoutProps = {
     mediaPlayerRef,
     isLoading,
@@ -348,6 +351,8 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
     eqGains,
     eqPreset,
     type,
+    isVideo,
+    name: playerMetadata.name,
     onIntervalChange: handleIntervalChange,
     onSeek: handleSeek,
     onScrubStart: val => { setIsScrubbing(true); setScrubTime(val) },
@@ -376,10 +381,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
   return (
     <TooltipProvider>
       <div className='h-full w-full flex flex-col'>
-        <div className='h-[5vh] px-4 flex flex-none items-center justify-between'>
-          <div className='max-w-[80%] truncate text-sm font-medium'>
-            {playerMetadata.name}
-          </div>
+        <div className='px-2 py-1 flex flex-none items-center justify-end sm:h-[5vh] sm:px-4'>
           <div className='flex items-center gap-1'>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -388,7 +390,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                   size='xs'
                   onClick={() => setShowSettings(s => !s)}
                   aria-label='Song settings'
-                  className='hidden lg:inline-flex'
+                  className='hidden sm:inline-flex'
                 >
                   <Menu />
                 </Button>
@@ -403,6 +405,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
                   disabled={controlsDisabled}
                   onClick={handleCloseVideo}
                   aria-label='Close'
+                  className='hidden sm:inline-flex'
                 >
                   <X />
                 </Button>
@@ -412,7 +415,7 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           </div>
         </div>
 
-        <div className='hidden lg:flex flex-col flex-1 overflow-hidden'>
+        <div className='hidden sm:flex flex-col flex-1 overflow-hidden'>
           <DesktopLayout
             {...layoutProps}
             showSettings={showSettings}
@@ -420,8 +423,8 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           />
         </div>
 
-        <div className='flex lg:hidden flex-col flex-1 overflow-hidden'>
-          <MobileLayout {...layoutProps} />
+        <div className='flex sm:hidden flex-col flex-1 overflow-hidden'>
+          <MobileLayout {...layoutProps} onClose={handleCloseVideo} />
         </div>
       </div>
     </TooltipProvider>

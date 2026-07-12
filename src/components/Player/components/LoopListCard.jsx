@@ -10,6 +10,7 @@ export function LoopListCard({
   onLoadLoop,
   onDeleteLoop,
   onTitleChange,
+  className,
 }) {
   const renderLoop = (loop, pathKey) => {
     const hasChildren = !!(
@@ -47,7 +48,7 @@ export function LoopListCard({
   }
 
   return (
-    <Card className='flex flex-col overflow-hidden min-h-[50%] p-2 pb-6'>
+    <Card className={`flex flex-col overflow-hidden p-2 pb-6 ${className ?? 'min-h-[50%]'}`}>
       {loops && Object.keys(loops).length > 0 ? (
         <div className='flex flex-col'>
           {Object.values(loops)

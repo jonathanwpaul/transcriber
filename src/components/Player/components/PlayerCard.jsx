@@ -1,12 +1,15 @@
+import { useState } from 'react'
 import {
+  Eye,
+  EyeOff,
   Flag,
+  LoaderCircle,
   Pause,
   Play,
   RotateCcw,
   Save,
   SkipBack,
 } from 'lucide-react'
-import { LoaderCircle } from 'lucide-react'
 import { timestampFormatter } from '@utils/video'
 import { Button, Card, Separator, Slider } from '@components/ui'
 import {
@@ -27,6 +30,8 @@ export function PlayerCard({
   isScrubbing,
   scrubTime,
   controlsDisabled,
+  isVideo,
+  name,
   onIntervalChange,
   onSeek,
   onScrubStart,
@@ -40,10 +45,37 @@ export function PlayerCard({
   onSaveLoop,
   onPlaybackRateChange,
 }) {
+  const [showVideo, setShowVideo] = useState(true)
+
   return (
     <Card className='flex flex-col gap-4 p-4'>
+      {name && (
+        <div className='truncate text-sm font-medium'>{name}</div>
+      )}
       {isLoading && <LoaderCircle className='animate-spin' />}
-      {mediaPlayerRef.current && mediaPlayerRef.current.renderComponent()}
+      {mediaPlayerRef.current && (
+        <div className='relative'>
+          <div className={isVideo && !showVideo ? 'hidden' : ''}>
+            {mediaPlayerRef.current.renderComponent()}
+          </div>
+          {isVideo && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant='ghost'
+                  size='xs'
+                  className='absolute top-1 right-1'
+                  onClick={() => setShowVideo(v => !v)}
+                  aria-label={showVideo ? 'Hide video' : 'Show video'}
+                >
+                  {showVideo ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{showVideo ? 'Hide video' : 'Show video'}</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      )}
 
       <div className='flex w-full justify-between text-xs text-muted-foreground'>
         <span>{timestampFormatter(currentTime)}</span>
