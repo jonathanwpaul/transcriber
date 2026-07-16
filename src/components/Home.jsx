@@ -56,6 +56,17 @@ function fileToBase64(file) {
   })
 }
 
+function getSongIdFromPath() {
+  const pathParts = window.location.pathname.split('/').filter(Boolean)
+  if (pathParts.length !== 1) return null
+
+  try {
+    return decodeURIComponent(pathParts[0])
+  } catch {
+    return null
+  }
+}
+
 export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [id, setId] = useState()
   const [songType, setSongType] = useState()
@@ -81,11 +92,45 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     setSongs(rows)
     setRecents(recentRows)
     setFolders(folderRows)
+    return rows
   }
 
   useEffect(() => {
-    loadSongs().finally(() => setLoading(false))
+    loadSongs()
+      .then(rows => {
+        const routeSongId = getSongIdFromPath()
+        const routeSong = rows.find(song => String(song.id) === routeSongId)
+
+        if (routeSong) {
+          setId(routeSong.id)
+          setSongType(routeSong.type)
+          setShowPlayer(true)
+        } else if (routeSongId) {
+          window.history.replaceState({}, '', '/')
+        }
+      })
+      .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const routeSongId = getSongIdFromPath()
+      if (!routeSongId) {
+        setShowPlayer(false)
+        return
+      }
+
+      const routeSong = songs.find(song => String(song.id) === routeSongId)
+      if (routeSong) {
+        setId(routeSong.id)
+        setSongType(routeSong.type)
+        setShowPlayer(true)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [songs])
 
   // Reload songs when returning from Player so metadata updates are reflected.
   useEffect(() => {
@@ -112,6 +157,10 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
 
   const openSong = async (songId, songType) => {
     await patchSong(songId, { last_accessed: new Date().toISOString() })
+    const nextPath = `/${encodeURIComponent(songId)}`
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath)
+    }
     setId(songId)
     setSongType(songType)
     setShowPlayer(true)
@@ -151,6 +200,13 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       }
     }
     await loadSongs()
+  }
+
+  const closePlayer = () => {
+    if (getSongIdFromPath()) {
+      window.history.pushState({}, '', '/')
+    }
+    setShowPlayer(false)
   }
 
   const handleLocalFileSelect = async file => {
@@ -346,10 +402,10 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
       </div>
     </TooltipProvider>
   ) : (
-    <Player
+            <Player
       id={id}
       type={songType}
-      setShowPlayer={setShowPlayer}
+       setShowPlayer={closePlayer}
       showToast={showToast}
     />
   )
