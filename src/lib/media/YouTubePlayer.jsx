@@ -139,15 +139,15 @@ export class YouTubePlayer extends MediaPlayer {
     if (!videoId) return null
 
     return (
-      <div className={`overflow-hidden rounded-lg border bg-card ${constrainHeight ? 'h-full max-h-full max-w-full aspect-video' : 'w-full flex-none'}`}>
-        <div className='relative h-full w-full'>
+      <div className={`w-full min-w-0 overflow-hidden rounded-lg border bg-card ${constrainHeight ? 'h-full max-h-full aspect-video' : 'flex-none'}`}>
+        <div className='relative h-full w-full min-w-0'>
           <YouTube
             opts={videoOptions}
             videoId={videoId}
             onReady={this._handleReady}
             onPlay={this._handlePlay}
             onPause={this._handlePause}
-            className='absolute inset-0 h-full w-full'
+            className='absolute inset-0 h-full w-full min-w-0 [&>iframe]:block [&>iframe]:h-full [&>iframe]:w-full [&>iframe]:max-w-full'
           />
         </div>
       </div>

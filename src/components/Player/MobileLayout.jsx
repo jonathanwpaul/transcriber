@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import {
-  Eye,
-  EyeOff,
   Flag,
   Home,
   ListMusic,
@@ -83,20 +81,15 @@ export function MobileLayout({
   onClose,
 }) {
   const [activeTab, setActiveTab] = useState(1)
-  const [showVideo, setShowVideo] = useState(true)
-
   return (
     <div className='flex flex-col h-full w-full'>
-      {/* Video card — always mounted to keep media element in DOM, hidden via CSS when not needed */}
-      <div className={`flex-none px-2 pt-2 ${!(isVideo && showVideo) ? 'hidden' : ''}`}>
-          <PlayerCard
-            mediaPlayerRef={mediaPlayerRef}
+      <div className='flex-none px-2 pt-2'>
+        <PlayerCard
+          mediaPlayerRef={mediaPlayerRef}
           isLoading={isLoading}
           isVideo={isVideo}
           name={name}
           videoOnly={true}
-          showVideo={showVideo}
-          onShowVideoChange={setShowVideo}
         />
       </div>
 
@@ -166,7 +159,7 @@ export function MobileLayout({
             <div className='truncate text-sm font-medium'>{name}</div>
           )}
 
-          {isLoading && !(isVideo && showVideo) && <LoaderCircle className='animate-spin' />}
+          {isLoading && <LoaderCircle className='animate-spin' />}
 
           <div className='order-2 flex w-full justify-between text-xs text-muted-foreground'>
             <span>{timestampFormatter(currentTime)}</span>
@@ -330,21 +323,6 @@ export function MobileLayout({
               />
             </div>
 
-            {isVideo && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='xs'
-                    onClick={() => setShowVideo(v => !v)}
-                    aria-label={showVideo ? 'Hide video' : 'Show video'}
-                  >
-                    {showVideo ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{showVideo ? 'Hide video' : 'Show video'}</TooltipContent>
-              </Tooltip>
-            )}
           </div>
         </div>
 

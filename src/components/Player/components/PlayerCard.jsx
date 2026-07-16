@@ -1,7 +1,4 @@
-import { useState } from 'react'
 import {
-  Eye,
-  EyeOff,
   Flag,
   LoaderCircle,
   Pause,
@@ -34,8 +31,6 @@ export function PlayerCard({
   name,
   videoOnly = false,
   controlsOnly = false,
-  showVideo: showVideoProp,
-  onShowVideoChange,
   onIntervalChange,
   onSeek,
   onScrubStart,
@@ -49,39 +44,17 @@ export function PlayerCard({
   onSaveLoop,
   onPlaybackRateChange,
 }) {
-  const [internalShowVideo, setInternalShowVideo] = useState(true)
-  const effectiveShowVideo = showVideoProp !== undefined ? showVideoProp : internalShowVideo
   const renderMedia = constrainHeight => mediaPlayerRef.current?.renderComponent({ constrainHeight })
-
-  const handleToggle = showVideoProp !== undefined
-    ? () => onShowVideoChange(v => !v)
-    : () => setInternalShowVideo(v => !v)
 
   if (videoOnly) {
     return (
-      <Card className='flex h-full min-h-0 flex-col gap-4 overflow-hidden p-4'>
+      <Card className='flex h-auto aspect-video min-h-0 min-w-0 flex-col gap-4 overflow-hidden p-4 lg:h-full lg:aspect-auto'>
         {isLoading && <LoaderCircle className='animate-spin' />}
         {mediaPlayerRef.current && (
           <div className='relative flex min-h-0 flex-1 justify-center'>
-            <div className={`h-full min-h-0 ${isVideo && !effectiveShowVideo ? 'hidden' : ''}`}>
+            <div className='h-full min-h-0 min-w-0 max-w-full'>
               {renderMedia(isVideo)}
             </div>
-            {isVideo && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='xs'
-                    className='absolute top-1 right-1'
-                    onClick={handleToggle}
-                    aria-label={effectiveShowVideo ? 'Hide video' : 'Show video'}
-                  >
-                    {effectiveShowVideo ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{effectiveShowVideo ? 'Hide video' : 'Show video'}</TooltipContent>
-              </Tooltip>
-            )}
           </div>
         )}
       </Card>
@@ -89,29 +62,13 @@ export function PlayerCard({
   }
 
   return (
-    <Card className={`flex min-h-0 flex-col gap-4 p-4 ${controlsOnly ? 'flex-none' : 'h-full overflow-y-auto'}`}>
+    <Card className={`flex min-h-0 min-w-0 flex-col gap-4 p-4 ${controlsOnly ? 'flex-none' : 'h-full overflow-y-auto'}`}>
       {isLoading && controlsOnly && <LoaderCircle className='animate-spin' />}
       {!controlsOnly && mediaPlayerRef.current && (
         <div className={`relative ${isVideo ? 'min-h-0 flex-1 flex justify-center' : ''}`}>
-          <div className={`h-full ${isVideo && !effectiveShowVideo ? 'hidden' : ''}`}>
+          <div className='h-full'>
             {renderMedia(isVideo)}
           </div>
-          {isVideo && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant='ghost'
-                  size='xs'
-                  className='absolute top-1 right-1'
-                  onClick={handleToggle}
-                  aria-label={effectiveShowVideo ? 'Hide video' : 'Show video'}
-                >
-                  {effectiveShowVideo ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{effectiveShowVideo ? 'Hide video' : 'Show video'}</TooltipContent>
-            </Tooltip>
-          )}
         </div>
       )}
 

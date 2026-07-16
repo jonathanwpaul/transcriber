@@ -348,8 +348,8 @@ function LocalFileMediaElement({ player, constrainHeight }) {
 
   if (isVideo) {
     return (
-      <div className={`overflow-hidden rounded-lg border bg-card ${constrainHeight ? 'h-full max-h-full max-w-full aspect-video' : 'w-full flex-none'}`}>
-        <div className='relative h-full w-full'>
+      <div className={`w-full min-w-0 overflow-hidden rounded-lg border bg-card ${constrainHeight ? 'h-full max-h-full aspect-video' : 'flex-none'}`}>
+        <div className='relative h-full w-full min-w-0'>
           <video {...commonProps} />
         </div>
       </div>

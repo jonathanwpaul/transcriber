@@ -50,12 +50,12 @@ export function DesktopLayout({
   onBpmChange,
   onBeatsPerMeasureChange,
   onEqBandChange,
-  onEqPresetChange,
-  }) {
+   onEqPresetChange,
+   }) {
   return (
     <div className='flex h-full min-h-0 w-full flex-col gap-2 px-2 pb-6'>
-      <div className='grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[1.5fr_1fr_1fr] lg:overflow-hidden'>
-        <section className='h-full min-h-0 overflow-y-auto md:p-2'>
+      <div className='grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:overflow-hidden'>
+        <section className='min-w-0 p-2 lg:h-full lg:min-h-0'>
           <PlayerCard
             mediaPlayerRef={mediaPlayerRef}
             isLoading={isLoading}
@@ -64,7 +64,7 @@ export function DesktopLayout({
           />
         </section>
 
-        <section className='h-full min-h-0 pt-6 pb-6 md:p-2 flex flex-col gap-2 lg:overflow-y-auto'>
+        <section className='min-w-0 p-2 lg:min-h-0 lg:overflow-y-auto'>
           {showSettings ? (
             <SongSettings
               onClose={onToggleSettings}
@@ -104,9 +104,6 @@ export function DesktopLayout({
               />
             </>
           )}
-        </section>
-
-        <section className='h-full min-h-0 pt-6 pb-6 md:p-2 flex flex-col gap-2 overflow-y-auto'>
           {!showSettings && (
             <LoopListCard
               loops={playerMetadata.loops}
