@@ -41,9 +41,6 @@ export function MeasureTraversalCard({
         </Tooltip>
 
         <div className='w-full'>
-          <div className='mb-1 text-xs font-medium text-muted-foreground'>
-            measures
-          </div>
           <ScrubbableNumberInput
             value={measures}
             onChange={val => onMeasuresChange(parseInt(val, 10) || 0)}

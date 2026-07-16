@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { LoaderCircle } from 'lucide-react'
 import {
   LoopListCard,
   LoopControlsCard,
@@ -138,7 +139,7 @@ export function PlayerLayout({
   )
 
   return (
-    <div className='flex h-full min-h-0 w-full flex-col gap-2 px-2 sm:pb-2'>
+    <div className='relative flex h-full min-h-0 w-full flex-col gap-2 px-2 sm:pb-2'>
       <div className='grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:overflow-hidden'>
         <section
           className={`min-w-0 p-2 lg:h-full lg:min-h-0 ${
@@ -147,7 +148,6 @@ export function PlayerLayout({
         >
           <MediaCard
             mediaPlayerRef={mediaPlayerRef}
-            isLoading={isLoading}
             isVideo={isVideo}
             showVideo={showVideo}
           />
@@ -190,6 +190,12 @@ export function PlayerLayout({
         onTabChange={setActiveTab}
         onClose={onClose}
       />
+
+      {isLoading && (
+        <div className='absolute inset-0 z-50 flex items-center justify-center rounded-lg bg-black/60 backdrop-blur-sm'>
+          <LoaderCircle className='h-10 w-10 animate-spin text-white' />
+        </div>
+      )}
     </div>
   )
 }
