@@ -14,6 +14,7 @@
     /* Keep cards pure white for maximum contrast against the tinted background */
     --card: 0 0% 100%;
     --card-foreground: 222.2 47.4% 11.2%;
+    --interactives: 0 0% 100%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
@@ -42,6 +43,7 @@
 
     --card: 0 0% 12%;
     --card-foreground: 210 40% 98%;
+    --interactives: 0 0% 12%;
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;

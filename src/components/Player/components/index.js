@@ -1,6 +1,7 @@
 export { BPMInput } from './BPMInput'
 export { EqualizerCard, EQ_BANDS, EQ_PRESETS } from './EqualizerCard'
 export { LoopListCard } from './LoopListCard'
+export { LoopControlsCard } from './LoopControlsCard'
 export { MeasureTraversalCard } from './MeasureTraversalCard'
 export { ControlCard } from './ControlCard'
 export { MediaCard } from './MediaCard'

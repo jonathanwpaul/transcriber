@@ -1,4 +1,5 @@
 import { Home, ListMusic, Settings2, Timer } from 'lucide-react'
+import { Button } from '../ui'
 
 const TABS = [
   { icon: Home, label: 'Home', value: 0 },
@@ -15,9 +16,9 @@ export function PlayerTabBar({ activeTab, onTabChange, onClose }) {
         const isActive = !isHome && activeTab === value
 
         return (
-          <button
+          <Button
             key={label}
-            type='button'
+            variant='ghost'
             className={`flex flex-1 flex-col items-center gap-1 py-3 text-xs transition-colors ${
               isActive ? 'text-foreground' : 'text-muted-foreground'
             }`}
@@ -25,7 +26,7 @@ export function PlayerTabBar({ activeTab, onTabChange, onClose }) {
             aria-label={label}
           >
             <Icon className={`h-5 w-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
-          </button>
+          </Button>
         )
       })}
     </div>

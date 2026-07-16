@@ -26,6 +26,8 @@ const META_TO_COL = {
   fileSize: 'file_size',
   lastModified: 'last_modified',
   displayName: 'display_name',
+  showVideo: 'show_video',
+  loopEnabled: 'loop_enabled',
 }
 
 function rowToMetadata(row) {
@@ -45,6 +47,8 @@ function rowToMetadata(row) {
     lastLoopStartPosition: row.last_loop_start_position ?? null,
     lastLoopEndPosition: row.last_loop_end_position ?? null,
     lastPlaybackPosition: row.last_playback_position ?? null,
+    showVideo: row.show_video !== 0,
+    loopEnabled: row.loop_enabled !== 0,
   }
 }
 

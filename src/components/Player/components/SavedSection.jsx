@@ -41,9 +41,13 @@ export const SavedSection = ({
         (isSelected ? 'border-primary bg-accent' : 'hover:bg-accent')
       }
     >
-      <button
-        type='button'
+      <div
         onClick={onClick}
+        role='button'
+        tabIndex={0}
+        onKeyDown={event => {
+          if (event.key === 'Enter' || event.key === ' ') onClick()
+        }}
         className='flex w-full items-center gap-2 p-3 text-left'
       >
         <div className='shrink-0'>
@@ -52,7 +56,7 @@ export const SavedSection = ({
               type='button'
               size='icon'
               variant='outline'
-              className='h-8 w-8 border-border bg-background shadow-sm'
+               className='h-8 w-8 border-border bg-interactives shadow-sm'
               onClick={e => {
                 e.stopPropagation()
                 onToggleCollapse?.()
@@ -95,7 +99,7 @@ export const SavedSection = ({
         >
           <Trash2 />
         </Button>
-      </button>
+      </div>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className='max-w-sm'>

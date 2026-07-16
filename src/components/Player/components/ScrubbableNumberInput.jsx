@@ -6,7 +6,7 @@ import { cn } from '../../../lib/utils'
 /**
  * Numeric input that supports:
  * - Scroll wheel to increment/decrement while hovered
- * - Pointer drag (mouse or touch) left/right to scrub the value
+ * - Pointer drag with a mouse left/right to scrub the value
  */
 export const ScrubbableNumberInput = ({
   value,
@@ -50,8 +50,7 @@ export const ScrubbableNumberInput = ({
 
   const handlePointerDown = e => {
     if (disabled) return
-    // Only left button for mouse, allow any pointerType for touch/pen
-    if (e.pointerType === 'mouse' && e.button !== 0) return
+    if (e.pointerType !== 'mouse' || e.button !== 0) return
 
     const current = parseValue()
     setDragState({
@@ -69,7 +68,7 @@ export const ScrubbableNumberInput = ({
     if (!dragState || e.pointerId !== dragState.pointerId) return
     if (disabled) return
 
-    // Prevent text selection / page scroll while scrubbing
+    // Prevent text selection while mouse scrubbing.
     e.preventDefault()
 
     const deltaX = e.clientX - dragState.startX
@@ -92,7 +91,7 @@ export const ScrubbableNumberInput = ({
   return (
     <div
       ref={containerRef}
-      className={cn('touch-none select-none', className)}
+      className={cn('select-none', className)}
       onWheel={handleWheel}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

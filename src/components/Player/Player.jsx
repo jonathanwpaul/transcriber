@@ -6,7 +6,7 @@ import { getAppSetting, setAppSetting } from '@lib/storage/dbService'
 import { round } from '@utils/video'
 import { YouTubePlayer, LocalFilePlayer } from '../../lib/media'
 
-import { EQ_PRESETS } from './components'
+import { EQ_PRESETS, SongSettings } from './components'
 import { Button } from '../ui'
 import {
   Tooltip,
@@ -37,12 +37,16 @@ export const Player = ({ id, type, setShowPlayer }) => {
   const [showSettings, setShowSettings] = useState(false)
   const [eqGains, setEqGains] = useState([20, 0, 0, 0, 0, 0, 20000])
   const [eqPreset, setEqPreset] = useState('flat')
+  const [showVideo, setShowVideo] = useState(true)
+  const [loopEnabled, setLoopEnabled] = useState(true)
 
   const mediaPlayerRef = useRef(null)
   const loopStartRef = useRef()
   const loopEndRef = useRef()
+  const loopEnabledRef = useRef(loopEnabled)
   loopStartRef.current = loopStart
   loopEndRef.current = loopEnd
+  loopEnabledRef.current = loopEnabled
 
   const controlsDisabled = !mediaPlayerRef.current
   const measures = appSettings['measures']
@@ -105,13 +109,17 @@ export const Player = ({ id, type, setShowPlayer }) => {
       onTimeUpdate: t => {
         const rounded = round(t)
         setCurrentTime(rounded)
-        if (t > loopEndRef.current) {
+        if (loopEnabledRef.current && t > loopEndRef.current) {
           handleSeek(loopStartRef.current)
         }
       },
       onPlaybackRateChange: r => setPlaybackRate(r),
       onPlayingChange: playing => setIsPlaying(playing),
-      onMetadataChange: meta => setPlayerMetadata(meta),
+      onMetadataChange: meta => {
+        setPlayerMetadata(meta)
+        if (typeof meta.showVideo === 'boolean') setShowVideo(meta.showVideo)
+        if (typeof meta.loopEnabled === 'boolean') setLoopEnabled(meta.loopEnabled)
+      },
     }
 
     const player = new PlayerClass({ id, callbacks })
@@ -313,6 +321,16 @@ export const Player = ({ id, type, setShowPlayer }) => {
     mediaPlayerRef.current.setBeatsPerMeasure(newBeatsPerMeasure)
   }
 
+  const handleShowVideoChange = nextShowVideo => {
+    setShowVideo(nextShowVideo)
+    mediaPlayerRef.current?._saveMetadata?.({ showVideo: nextShowVideo })
+  }
+
+  const handleLoopEnabledChange = nextLoopEnabled => {
+    setLoopEnabled(nextLoopEnabled)
+    mediaPlayerRef.current?._saveMetadata?.({ loopEnabled: nextLoopEnabled })
+  }
+
   const handleCloseVideo = () => {
     if (mediaPlayerRef.current) {
       if (mediaPlayerRef.current.setLastPlaybackPosition) {
@@ -351,6 +369,9 @@ export const Player = ({ id, type, setShowPlayer }) => {
     eqPreset,
     type,
     isVideo,
+    showVideo,
+    loopEnabled,
+    onLoopEnabledChange: handleLoopEnabledChange,
     name: playerMetadata.name,
     onIntervalChange: handleIntervalChange,
     onSeek: handleSeek,
@@ -425,9 +446,27 @@ export const Player = ({ id, type, setShowPlayer }) => {
 
         <PlayerLayout
           {...layoutProps}
-          showSettings={showSettings}
-          onToggleSettings={() => setShowSettings(s => !s)}
           onClose={handleCloseVideo}
+          showVideo={showVideo}
+          onShowVideoChange={handleShowVideoChange}
+        />
+        <SongSettings
+          asDialog
+          hideHeader
+          open={showSettings}
+          onOpenChange={setShowSettings}
+          type={type}
+          bpm={playerMetadata.bpm}
+          beatsPerMeasure={playerMetadata.beatsPerMeasure}
+          onBpmChange={handleBpmChange}
+          onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
+          gains={eqGains}
+          onBandChange={handleEqBandChange}
+          activePreset={eqPreset}
+          onPresetChange={handleEqPresetChange}
+          playerRef={mediaPlayerRef}
+          showVideo={showVideo}
+          onShowVideoChange={handleShowVideoChange}
         />
       </div>
     </TooltipProvider>

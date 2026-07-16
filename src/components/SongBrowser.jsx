@@ -16,13 +16,13 @@ const songLabel = song => song.display_name || song.name || song.file_name || so
 function SongRow({ song, onOpen, onRename, onDelete, onFolders }) {
   return (
     <div className='flex items-center gap-2 rounded-md px-3 py-2 hover:bg-accent'>
-      <button
-        type='button'
-        className='min-w-0 flex-1 truncate text-left text-sm font-medium'
+      <Button
+        variant='ghost'
+        className='min-w-0 flex-1 justify-start truncate text-left text-sm font-medium'
         onClick={() => onOpen(song.id, song.type)}
       >
         {songLabel(song)}
-      </button>
+      </Button>
       <Button
         variant='ghost'
         size='icon'
@@ -115,16 +115,16 @@ export const SongBrowser = ({
               const isCollapsed = collapsed[folder.id]
               return (
                 <div key={folder.id}>
-                  <button
-                    type='button'
-                    className='flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm font-medium hover:bg-accent'
+                  <Button
+                    variant='ghost'
+                    className='flex w-full justify-start gap-2 rounded-md px-2 py-2 text-left text-sm font-medium'
                     onClick={() => setCollapsed(current => ({ ...current, [folder.id]: !isCollapsed }))}
                   >
                     <ChevronRight className={`h-4 w-4 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} />
                     <Folder className='h-4 w-4' />
                     <span>{folder.name}</span>
                     <span className='ml-auto text-xs text-muted-foreground'>{folderSongs.length}</span>
-                  </button>
+                  </Button>
                   {!isCollapsed && folderSongs.map(song => (
                     <div className='ml-5' key={`${folder.id}-${song.id}`}>
                       <SongRow song={song} onOpen={onOpen} onRename={onRename} onDelete={onDelete} onFolders={onFolders} />

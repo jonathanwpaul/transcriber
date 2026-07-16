@@ -1,6 +1,6 @@
-import { Flag, Pause, Play, RotateCcw, Save, SkipBack } from 'lucide-react'
+import { Pause, Play, RotateCcw, SkipBack } from 'lucide-react'
 import { timestampFormatter } from '@utils/video'
-import { Button, Card, Separator, Slider } from '@components/ui'
+import { Button, Card, Slider } from '@components/ui'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip'
 
 export function ControlCard({
@@ -8,6 +8,7 @@ export function ControlCard({
   duration,
   loopStart,
   loopEnd,
+  loopEnabled,
   playbackRate,
   isPlaying,
   isScrubbing,
@@ -20,9 +21,6 @@ export function ControlCard({
   onPause,
   onRestartPlayer,
   onRestartLoop,
-  onMarkLoopStart,
-  onMarkLoopEnd,
-  onSaveLoop,
   onPlaybackRateChange,
 }) {
   return (
@@ -36,7 +34,9 @@ export function ControlCard({
         <div className='relative w-full'>
           {duration > 0 && loopEnd > loopStart && (
             <div
-              className='pointer-events-none absolute top-1/2 -translate-y-1/2 h-5 bg-muted-foreground/20 z-0'
+              className={`pointer-events-none absolute top-1/2 z-0 h-5 -translate-y-1/2 ${
+                loopEnabled ? 'bg-muted-foreground/20' : 'bg-muted/40'
+              }`}
               style={{
                 left: `${(Math.max(0, loopStart) / duration) * 100}%`,
                 width: `${
@@ -55,10 +55,20 @@ export function ControlCard({
               step={0.1}
               value={[loopStart, loopEnd]}
               onValueChange={onIntervalChange}
-              className='relative'
+              rangeClassName={
+                loopEnabled ? 'bg-primary' : 'bg-muted-foreground/30'
+              }
               thumbClassNames={[
-                'relative rounded-none border-0 border-l-2 border-l-emerald-500 before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full before:bg-emerald-500',
-                'relative before:-translate-x-full rounded-none border-0 border-r-2 border-r-red-500 before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full before:bg-red-500',
+                `relative rounded-none border-0 border-l-2 ${
+                  loopEnabled ? 'border-l-emerald-500' : 'border-l-muted-foreground/30'
+                } before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full ${
+                  loopEnabled ? 'before:bg-emerald-500' : 'before:bg-muted-foreground/30'
+                }`,
+                `relative before:-translate-x-full rounded-none border-0 border-r-2 ${
+                  loopEnabled ? 'border-r-red-500' : 'border-r-muted-foreground/30'
+                } before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full ${
+                  loopEnabled ? 'before:bg-red-500' : 'before:bg-muted-foreground/30'
+                }`,
               ]}
             />
           </div>
@@ -76,8 +86,9 @@ export function ControlCard({
             }}
             className='relative z-20'
           />
+          </div>
+
         </div>
-      </div>
 
       <div className='order-1 flex flex-col items-center gap-6'>
         <div className='flex flex-col sm:flex-row w-full items-center justify-center gap-6'>
@@ -141,54 +152,6 @@ export function ControlCard({
             </Tooltip>
           </div>
 
-          <Separator className='hidden sm:block' orientation='vertical' />
-
-          <div className='flex gap-5 sm:gap-3 items-center'>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type='button'
-                  variant='outline'
-                  size='icon'
-                  className='h-10 w-10 rounded-md'
-                  onClick={onMarkLoopStart}
-                >
-                  <Flag className='text-emerald-500' />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Mark loop start</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type='button'
-                  variant='outline'
-                  size='icon'
-                  className='h-10 w-10 rounded-md'
-                  onClick={onSaveLoop}
-                >
-                  <Save />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Save loop</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type='button'
-                  variant='outline'
-                  size='icon'
-                  className='h-10 w-10 rounded-md'
-                  onClick={onMarkLoopEnd}
-                >
-                  <Flag className='text-red-500' />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Mark loop end</TooltipContent>
-            </Tooltip>
-          </div>
         </div>
       </div>
     </Card>
