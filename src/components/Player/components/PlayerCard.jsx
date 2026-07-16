@@ -32,6 +32,10 @@ export function PlayerCard({
   controlsDisabled,
   isVideo,
   name,
+  videoOnly = false,
+  controlsOnly = false,
+  showVideo: showVideoProp,
+  onShowVideoChange,
   onIntervalChange,
   onSeek,
   onScrubStart,
@@ -45,18 +49,52 @@ export function PlayerCard({
   onSaveLoop,
   onPlaybackRateChange,
 }) {
-  const [showVideo, setShowVideo] = useState(true)
+  const [internalShowVideo, setInternalShowVideo] = useState(true)
+  const effectiveShowVideo = showVideoProp !== undefined ? showVideoProp : internalShowVideo
+  const handleToggle = showVideoProp !== undefined
+    ? () => onShowVideoChange(v => !v)
+    : () => setInternalShowVideo(v => !v)
+
+  const renderMedia = constrainHeight => mediaPlayerRef.current?.renderComponent({ constrainHeight })
+
+  if (videoOnly) {
+    return (
+      <Card className='flex h-full min-h-0 flex-col gap-4 overflow-hidden p-4'>
+        {isLoading && <LoaderCircle className='animate-spin' />}
+        {mediaPlayerRef.current && (
+          <div className='relative flex min-h-0 flex-1 justify-center'>
+            <div className={`h-full min-h-0 ${isVideo && !effectiveShowVideo ? 'hidden' : ''}`}>
+              {renderMedia(isVideo)}
+            </div>
+            {isVideo && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant='ghost'
+                    size='xs'
+                    className='absolute top-1 right-1'
+                    onClick={handleToggle}
+                    aria-label={effectiveShowVideo ? 'Hide video' : 'Show video'}
+                  >
+                    {effectiveShowVideo ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{effectiveShowVideo ? 'Hide video' : 'Show video'}</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        )}
+      </Card>
+    )
+  }
 
   return (
-    <Card className='flex flex-col gap-4 p-4'>
-      {name && (
-        <div className='truncate text-sm font-medium'>{name}</div>
-      )}
-      {isLoading && <LoaderCircle className='animate-spin' />}
-      {mediaPlayerRef.current && (
-        <div className='relative'>
-          <div className={isVideo && !showVideo ? 'hidden' : ''}>
-            {mediaPlayerRef.current.renderComponent()}
+    <Card className={`flex min-h-0 flex-col gap-4 p-4 ${controlsOnly ? 'flex-none' : 'h-full overflow-y-auto'}`}>
+      {isLoading && controlsOnly && <LoaderCircle className='animate-spin' />}
+      {!controlsOnly && mediaPlayerRef.current && (
+        <div className={`relative ${isVideo ? 'min-h-0 flex-1 flex justify-center' : ''}`}>
+          <div className={`h-full ${isVideo && !effectiveShowVideo ? 'hidden' : ''}`}>
+            {renderMedia(isVideo)}
           </div>
           {isVideo && (
             <Tooltip>
@@ -65,24 +103,24 @@ export function PlayerCard({
                   variant='ghost'
                   size='xs'
                   className='absolute top-1 right-1'
-                  onClick={() => setShowVideo(v => !v)}
-                  aria-label={showVideo ? 'Hide video' : 'Show video'}
+                  onClick={handleToggle}
+                  aria-label={effectiveShowVideo ? 'Hide video' : 'Show video'}
                 >
-                  {showVideo ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                  {effectiveShowVideo ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>{showVideo ? 'Hide video' : 'Show video'}</TooltipContent>
+              <TooltipContent>{effectiveShowVideo ? 'Hide video' : 'Show video'}</TooltipContent>
             </Tooltip>
           )}
         </div>
       )}
 
-      <div className='flex w-full justify-between text-xs text-muted-foreground'>
+      <div className='order-2 flex w-full justify-between text-xs text-muted-foreground'>
         <span>{timestampFormatter(currentTime)}</span>
         <span>{timestampFormatter(duration)}</span>
       </div>
 
-      <div className='w-full'>
+      <div className='order-2 w-full'>
         <div className='relative w-full'>
           {duration > 0 && loopEnd > loopStart && (
             <div
@@ -129,7 +167,7 @@ export function PlayerCard({
         </div>
       </div>
 
-      <div className='mt-8 flex flex-col items-center gap-6'>
+      <div className='order-1 mt-8 flex flex-col items-center gap-6'>
         <div className='flex flex-col sm:flex-row w-full items-center justify-center gap-6'>
           <div className='flex gap-5 sm:gap-3 items-center'>
             <Tooltip>
@@ -229,19 +267,20 @@ export function PlayerCard({
           </div>
         </div>
 
-        <div className='flex w-full justify-center'>
-          <div className='flex items-center gap-2 w-full max-w-[12rem]'>
-            <div className='text-xs text-muted-foreground'>
-              {playbackRate?.toFixed(2)}x
-            </div>
-            <Slider
-              min={0.125}
-              max={2}
-              step={0.125}
-              value={[playbackRate]}
-              onValueChange={val => onPlaybackRateChange(val[0])}
-            />
+      </div>
+
+      <div className='order-3 flex w-full justify-center'>
+        <div className='flex items-center gap-2 w-full max-w-[12rem]'>
+          <div className='text-xs text-muted-foreground'>
+            {playbackRate?.toFixed(2)}x
           </div>
+          <Slider
+            min={0.125}
+            max={2}
+            step={0.125}
+            value={[playbackRate]}
+            onValueChange={val => onPlaybackRateChange(val[0])}
+          />
         </div>
       </div>
     </Card>

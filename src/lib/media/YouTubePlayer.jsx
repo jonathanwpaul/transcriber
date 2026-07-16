@@ -127,7 +127,7 @@ export class YouTubePlayer extends MediaPlayer {
 
   // ----- Rendering -----
 
-  renderComponent() {
+  renderComponent({ constrainHeight = false } = {}) {
     const videoOptions = {
       playerVars: {
         controls: 1,
@@ -139,13 +139,8 @@ export class YouTubePlayer extends MediaPlayer {
     if (!videoId) return null
 
     return (
-      <div className='w-full overflow-hidden rounded-lg border bg-card flex-none'>
-        {/*
-          Keep a responsive 16:9 aspect ratio based on width, but also enforce
-          a sensible minimum height on small screens so the player (and its
-          controls) never gets vertically clipped.
-        */}
-        <div className='relative w-full aspect-video'>
+      <div className={`overflow-hidden rounded-lg border bg-card ${constrainHeight ? 'h-full max-h-full max-w-full aspect-video' : 'w-full flex-none'}`}>
+        <div className='relative h-full w-full'>
           <YouTube
             opts={videoOptions}
             videoId={videoId}

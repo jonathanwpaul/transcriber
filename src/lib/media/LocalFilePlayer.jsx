@@ -112,12 +112,12 @@ export class LocalFilePlayer extends MediaPlayer {
 
   // ----- Rendering -----
 
-  renderComponent() {
-    return <LocalFileMediaElement player={this} />
+  renderComponent({ constrainHeight = false } = {}) {
+    return <LocalFileMediaElement player={this} constrainHeight={constrainHeight} />
   }
 }
 
-function LocalFileMediaElement({ player }) {
+function LocalFileMediaElement({ player, constrainHeight }) {
   const mediaRef = useRef(null)
 
   const metadata = player._metadata || {}
@@ -340,13 +340,15 @@ function LocalFileMediaElement({ player }) {
     ref: setRef,
     src: resolvedSourceUrl,
     controls: true,
-    className: isVideo ? 'absolute inset-0 h-full w-full' : 'w-full',
+    className: isVideo
+      ? 'absolute inset-0 h-full w-full object-contain'
+      : 'w-full',
   }
 
   if (isVideo) {
     return (
-      <div className='w-full overflow-hidden rounded-lg border bg-card flex-none'>
-        <div className='relative w-full aspect-video'>
+      <div className={`overflow-hidden rounded-lg border bg-card ${constrainHeight ? 'h-full max-h-full max-w-full aspect-video' : 'w-full flex-none'}`}>
+        <div className='relative h-full w-full'>
           <video {...commonProps} />
         </div>
       </div>

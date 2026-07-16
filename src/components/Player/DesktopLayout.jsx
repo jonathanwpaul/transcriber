@@ -26,7 +26,6 @@ export function DesktopLayout({
   eqPreset,
   type,
   isVideo,
-  name,
   showSettings,
   onToggleSettings,
   onIntervalChange,
@@ -52,77 +51,63 @@ export function DesktopLayout({
   onBeatsPerMeasureChange,
   onEqBandChange,
   onEqPresetChange,
-}) {
+  }) {
   return (
-    <div className='h-full w-full px-2 pb-6 overflow-y-auto grid lg:grid-cols-[2fr_1fr] lg:overflow-hidden'>
-      <section className='md:p-2'>
-        <PlayerCard
-          mediaPlayerRef={mediaPlayerRef}
-          isLoading={isLoading}
-          currentTime={currentTime}
-          duration={duration}
-          loopStart={loopStart}
-          loopEnd={loopEnd}
-          playbackRate={playbackRate}
-          isPlaying={isPlaying}
-          isScrubbing={isScrubbing}
-          scrubTime={scrubTime}
-          controlsDisabled={controlsDisabled}
-          isVideo={isVideo}
-          name={name}
-          onIntervalChange={onIntervalChange}
-          onSeek={onSeek}
-          onScrubStart={onScrubStart}
-          onScrubEnd={onScrubEnd}
-          onPlay={onPlay}
-          onPause={onPause}
-          onRestartPlayer={onRestartPlayer}
-          onRestartLoop={onRestartLoop}
-          onMarkLoopStart={onMarkLoopStart}
-          onMarkLoopEnd={onMarkLoopEnd}
-          onSaveLoop={onSaveLoop}
-          onPlaybackRateChange={onPlaybackRateChange}
-        />
-      </section>
-
-      <section className='pt-6 pb-6 md:p-2 flex flex-col gap-2 lg:overflow-y-auto'>
-        {showSettings ? (
-          <SongSettings
-            onClose={onToggleSettings}
-            type={type}
-            bpm={playerMetadata.bpm}
-            beatsPerMeasure={playerMetadata.beatsPerMeasure}
-            onBpmChange={onBpmChange}
-            onBeatsPerMeasureChange={onBeatsPerMeasureChange}
-            gains={eqGains}
-            onBandChange={onEqBandChange}
-            activePreset={eqPreset}
-            onPresetChange={onEqPresetChange}
-            playerRef={mediaPlayerRef}
+    <div className='flex h-full min-h-0 w-full flex-col gap-2 px-2 pb-6'>
+      <div className='grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[1.5fr_1fr_1fr] lg:overflow-hidden'>
+        <section className='h-full min-h-0 overflow-y-auto md:p-2'>
+          <PlayerCard
+            mediaPlayerRef={mediaPlayerRef}
+            isLoading={isLoading}
+            isVideo={isVideo}
+            videoOnly
           />
-        ) : (
-          <>
-            <TimeInputsCard
-              loopStart={loopStart}
-              loopEnd={loopEnd}
-              currentTime={currentTime}
-              duration={duration}
-              controlsDisabled={controlsDisabled}
-              onLoopStartChange={onLoopStartChange}
-              onLoopEndChange={onLoopEndChange}
-              onCurrentTimeChange={onCurrentTimeChange}
-            />
-            <MeasureTraversalCard
+        </section>
+
+        <section className='h-full min-h-0 pt-6 pb-6 md:p-2 flex flex-col gap-2 lg:overflow-y-auto'>
+          {showSettings ? (
+            <SongSettings
+              onClose={onToggleSettings}
+              type={type}
               bpm={playerMetadata.bpm}
               beatsPerMeasure={playerMetadata.beatsPerMeasure}
-              measures={measures}
-              loopStart={loopStart}
-              loopEnd={loopEnd}
-              onLoopStartChange={onLoopStartChange}
-              onLoopEndChange={onLoopEndChange}
-              onSeek={onSeek}
-              onMeasuresChange={onMeasuresChange}
+              onBpmChange={onBpmChange}
+              onBeatsPerMeasureChange={onBeatsPerMeasureChange}
+              gains={eqGains}
+              onBandChange={onEqBandChange}
+              activePreset={eqPreset}
+              onPresetChange={onEqPresetChange}
+              playerRef={mediaPlayerRef}
             />
+          ) : (
+            <>
+              <TimeInputsCard
+                loopStart={loopStart}
+                loopEnd={loopEnd}
+                currentTime={currentTime}
+                duration={duration}
+                controlsDisabled={controlsDisabled}
+                onLoopStartChange={onLoopStartChange}
+                onLoopEndChange={onLoopEndChange}
+                onCurrentTimeChange={onCurrentTimeChange}
+              />
+              <MeasureTraversalCard
+                bpm={playerMetadata.bpm}
+                beatsPerMeasure={playerMetadata.beatsPerMeasure}
+                measures={measures}
+                loopStart={loopStart}
+                loopEnd={loopEnd}
+                onLoopStartChange={onLoopStartChange}
+                onLoopEndChange={onLoopEndChange}
+                onSeek={onSeek}
+                onMeasuresChange={onMeasuresChange}
+              />
+            </>
+          )}
+        </section>
+
+        <section className='h-full min-h-0 pt-6 pb-6 md:p-2 flex flex-col gap-2 overflow-y-auto'>
+          {!showSettings && (
             <LoopListCard
               loops={playerMetadata.loops}
               loopStart={loopStart}
@@ -133,9 +118,36 @@ export function DesktopLayout({
               onDeleteLoop={onDeleteLoop}
               onTitleChange={onTitleChange}
             />
-          </>
-        )}
-      </section>
+          )}
+        </section>
+      </div>
+
+      <PlayerCard
+        mediaPlayerRef={mediaPlayerRef}
+        isLoading={isLoading}
+        currentTime={currentTime}
+        duration={duration}
+        loopStart={loopStart}
+        loopEnd={loopEnd}
+        playbackRate={playbackRate}
+        isPlaying={isPlaying}
+        isScrubbing={isScrubbing}
+        scrubTime={scrubTime}
+        controlsDisabled={controlsDisabled}
+        isVideo={isVideo}
+        controlsOnly
+        onIntervalChange={onIntervalChange}
+        onScrubStart={onScrubStart}
+        onScrubEnd={onScrubEnd}
+        onPlay={onPlay}
+        onPause={onPause}
+        onRestartPlayer={onRestartPlayer}
+        onRestartLoop={onRestartLoop}
+        onMarkLoopStart={onMarkLoopStart}
+        onMarkLoopEnd={onMarkLoopEnd}
+        onSaveLoop={onSaveLoop}
+        onPlaybackRateChange={onPlaybackRateChange}
+      />
     </div>
   )
 }
