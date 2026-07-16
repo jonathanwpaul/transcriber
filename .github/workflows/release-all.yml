@@ -75,7 +75,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
       fail-fast: false # don't cancel one OS build if the other fails
 
     steps:
@@ -106,6 +106,7 @@ jobs:
           path: |
             electron-dist/*.exe
             electron-dist/*.dmg
+            electron-dist/*.AppImage
 
   ios:
     name: iOS
