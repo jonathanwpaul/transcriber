@@ -8,7 +8,6 @@ import {
   createFolder,
   deleteSong,
   getFolders,
-  getRecentSongs,
   getSongs,
   patchSong,
   setSongFolders,
@@ -21,12 +20,7 @@ import FileUpload from './FileUpload'
 import { Button } from './ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Input } from './ui/input'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import {
   Tooltip,
   TooltipContent,
@@ -74,7 +68,6 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [inputText, setInputText] = useState()
   const [error, setError] = useState(false)
   const [songs, setSongs] = useState([])
-  const [recents, setRecents] = useState([])
   const [folders, setFolders] = useState([])
   const [loading, setLoading] = useState(true)
   const [renameSong, setRenameSong] = useState(null)
@@ -84,13 +77,8 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [deleteSongTarget, setDeleteSongTarget] = useState(null)
 
   const loadSongs = async () => {
-    const [rows, recentRows, folderRows] = await Promise.all([
-      getSongs(),
-      getRecentSongs(3),
-      getFolders(),
-    ])
+    const [rows, folderRows] = await Promise.all([getSongs(), getFolders()])
     setSongs(rows)
-    setRecents(recentRows)
     setFolders(folderRows)
     return rows
   }
@@ -266,7 +254,7 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
 
   return !showPlayer ? (
     <TooltipProvider>
-      <div className='mx-auto flex h-full w-full max-w-5xl flex-col gap-6 p-4 sm:p-6'>
+      <div className='mx-auto flex h-full w-full max-w-5xl flex-col gap-6 p-4 pb-6 sm:p-6'>
         <div className='flex items-center justify-between gap-2'>
           <h1 className='text-3xl font-bold'>Transcriber!</h1>
           <Tooltip>
@@ -335,7 +323,6 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
 
         <SongBrowser
           songs={songs}
-          recents={recents}
           folders={folders}
           onOpen={openSong}
           onRename={song => {
@@ -353,29 +340,56 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
           }}
         />
 
-        <Dialog open={Boolean(renameSong)} onOpenChange={open => !open && setRenameSong(null)}>
+        <Dialog
+          open={Boolean(renameSong)}
+          onOpenChange={open => !open && setRenameSong(null)}
+        >
           <DialogContent className='max-w-sm'>
-            <DialogHeader><DialogTitle>Rename song</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>Rename song</DialogTitle>
+            </DialogHeader>
             <form className='flex gap-2 pt-2' onSubmit={handleRename}>
-              <Input autoFocus value={renameValue} onChange={event => setRenameValue(event.target.value)} />
-              <Button type='submit' disabled={!renameValue.trim()}>Save</Button>
+              <Input
+                autoFocus
+                value={renameValue}
+                onChange={event => setRenameValue(event.target.value)}
+              />
+              <Button type='submit' disabled={!renameValue.trim()}>
+                Save
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
 
-        <Dialog open={Boolean(folderSong)} onOpenChange={open => !open && setFolderSong(null)}>
+        <Dialog
+          open={Boolean(folderSong)}
+          onOpenChange={open => !open && setFolderSong(null)}
+        >
           <DialogContent className='max-w-sm'>
-            <DialogHeader><DialogTitle>Organize song</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>Organize song</DialogTitle>
+            </DialogHeader>
             <form className='space-y-3 pt-2' onSubmit={handleFolderSave}>
-              {!folders.length && <p className='text-sm text-muted-foreground'>Create a folder first.</p>}
+              {!folders.length && (
+                <p className='text-sm text-muted-foreground'>
+                  Create a folder first.
+                </p>
+              )}
               {folders.map(folder => (
-                <label key={folder.id} className='flex items-center gap-2 text-sm'>
+                <label
+                  key={folder.id}
+                  className='flex items-center gap-2 text-sm'
+                >
                   <input
                     type='checkbox'
                     checked={selectedFolderIds.includes(folder.id)}
-                    onChange={event => setSelectedFolderIds(current => event.target.checked
-                      ? [...current, folder.id]
-                      : current.filter(id => id !== folder.id))}
+                    onChange={event =>
+                      setSelectedFolderIds(current =>
+                        event.target.checked
+                          ? [...current, folder.id]
+                          : current.filter(id => id !== folder.id),
+                      )
+                    }
                   />
                   {folder.name}
                 </label>
@@ -387,25 +401,38 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={Boolean(deleteSongTarget)} onOpenChange={open => !open && setDeleteSongTarget(null)}>
+        <Dialog
+          open={Boolean(deleteSongTarget)}
+          onOpenChange={open => !open && setDeleteSongTarget(null)}
+        >
           <DialogContent className='max-w-sm'>
-            <DialogHeader><DialogTitle>Delete song?</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>Delete song?</DialogTitle>
+            </DialogHeader>
             <p className='text-sm text-muted-foreground'>
-              “{deleteSongTarget ? songLabel(deleteSongTarget) : ''}” and its saved data will be deleted permanently.
+              “{deleteSongTarget ? songLabel(deleteSongTarget) : ''}” and its
+              saved data will be deleted permanently.
             </p>
             <div className='flex justify-end gap-2 pt-2'>
-              <Button variant='outline' onClick={() => setDeleteSongTarget(null)}>Cancel</Button>
-              <Button variant='destructive' onClick={handleDelete}>Delete</Button>
+              <Button
+                variant='outline'
+                onClick={() => setDeleteSongTarget(null)}
+              >
+                Cancel
+              </Button>
+              <Button variant='destructive' onClick={handleDelete}>
+                Delete
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
     </TooltipProvider>
   ) : (
-            <Player
+    <Player
       id={id}
       type={songType}
-       setShowPlayer={closePlayer}
+      setShowPlayer={closePlayer}
       showToast={showToast}
     />
   )
