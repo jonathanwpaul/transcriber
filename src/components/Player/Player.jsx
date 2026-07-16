@@ -15,13 +15,9 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip'
 
-import { DesktopLayout } from './DesktopLayout'
-import { MobileLayout } from './MobileLayout'
+import { PlayerLayout } from './PlayerLayout'
 
-export const Player = ({ id, type, setShowPlayer, showToast }) => {
-  const [isDesktop, setIsDesktop] = useState(() =>
-    window.matchMedia('(min-width: 640px)').matches,
-  )
+export const Player = ({ id, type, setShowPlayer }) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -47,14 +43,6 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
   const loopEndRef = useRef()
   loopStartRef.current = loopStart
   loopEndRef.current = loopEnd
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 640px)')
-    const handleChange = event => setIsDesktop(event.matches)
-
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [])
 
   const controlsDisabled = !mediaPlayerRef.current
   const measures = appSettings['measures']
@@ -366,8 +354,14 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
     name: playerMetadata.name,
     onIntervalChange: handleIntervalChange,
     onSeek: handleSeek,
-    onScrubStart: val => { setIsScrubbing(true); setScrubTime(val) },
-    onScrubEnd: val => { setIsScrubbing(false); handleSeek(val) },
+    onScrubStart: val => {
+      setIsScrubbing(true)
+      setScrubTime(val)
+    },
+    onScrubEnd: val => {
+      setIsScrubbing(false)
+      handleSeek(val)
+    },
     onPlay: handlePlay,
     onPause: handlePause,
     onRestartPlayer: restartPlayer,
@@ -429,19 +423,12 @@ export const Player = ({ id, type, setShowPlayer, showToast }) => {
           </div>
         </div>
 
-        {isDesktop ? (
-          <div className='flex flex-col flex-1 overflow-hidden'>
-            <DesktopLayout
-              {...layoutProps}
-              showSettings={showSettings}
-              onToggleSettings={() => setShowSettings(s => !s)}
-            />
-          </div>
-        ) : (
-          <div className='flex flex-col flex-1 overflow-hidden'>
-            <MobileLayout {...layoutProps} onClose={handleCloseVideo} />
-          </div>
-        )}
+        <PlayerLayout
+          {...layoutProps}
+          showSettings={showSettings}
+          onToggleSettings={() => setShowSettings(s => !s)}
+          onClose={handleCloseVideo}
+        />
       </div>
     </TooltipProvider>
   )

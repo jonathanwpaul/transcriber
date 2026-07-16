@@ -1,23 +1,9 @@
-import {
-  Flag,
-  LoaderCircle,
-  Pause,
-  Play,
-  RotateCcw,
-  Save,
-  SkipBack,
-} from 'lucide-react'
+import { Flag, Pause, Play, RotateCcw, Save, SkipBack } from 'lucide-react'
 import { timestampFormatter } from '@utils/video'
 import { Button, Card, Separator, Slider } from '@components/ui'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip'
 
-export function PlayerCard({
-  mediaPlayerRef,
-  isLoading,
+export function ControlCard({
   currentTime,
   duration,
   loopStart,
@@ -27,12 +13,7 @@ export function PlayerCard({
   isScrubbing,
   scrubTime,
   controlsDisabled,
-  isVideo,
-  name,
-  videoOnly = false,
-  controlsOnly = false,
   onIntervalChange,
-  onSeek,
   onScrubStart,
   onScrubEnd,
   onPlay,
@@ -44,40 +25,14 @@ export function PlayerCard({
   onSaveLoop,
   onPlaybackRateChange,
 }) {
-  const renderMedia = constrainHeight => mediaPlayerRef.current?.renderComponent({ constrainHeight })
-
-  if (videoOnly) {
-    return (
-      <Card className='flex h-auto aspect-video min-h-0 min-w-0 flex-col gap-4 overflow-hidden p-4 lg:h-full lg:aspect-auto'>
-        {isLoading && <LoaderCircle className='animate-spin' />}
-        {mediaPlayerRef.current && (
-          <div className='relative flex min-h-0 flex-1 justify-center'>
-            <div className='h-full min-h-0 min-w-0 max-w-full'>
-              {renderMedia(isVideo)}
-            </div>
-          </div>
-        )}
-      </Card>
-    )
-  }
-
   return (
-    <Card className={`flex min-h-0 min-w-0 flex-col gap-4 p-4 ${controlsOnly ? 'flex-none' : 'h-full overflow-y-auto'}`}>
-      {isLoading && controlsOnly && <LoaderCircle className='animate-spin' />}
-      {!controlsOnly && mediaPlayerRef.current && (
-        <div className={`relative ${isVideo ? 'min-h-0 flex-1 flex justify-center' : ''}`}>
-          <div className='h-full'>
-            {renderMedia(isVideo)}
-          </div>
-        </div>
-      )}
-
+    <Card className={`flex min-h-0 min-w-0 flex-col gap-4 p-4 bg-card`}>
       <div className='order-2 flex w-full justify-between text-xs text-muted-foreground'>
         <span>{timestampFormatter(currentTime)}</span>
         <span>{timestampFormatter(duration)}</span>
       </div>
 
-      <div className='order-2 w-full'>
+      <div className='order-2 w-full mb-8'>
         <div className='relative w-full'>
           {duration > 0 && loopEnd > loopStart && (
             <div
@@ -90,7 +45,7 @@ export function PlayerCard({
                   100
                 }%`,
               }}
-            />
+            ></div>
           )}
 
           <div className='absolute inset-0 flex items-center z-10'>
@@ -124,8 +79,20 @@ export function PlayerCard({
         </div>
       </div>
 
-      <div className='order-1 mt-8 flex flex-col items-center gap-6'>
+      <div className='order-1 flex flex-col items-center gap-6'>
         <div className='flex flex-col sm:flex-row w-full items-center justify-center gap-6'>
+          <div className='w-[10rem]'>
+            <div className='text-xs text-muted-foreground'>
+              {playbackRate?.toFixed(2)}x
+            </div>
+            <Slider
+              min={0.125}
+              max={2}
+              step={0.125}
+              value={[playbackRate]}
+              onValueChange={val => onPlaybackRateChange(val[0])}
+            />
+          </div>
           <div className='flex gap-5 sm:gap-3 items-center'>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -222,22 +189,6 @@ export function PlayerCard({
               <TooltipContent>Mark loop end</TooltipContent>
             </Tooltip>
           </div>
-        </div>
-
-      </div>
-
-      <div className='order-3 flex w-full justify-center'>
-        <div className='flex items-center gap-2 w-full max-w-[12rem]'>
-          <div className='text-xs text-muted-foreground'>
-            {playbackRate?.toFixed(2)}x
-          </div>
-          <Slider
-            min={0.125}
-            max={2}
-            step={0.125}
-            value={[playbackRate]}
-            onValueChange={val => onPlaybackRateChange(val[0])}
-          />
         </div>
       </div>
     </Card>
