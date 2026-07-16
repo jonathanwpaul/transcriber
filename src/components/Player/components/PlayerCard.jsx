@@ -51,11 +51,11 @@ export function PlayerCard({
 }) {
   const [internalShowVideo, setInternalShowVideo] = useState(true)
   const effectiveShowVideo = showVideoProp !== undefined ? showVideoProp : internalShowVideo
+  const renderMedia = constrainHeight => mediaPlayerRef.current?.renderComponent({ constrainHeight })
+
   const handleToggle = showVideoProp !== undefined
     ? () => onShowVideoChange(v => !v)
     : () => setInternalShowVideo(v => !v)
-
-  const renderMedia = constrainHeight => mediaPlayerRef.current?.renderComponent({ constrainHeight })
 
   if (videoOnly) {
     return (

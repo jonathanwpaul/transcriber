@@ -89,8 +89,8 @@ export function MobileLayout({
     <div className='flex flex-col h-full w-full'>
       {/* Video card — always mounted to keep media element in DOM, hidden via CSS when not needed */}
       <div className={`flex-none px-2 pt-2 ${!(isVideo && showVideo) ? 'hidden' : ''}`}>
-        <PlayerCard
-          mediaPlayerRef={mediaPlayerRef}
+          <PlayerCard
+            mediaPlayerRef={mediaPlayerRef}
           isLoading={isLoading}
           isVideo={isVideo}
           name={name}

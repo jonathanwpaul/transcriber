@@ -4,13 +4,29 @@ import { Moon, Sun } from 'lucide-react'
 
 import { Player } from './Player/Player'
 import { SONG_TYPE } from 'utils/constants'
-import { getSongs, upsertSong, patchSong } from '@lib/storage/dbService'
+import {
+  createFolder,
+  deleteSong,
+  getFolders,
+  getRecentSongs,
+  getSongs,
+  patchSong,
+  setSongFolders,
+  upsertSong,
+} from '@lib/storage/dbService'
+import { SongBrowser, songLabel } from './SongBrowser'
 
 import FileUpload from './FileUpload'
 
 import { Button } from './ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Input } from './ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog'
 import {
   Tooltip,
   TooltipContent,
@@ -47,11 +63,24 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [inputText, setInputText] = useState()
   const [error, setError] = useState(false)
   const [songs, setSongs] = useState([])
+  const [recents, setRecents] = useState([])
+  const [folders, setFolders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [renameSong, setRenameSong] = useState(null)
+  const [renameValue, setRenameValue] = useState('')
+  const [folderSong, setFolderSong] = useState(null)
+  const [selectedFolderIds, setSelectedFolderIds] = useState([])
+  const [deleteSongTarget, setDeleteSongTarget] = useState(null)
 
   const loadSongs = async () => {
-    const rows = await getSongs()
+    const [rows, recentRows, folderRows] = await Promise.all([
+      getSongs(),
+      getRecentSongs(3),
+      getFolders(),
+    ])
     setSongs(rows)
+    setRecents(recentRows)
+    setFolders(folderRows)
   }
 
   useEffect(() => {
@@ -86,6 +115,42 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     setId(songId)
     setSongType(songType)
     setShowPlayer(true)
+  }
+
+  const handleRename = async event => {
+    event.preventDefault()
+    if (!renameSong || !renameValue.trim()) return
+    await patchSong(renameSong.id, { displayName: renameValue.trim() })
+    setRenameSong(null)
+    await loadSongs()
+  }
+
+  const handleFolderSave = async event => {
+    event.preventDefault()
+    if (!folderSong) return
+    await setSongFolders(folderSong.id, selectedFolderIds)
+    setFolderSong(null)
+    await loadSongs()
+  }
+
+  const handleDelete = async () => {
+    if (!deleteSongTarget) return
+    const removed = await deleteSong(deleteSongTarget.id)
+    setDeleteSongTarget(null)
+    if (removed?.type === SONG_TYPE.FILE && removed.content) {
+      try {
+        await Filesystem.deleteFile({
+          path: removed.content,
+          directory:
+            removed.file_directory === 'DOCUMENTS'
+              ? Directory.Documents
+              : Directory.Data,
+        })
+      } catch (error) {
+        console.warn('Failed to delete local media file', error)
+      }
+    }
+    await loadSongs()
   }
 
   const handleLocalFileSelect = async file => {
@@ -142,8 +207,6 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     })
     await openSong(id, SONG_TYPE.YOUTUBE)
   }
-
-  const formatTimeString = timeString => new Date(timeString).toLocaleString()
 
   return !showPlayer ? (
     <TooltipProvider>
@@ -214,30 +277,72 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
           </Card>
         </div>
 
-        <CardTitle className='mt-4'>Recents</CardTitle>
+        <SongBrowser
+          songs={songs}
+          recents={recents}
+          folders={folders}
+          onOpen={openSong}
+          onRename={song => {
+            setRenameSong(song)
+            setRenameValue(songLabel(song))
+          }}
+          onDelete={setDeleteSongTarget}
+          onFolders={song => {
+            setFolderSong(song)
+            setSelectedFolderIds(song.folders?.map(folder => folder.id) || [])
+          }}
+          onCreateFolder={async name => {
+            await createFolder(name)
+            await loadSongs()
+          }}
+        />
 
-        {songs.length > 0 && (
-          <Card>
-            <CardContent className='flex flex-col gap-1'>
-              {songs.map(song => (
-                <button
-                  key={song.id}
-                  onClick={() => openSong(song.id, song.type)}
-                  className='flex flex-col md:flex-row w-full items-start md:items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-accent'
-                >
-                  <div className='min-w-0 flex-1 w-full font-medium text-primary'>
-                    {song.title ?? song.name ?? song.id}
-                  </div>
-                  <div className='shrink-0 text-xs text-muted-foreground'>
-                    {song.last_accessed
-                      ? formatTimeString(song.last_accessed)
-                      : ''}
-                  </div>
-                </button>
+        <Dialog open={Boolean(renameSong)} onOpenChange={open => !open && setRenameSong(null)}>
+          <DialogContent className='max-w-sm'>
+            <DialogHeader><DialogTitle>Rename song</DialogTitle></DialogHeader>
+            <form className='flex gap-2 pt-2' onSubmit={handleRename}>
+              <Input autoFocus value={renameValue} onChange={event => setRenameValue(event.target.value)} />
+              <Button type='submit' disabled={!renameValue.trim()}>Save</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={Boolean(folderSong)} onOpenChange={open => !open && setFolderSong(null)}>
+          <DialogContent className='max-w-sm'>
+            <DialogHeader><DialogTitle>Organize song</DialogTitle></DialogHeader>
+            <form className='space-y-3 pt-2' onSubmit={handleFolderSave}>
+              {!folders.length && <p className='text-sm text-muted-foreground'>Create a folder first.</p>}
+              {folders.map(folder => (
+                <label key={folder.id} className='flex items-center gap-2 text-sm'>
+                  <input
+                    type='checkbox'
+                    checked={selectedFolderIds.includes(folder.id)}
+                    onChange={event => setSelectedFolderIds(current => event.target.checked
+                      ? [...current, folder.id]
+                      : current.filter(id => id !== folder.id))}
+                  />
+                  {folder.name}
+                </label>
               ))}
-            </CardContent>
-          </Card>
-        )}
+              <div className='flex justify-end'>
+                <Button type='submit'>Save</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={Boolean(deleteSongTarget)} onOpenChange={open => !open && setDeleteSongTarget(null)}>
+          <DialogContent className='max-w-sm'>
+            <DialogHeader><DialogTitle>Delete song?</DialogTitle></DialogHeader>
+            <p className='text-sm text-muted-foreground'>
+              “{deleteSongTarget ? songLabel(deleteSongTarget) : ''}” and its saved data will be deleted permanently.
+            </p>
+            <div className='flex justify-end gap-2 pt-2'>
+              <Button variant='outline' onClick={() => setDeleteSongTarget(null)}>Cancel</Button>
+              <Button variant='destructive' onClick={handleDelete}>Delete</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   ) : (

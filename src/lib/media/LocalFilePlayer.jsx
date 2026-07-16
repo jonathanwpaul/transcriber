@@ -155,6 +155,7 @@ function LocalFileMediaElement({ player, constrainHeight }) {
     let canceled = false
 
     async function resolveSource() {
+      if (canceled) return
       if (sourceUrl) {
         // Data URL built from DB blob content — use directly.
         if (!canceled) setResolvedSourceUrl(sourceUrl)

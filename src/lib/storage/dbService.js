@@ -25,6 +25,7 @@ const META_TO_COL = {
   fileName: 'file_name',
   fileSize: 'file_size',
   lastModified: 'last_modified',
+  displayName: 'display_name',
 }
 
 function rowToMetadata(row) {
@@ -39,7 +40,7 @@ function rowToMetadata(row) {
     bpm: row.beats_per_minute ?? null,
     beatsPerMeasure: row.beats_per_measure ?? null,
     loops: {},
-    name: row.name ?? null,
+    name: row.display_name ?? row.name ?? null,
     lastPlaybackRate: row.last_playback_rate ?? null,
     lastLoopStartPosition: row.last_loop_start_position ?? null,
     lastLoopEndPosition: row.last_loop_end_position ?? null,
@@ -106,9 +107,71 @@ export async function initDB() {
 
 export async function getSongs() {
   const mgr = AppDataSource.manager
-  return mgr.query(
-    'SELECT id, name, type, last_accessed, mime_type FROM song ORDER BY last_accessed DESC NULLS LAST',
+  const songs = await mgr.query(`
+    SELECT id, name, display_name, type, last_accessed, mime_type, file_name,
+           content, file_directory
+    FROM song ORDER BY COALESCE(last_accessed, '') DESC
+  `)
+  for (const song of songs) {
+    song.folders = await mgr.query(
+      `SELECT f.id, f.name FROM folder f
+       JOIN song_folder sf ON sf.folder_id = f.id
+       WHERE sf.song_id = ? ORDER BY f.name`,
+      [song.id],
+    )
+  }
+  return songs
+}
+
+export async function getRecentSongs(limit = 3) {
+  const songs = await getSongs()
+  return songs.filter(song => song.last_accessed).slice(0, limit)
+}
+
+export async function getFolders() {
+  return AppDataSource.manager.query(
+    'SELECT id, name FROM folder ORDER BY name COLLATE NOCASE',
   )
+}
+
+export async function createFolder(name) {
+  const trimmed = name.trim()
+  if (!trimmed) return null
+  const mgr = AppDataSource.manager
+  await mgr.query(
+    'INSERT OR IGNORE INTO folder (name, created_on) VALUES (?, ?)',
+    [trimmed, new Date().toISOString()],
+  )
+  await saveToStore()
+  const rows = await mgr.query('SELECT id, name FROM folder WHERE name = ?', [
+    trimmed,
+  ])
+  return rows[0]
+}
+
+export async function setSongFolders(songId, folderIds) {
+  const mgr = AppDataSource.manager
+  await mgr.transaction(async tx => {
+    await tx.query('DELETE FROM song_folder WHERE song_id = ?', [songId])
+    for (const folderId of folderIds) {
+      await tx.query(
+        'INSERT OR IGNORE INTO song_folder (song_id, folder_id) VALUES (?, ?)',
+        [songId, folderId],
+      )
+    }
+  })
+  await saveToStore()
+}
+
+export async function deleteSong(id) {
+  const mgr = AppDataSource.manager
+  const rows = await mgr.query(
+    'SELECT content, file_directory, type FROM song WHERE id = ?',
+    [id],
+  )
+  await mgr.query('DELETE FROM song WHERE id = ?', [id])
+  await saveToStore()
+  return rows[0] ?? null
 }
 
 export async function getSong(id) {
