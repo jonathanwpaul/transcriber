@@ -60,14 +60,22 @@ export function ControlCard({
               }
               thumbClassNames={[
                 `relative rounded-none border-0 border-l-2 ${
-                  loopEnabled ? 'border-l-emerald-500' : 'border-l-muted-foreground/30'
+                  loopEnabled
+                    ? 'border-l-emerald-500'
+                    : 'border-l-muted-foreground/30'
                 } before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full ${
-                  loopEnabled ? 'before:bg-emerald-500' : 'before:bg-muted-foreground/30'
+                  loopEnabled
+                    ? 'before:bg-emerald-500'
+                    : 'before:bg-muted-foreground/30'
                 }`,
                 `relative before:-translate-x-full rounded-none border-0 border-r-2 ${
-                  loopEnabled ? 'border-r-red-500' : 'border-r-muted-foreground/30'
+                  loopEnabled
+                    ? 'border-r-red-500'
+                    : 'border-r-muted-foreground/30'
                 } before:absolute before:-bottom-8 before:h-7 before:w-5 before:rounded-full ${
-                  loopEnabled ? 'before:bg-red-500' : 'before:bg-muted-foreground/30'
+                  loopEnabled
+                    ? 'before:bg-red-500'
+                    : 'before:bg-muted-foreground/30'
                 }`,
               ]}
             />
@@ -86,12 +94,11 @@ export function ControlCard({
             }}
             className='relative z-20'
           />
-          </div>
-
         </div>
+      </div>
 
       <div className='order-1 flex flex-col items-center gap-6'>
-        <div className='flex flex-col sm:flex-row w-full items-center justify-center gap-6'>
+        <div className='flex flex-col w-full items-center justify-center gap-6'>
           <div className='w-[10rem]'>
             <div className='text-xs text-muted-foreground'>
               {playbackRate?.toFixed(2)}x
@@ -151,7 +158,6 @@ export function ControlCard({
               <TooltipContent>Jump to loop start</TooltipContent>
             </Tooltip>
           </div>
-
         </div>
       </div>
     </Card>
