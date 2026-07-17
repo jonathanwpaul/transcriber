@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-import { LoaderCircle } from 'lucide-react'
 import {
   LoopListCard,
   LoopControlsCard,
@@ -14,7 +13,6 @@ import { PlayerTabBar } from './PlayerTabBar'
 
 export function PlayerLayout({
   mediaPlayerRef,
-  isLoading,
   currentTime,
   duration,
   loopStart,
@@ -162,7 +160,6 @@ export function PlayerLayout({
 
       <ControlCard
         mediaPlayerRef={mediaPlayerRef}
-        isLoading={isLoading}
         currentTime={currentTime}
         duration={duration}
         loopStart={loopStart}
@@ -191,11 +188,6 @@ export function PlayerLayout({
         onClose={onClose}
       />
 
-      {isLoading && (
-        <div className='absolute inset-0 z-50 flex items-center justify-center rounded-lg bg-black/60 backdrop-blur-sm'>
-          <LoaderCircle className='h-10 w-10 animate-spin text-white' />
-        </div>
-      )}
     </div>
   )
 }

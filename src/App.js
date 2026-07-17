@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { Home } from './components/Home'
 import { initDB } from '@lib/storage/dbService'
+import { LoadingProvider } from '@lib/LoadingContext'
 
 function App() {
   const [toastMessage, setToastMessage] = useState()
@@ -39,6 +40,7 @@ function App() {
   )
 
   return (
+    <LoadingProvider>
     <div className='App'>
       {toastOpen && (
         <div className='fixed top-3 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-lg border bg-card px-4 py-2 text-sm text-card-foreground shadow-lg'>
@@ -54,6 +56,7 @@ function App() {
         />
       )}
     </div>
+    </LoadingProvider>
   )
 }
 

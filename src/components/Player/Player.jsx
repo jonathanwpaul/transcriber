@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 
 import { getAppSetting, setAppSetting } from '@lib/storage/dbService'
+import { useLoading } from '@lib/LoadingContext'
 import { round } from '@utils/video'
 import { YouTubePlayer, LocalFilePlayer } from '../../lib/media'
 
@@ -18,10 +19,10 @@ import {
 import { PlayerLayout } from './PlayerLayout'
 
 export const Player = ({ id, type, setShowPlayer }) => {
+  const { setIsLoading } = useLoading()
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
   const [playbackRate, setPlaybackRate] = useState(1)
   const [loopStart, setLoopStart] = useState(0)
   const [loopEnd, setLoopEnd] = useState(0)
@@ -75,6 +76,8 @@ export const Player = ({ id, type, setShowPlayer }) => {
       }
       return
     }
+
+    setIsLoading(true)
 
     let PlayerClass = null
     if (type === 'file') {
@@ -130,6 +133,7 @@ export const Player = ({ id, type, setShowPlayer }) => {
       if (mediaPlayerRef.current === player) {
         mediaPlayerRef.current = null
       }
+      setIsLoading(false)
     }
   }, [id, type])
 
@@ -351,7 +355,6 @@ export const Player = ({ id, type, setShowPlayer }) => {
 
   const layoutProps = {
     mediaPlayerRef,
-    isLoading,
     currentTime,
     duration,
     loopStart,
