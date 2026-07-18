@@ -127,11 +127,6 @@ export async function getSongs() {
   return songs
 }
 
-export async function getRecentSongs(limit = 3) {
-  const songs = await getSongs()
-  return songs.filter(song => song.last_accessed).slice(0, limit)
-}
-
 export async function getFolders() {
   return AppDataSource.manager.query(
     'SELECT id, name FROM folder ORDER BY name COLLATE NOCASE',

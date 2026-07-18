@@ -1,4 +1,4 @@
-import { Flag, Repeat, Save } from 'lucide-react'
+import { Flag, Infinity, Save } from 'lucide-react'
 
 import { Button, Card } from '@components/ui'
 
@@ -12,6 +12,20 @@ export function LoopControlsCard({
   return (
     <Card className='flex flex-col gap-3 p-4'>
       <div className='flex gap-2'>
+        <Button
+          variant='ghost'
+          size='sm'
+          className={`flex-1 ${loopEnabled ? 'text-primary' : 'text-muted-foreground'}`}
+          role='switch'
+          aria-checked={loopEnabled}
+          aria-label={
+            loopEnabled ? 'Disable loop playback' : 'Enable loop playback'
+          }
+          onClick={() => onLoopEnabledChange(!loopEnabled)}
+        >
+          <Infinity />
+        </Button>
+
         <Button
           type='button'
           variant='outline'
@@ -41,17 +55,6 @@ export function LoopControlsCard({
           onClick={onMarkLoopEnd}
         >
           <Flag className='text-red-500' />
-        </Button>
-        <Button
-          variant='ghost'
-          size='sm'
-          className={`flex-1 ${loopEnabled ? 'text-primary' : 'text-muted-foreground'}`}
-          role='switch'
-          aria-checked={loopEnabled}
-          aria-label={loopEnabled ? 'Disable loop playback' : 'Enable loop playback'}
-          onClick={() => onLoopEnabledChange(!loopEnabled)}
-        >
-          <Repeat />
         </Button>
       </div>
     </Card>

@@ -26,7 +26,7 @@ export const Slider = React.forwardRef(
       >
         <SliderPrimitive.Track
           className={cn(
-            'relative grow overflow-hidden rounded-full bg-background',
+            'relative grow overflow-hidden rounded-full border border-foreground bg-background',
             orientation === 'vertical' ? 'h-full w-2' : 'h-2 w-full',
           )}
         >

@@ -5,6 +5,7 @@
 @layer base {
   :root {
     --radius: 0.75rem;
+    --hard-shadow: 4px 4px 0px 0px #000;
 
     /* Light theme */
     /* Slightly tinted background so cards stand out as true "surfaces" */
@@ -37,6 +38,8 @@
   }
 
   .dark {
+    --hard-shadow: 4px 4px 0px 0px #fff;
+
     /* Use a slightly lighter background and slightly brighter cards for separation */
     --background: 0 0% 0%;
     --foreground: 210 40% 98%;

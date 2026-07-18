@@ -7,7 +7,7 @@ export function MediaCard({ mediaPlayerRef, isVideo, showVideo }) {
 
   return (
     <Card
-      className={`flex h-auto aspect-video flex-col gap-4 border-card overflow-hidden ${
+      className={`flex aspect-video flex-col gap-4 overflow-hidden ${
         showVideo ? '' : 'hidden'
       }`}
     >

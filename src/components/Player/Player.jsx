@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { useState, useRef, useEffect } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Cog, X } from 'lucide-react'
 
 import { getAppSetting, setAppSetting } from '@lib/storage/dbService'
 import { useLoading } from '@lib/LoadingContext'
@@ -8,7 +8,7 @@ import { round } from '@utils/video'
 import { YouTubePlayer, LocalFilePlayer } from '../../lib/media'
 
 import { EQ_PRESETS, SongSettings } from './components'
-import { Button } from '../ui'
+import { Button, Card } from '../ui'
 import {
   Tooltip,
   TooltipContent,
@@ -121,7 +121,8 @@ export const Player = ({ id, type, setShowPlayer }) => {
       onMetadataChange: meta => {
         setPlayerMetadata(meta)
         if (typeof meta.showVideo === 'boolean') setShowVideo(meta.showVideo)
-        if (typeof meta.loopEnabled === 'boolean') setLoopEnabled(meta.loopEnabled)
+        if (typeof meta.loopEnabled === 'boolean')
+          setLoopEnabled(meta.loopEnabled)
       },
     }
 
@@ -410,7 +411,7 @@ export const Player = ({ id, type, setShowPlayer }) => {
   return (
     <TooltipProvider>
       <div className='h-full w-full flex flex-col'>
-        <div className='px-2 py-1 flex flex-none items-center sm:h-[5vh] sm:px-4'>
+        <Card className='mx-2 my-1 flex flex-none items-center sm:h-[5vh] sm:px-4'>
           <div className='hidden min-w-0 flex-1 truncate text-sm font-medium sm:block'>
             {playerMetadata.name}
           </div>
@@ -418,13 +419,13 @@ export const Player = ({ id, type, setShowPlayer }) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant='ghost'
+                  variant='outline'
                   size='xs'
                   onClick={() => setShowSettings(s => !s)}
                   aria-label='Song settings'
                   className='hidden sm:inline-flex'
                 >
-                  <Menu />
+                  <Cog />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Song settings</TooltipContent>
@@ -445,7 +446,7 @@ export const Player = ({ id, type, setShowPlayer }) => {
               <TooltipContent>Close</TooltipContent>
             </Tooltip>
           </div>
-        </div>
+        </Card>
 
         <PlayerLayout
           {...layoutProps}

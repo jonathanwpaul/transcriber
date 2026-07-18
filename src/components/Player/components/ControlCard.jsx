@@ -24,7 +24,7 @@ export function ControlCard({
   onPlaybackRateChange,
 }) {
   return (
-    <Card className={`flex min-h-0 min-w-0 flex-col gap-4 p-4 bg-card`}>
+    <Card className={`flex min-h-0 min-w-0 flex-col gap-4 p-4 mb-4 bg-card`}>
       <div className='order-2 flex w-full justify-between text-xs text-muted-foreground'>
         <span>{timestampFormatter(currentTime)}</span>
         <span>{timestampFormatter(duration)}</span>
