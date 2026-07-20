@@ -96,7 +96,9 @@ export function ControlCard({
             className='relative z-20'
           />
         </div>
-        <div className='mt-2 text-muted-foreground text-xs'>{songName}</div>
+        <div className='w-full mt-2 text-muted-foreground text-xs text-center'>
+          {songName}
+        </div>
       </div>
 
       <div className='order-1 flex flex-col items-center gap-6'>

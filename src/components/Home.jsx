@@ -14,6 +14,7 @@ import {
   upsertSong,
 } from '@lib/storage/dbService'
 import { SongBrowser, songLabel } from './SongBrowser'
+import { ConfirmActionDialog } from './ConfirmActionDialog'
 
 import FileUpload from './FileUpload'
 
@@ -74,7 +75,7 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
   const [renameValue, setRenameValue] = useState('')
   const [folderSong, setFolderSong] = useState(null)
   const [selectedFolderIds, setSelectedFolderIds] = useState([])
-  const [deleteSongTarget, setDeleteSongTarget] = useState(null)
+  const [bulkActionTarget, setBulkActionTarget] = useState(null)
 
   const loadSongs = async () => {
     const [rows, folderRows] = await Promise.all([getSongs(), getFolders()])
@@ -170,23 +171,42 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
     await loadSongs()
   }
 
-  const handleDelete = async () => {
-    if (!deleteSongTarget) return
-    const removed = await deleteSong(deleteSongTarget.id)
-    setDeleteSongTarget(null)
-    if (removed?.type === SONG_TYPE.FILE && removed.content) {
-      try {
-        await Filesystem.deleteFile({
-          path: removed.content,
-          directory:
-            removed.file_directory === 'DOCUMENTS'
-              ? Directory.Documents
-              : Directory.Data,
-        })
-      } catch (error) {
-        console.warn('Failed to delete local media file', error)
+  const handleBulkDelete = songs => {
+    setBulkActionTarget({ action: 'delete', songs })
+  }
+
+  const handleBulkMove = (songs, folder) => {
+    setBulkActionTarget({ action: 'move', songs, folder })
+  }
+
+  const executeBulkAction = async () => {
+    if (!bulkActionTarget) return
+    const { action, songs, folder } = bulkActionTarget
+    setBulkActionTarget(null)
+
+    if (action === 'delete') {
+      for (const song of songs) {
+        const removed = await deleteSong(song.id)
+        if (removed?.type === SONG_TYPE.FILE && removed.content) {
+          try {
+            await Filesystem.deleteFile({
+              path: removed.content,
+              directory:
+                removed.file_directory === 'DOCUMENTS'
+                  ? Directory.Documents
+                  : Directory.Data,
+            })
+          } catch (error) {
+            console.warn('Failed to delete local media file', error)
+          }
+        }
+      }
+    } else if (action === 'move') {
+      for (const song of songs) {
+        await setSongFolders(song.id, [folder.id])
       }
     }
+
     await loadSongs()
   }
 
@@ -329,7 +349,7 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
             setRenameSong(song)
             setRenameValue(songLabel(song))
           }}
-          onDelete={setDeleteSongTarget}
+          onDelete={song => handleBulkDelete([song])}
           onFolders={song => {
             setFolderSong(song)
             setSelectedFolderIds(song.folders?.map(folder => folder.id) || [])
@@ -338,6 +358,8 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
             await createFolder(name)
             await loadSongs()
           }}
+          onBulkDelete={handleBulkDelete}
+          onBulkMove={handleBulkMove}
         />
 
         <Dialog
@@ -401,31 +423,14 @@ export const Home = ({ showToast, themeMode, setThemeMode }) => {
           </DialogContent>
         </Dialog>
 
-        <Dialog
-          open={Boolean(deleteSongTarget)}
-          onOpenChange={open => !open && setDeleteSongTarget(null)}
-        >
-          <DialogContent className='max-w-sm'>
-            <DialogHeader>
-              <DialogTitle>Delete song?</DialogTitle>
-            </DialogHeader>
-            <p className='text-sm text-muted-foreground'>
-              “{deleteSongTarget ? songLabel(deleteSongTarget) : ''}” and its
-              saved data will be deleted permanently.
-            </p>
-            <div className='flex justify-end gap-2 pt-2'>
-              <Button
-                variant='outline'
-                onClick={() => setDeleteSongTarget(null)}
-              >
-                Cancel
-              </Button>
-              <Button variant='destructive' onClick={handleDelete}>
-                Delete
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ConfirmActionDialog
+          open={Boolean(bulkActionTarget)}
+          onOpenChange={open => !open && setBulkActionTarget(null)}
+          action={bulkActionTarget?.action}
+          songs={bulkActionTarget?.songs ?? []}
+          targetFolder={bulkActionTarget?.folder}
+          onConfirm={executeBulkAction}
+        />
       </div>
     </TooltipProvider>
   ) : (

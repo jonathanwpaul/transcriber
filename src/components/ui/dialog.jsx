@@ -32,16 +32,6 @@ const DialogContent = React.forwardRef(
         {...props}
       >
         {children}
-        <DialogClose asChild>
-          <Button
-            variant='ghost'
-            size='icon'
-            className='absolute right-2 top-2'
-            aria-label='Close'
-          >
-            <X />
-          </Button>
-        </DialogClose>
       </DialogPrimitive.Content>
     </DialogPortal>
   ),
@@ -51,7 +41,7 @@ DialogContent.displayName = DialogPrimitive.Content.displayName
 const DialogHeader = ({ className, ...props }) => (
   <div
     className={cn(
-      'flex flex-col space-y-1.5 text-center sm:text-left',
+      'flex flex-col space-y-1.5 text-center sm:text-left mb-8',
       className,
     )}
     {...props}
