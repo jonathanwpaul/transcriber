@@ -13,6 +13,7 @@ export function ControlCard({
   isPlaying,
   isScrubbing,
   scrubTime,
+  songName,
   controlsDisabled,
   onIntervalChange,
   onScrubStart,
@@ -30,7 +31,7 @@ export function ControlCard({
         <span>{timestampFormatter(duration)}</span>
       </div>
 
-      <div className='order-2 w-full mb-8'>
+      <div className='order-2 w-full'>
         <div className='relative w-full'>
           {duration > 0 && loopEnd > loopStart && (
             <div
@@ -95,6 +96,7 @@ export function ControlCard({
             className='relative z-20'
           />
         </div>
+        <div className='mt-2 text-muted-foreground text-xs'>{songName}</div>
       </div>
 
       <div className='order-1 flex flex-col items-center gap-6'>

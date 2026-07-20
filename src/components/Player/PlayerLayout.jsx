@@ -126,7 +126,9 @@ export function PlayerLayout({
   )
 
   const loopsCard = (
-    <div className={`min-h-0 sm:flex-1 sm:flex sm:flex-col ${activeTab === 2 ? 'block' : 'hidden'}`}>
+    <div
+      className={`min-h-0 sm:flex-1 sm:flex sm:flex-col ${activeTab === 2 ? 'block' : 'hidden'}`}
+    >
       <LoopListCard
         loops={playerMetadata.loops}
         loopStart={loopStart}
@@ -176,6 +178,7 @@ export function PlayerLayout({
         isPlaying={isPlaying}
         isScrubbing={isScrubbing}
         scrubTime={scrubTime}
+        songName={playerMetadata.name}
         controlsDisabled={controlsDisabled}
         isVideo={isVideo}
         controlsOnly
