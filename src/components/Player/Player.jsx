@@ -240,7 +240,9 @@ export const Player = ({ id, type, setShowPlayer }) => {
       .filter(
         k =>
           loops[k].loopStart <= loop.loopStart &&
-          loops[k].loopEnd >= loop.loopEnd,
+          loops[k].loopEnd >= loop.loopEnd &&
+          (loops[k].loopStart !== loop.loopStart ||
+            loops[k].loopEnd !== loop.loopEnd),
       )
       .sort((a, b) => getLoopDistance(a) - getLoopDistance(b))
 
