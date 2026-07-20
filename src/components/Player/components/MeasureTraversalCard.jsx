@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { ArrowBigLeftDash, ArrowBigRightDash } from 'lucide-react'
 import { Button, Card, Input } from '@components/ui'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip'
@@ -13,6 +14,12 @@ export function MeasureTraversalCard({
   onSeek,
   onMeasuresChange,
 }) {
+  const [localMeasures, setLocalMeasures] = useState(measures ?? '')
+
+  useEffect(() => {
+    if (typeof measures === 'number' && measures !== Number(localMeasures)) setLocalMeasures(measures)
+  }, [measures])
+
   if (!bpm || !beatsPerMeasure) return null
 
   const secondsPerMeasure = (measures * beatsPerMeasure) / (bpm / 60)
@@ -42,9 +49,15 @@ export function MeasureTraversalCard({
         <div className='w-full'>
           <Input
             type='number'
-            value={measures}
+            value={localMeasures}
             min={1}
-            onChange={e => onMeasuresChange(parseInt(e.target.value, 10) || 1)}
+            onChange={e => setLocalMeasures(e.target.value)}
+            onBlur={e => {
+              const val = Math.max(1, parseInt(e.target.value, 10) || 1)
+              setLocalMeasures(val)
+              onMeasuresChange(val)
+            }}
+            onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}
           />
         </div>
 

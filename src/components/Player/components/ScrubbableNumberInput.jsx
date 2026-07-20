@@ -40,6 +40,7 @@ export const ScrubbableNumberInput = ({
 }) => {
   const [dragState, setDragState] = useState(null)
   const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(null) // string values for each segment while editing
   const hasDraggedRef = useRef(false)
   const containerRef = useRef(null)
   const hoursRef = useRef(null)
@@ -117,8 +118,26 @@ export const ScrubbableNumberInput = ({
     setDragState(null)
   }
 
+  const initDraft = () => {
+    const { hours, mins, secs, tenths } = toComponents(parseValue())
+    return {
+      hours: String(hours).padStart(2, '0'),
+      mins: String(mins).padStart(2, '0'),
+      secs: String(secs).padStart(2, '0'),
+      tenths: String(tenths),
+    }
+  }
+
+  const exitEditing = () => {
+    setEditing(false)
+    setDraft(null)
+  }
+
   const handleDisplayClick = () => {
-    if (!hasDraggedRef.current) setEditing(true)
+    if (!hasDraggedRef.current) {
+      setDraft(initDraft())
+      setEditing(true)
+    }
   }
 
   useEffect(() => {
@@ -129,7 +148,7 @@ export const ScrubbableNumberInput = ({
   }, [editing])
 
   const handleContainerBlur = e => {
-    if (!containerRef.current?.contains(e.relatedTarget)) setEditing(false)
+    if (!containerRef.current?.contains(e.relatedTarget)) exitEditing()
   }
 
   useEffect(() => {
@@ -141,11 +160,17 @@ export const ScrubbableNumberInput = ({
 
   const makeSegmentChange = (field, maxLen, maxVal, nextRef) => e => {
     const raw = e.target.value.replace(/\D/g, '').slice(0, maxLen)
-    const n = Math.min(maxVal, parseInt(raw, 10) || 0)
-    const { hours, mins, secs, tenths } = toComponents(parseValue())
-    const c = { hours, mins, secs, tenths, [field]: n }
-    const total = c.hours * 3600 + c.mins * 60 + c.secs + c.tenths * 0.1
-    onChange(clamp(Math.round(total * 10) / 10))
+    const newDraft = { ...draft, [field]: raw }
+    setDraft(newDraft)
+
+    // Only call onChange when the field has a value (allow blank while typing)
+    if (raw !== '') {
+      const fallback = toComponents(parseValue())
+      const seg = (key, cap) => newDraft[key] !== '' ? Math.min(cap, parseInt(newDraft[key], 10) || 0) : fallback[key]
+      const total = seg('hours', 99) * 3600 + seg('mins', 59) * 60 + seg('secs', 59) + seg('tenths', 9) * 0.1
+      onChange(clamp(Math.round(total * 10) / 10))
+    }
+
     if (raw.length >= maxLen && nextRef?.current) {
       nextRef.current.focus()
       nextRef.current.select()
@@ -153,10 +178,18 @@ export const ScrubbableNumberInput = ({
   }
 
   const handleSegmentKeyDown = e => {
-    if (e.key === 'Escape') setEditing(false)
+    if (e.key === 'Escape') exitEditing()
   }
 
-  const { hours, mins, secs, tenths } = toComponents(parseValue())
+  const segments = draft ?? (() => {
+    const { hours, mins, secs, tenths } = toComponents(parseValue())
+    return {
+      hours: String(hours).padStart(2, '0'),
+      mins: String(mins).padStart(2, '0'),
+      secs: String(secs).padStart(2, '0'),
+      tenths: String(tenths),
+    }
+  })()
 
   const segClass = cn(
     'bg-transparent outline-none text-center font-mono text-sm',
@@ -194,7 +227,7 @@ export const ScrubbableNumberInput = ({
             type='text'
             inputMode='numeric'
             maxLength={2}
-            value={String(hours).padStart(2, '0')}
+            value={segments.hours}
             onChange={makeSegmentChange('hours', 2, 99, minsRef)}
             onKeyDown={handleSegmentKeyDown}
             onFocus={e => e.target.select()}
@@ -207,7 +240,7 @@ export const ScrubbableNumberInput = ({
             type='text'
             inputMode='numeric'
             maxLength={2}
-            value={String(mins).padStart(2, '0')}
+            value={segments.mins}
             onChange={makeSegmentChange('mins', 2, 59, secsRef)}
             onKeyDown={handleSegmentKeyDown}
             onFocus={e => e.target.select()}
@@ -220,7 +253,7 @@ export const ScrubbableNumberInput = ({
             type='text'
             inputMode='numeric'
             maxLength={2}
-            value={String(secs).padStart(2, '0')}
+            value={segments.secs}
             onChange={makeSegmentChange('secs', 2, 59, tenthsRef)}
             onKeyDown={handleSegmentKeyDown}
             onFocus={e => e.target.select()}
@@ -233,7 +266,7 @@ export const ScrubbableNumberInput = ({
             type='text'
             inputMode='numeric'
             maxLength={1}
-            value={tenths}
+            value={segments.tenths}
             onChange={makeSegmentChange('tenths', 1, 9, null)}
             onKeyDown={handleSegmentKeyDown}
             onFocus={e => e.target.select()}

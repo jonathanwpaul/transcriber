@@ -17,17 +17,19 @@ export const BPMInput = ({
   onBeatsPerMeasureChange,
   onSubmit,
 }) => {
-  const [bpm, setBpm] = useState(value)
+  const [bpm, setBpm] = useState(value ?? '')
+  const [localBeats, setLocalBeats] = useState(beatsPerMeasure ?? '')
   const [lastTap, setLastTap] = useState(null)
   const [tapIntervals, setTapIntervals] = useState([])
 
-  // Keep local BPM state in sync when the parent value changes (e.g. from
-  // persisted JSON) so the input shows the correct value on load.
+  // Keep local state in sync when parent values change externally
   useEffect(() => {
-    if (typeof value === 'number' && value !== bpm) {
-      setBpm(value)
-    }
-  }, [value, bpm])
+    if (typeof value === 'number' && value !== Number(bpm)) setBpm(value)
+  }, [value])
+
+  useEffect(() => {
+    if (typeof beatsPerMeasure === 'number' && beatsPerMeasure !== Number(localBeats)) setLocalBeats(beatsPerMeasure)
+  }, [beatsPerMeasure])
 
   const handleTap = () => {
     const now = Date.now()
@@ -74,11 +76,13 @@ export const BPMInput = ({
                 type='number'
                 value={bpm}
                 min={0}
-                onChange={e => {
-                  const val = parseInt(e.target.value, 10) || 0
+                onChange={e => setBpm(e.target.value)}
+                onBlur={e => {
+                  const val = Math.max(0, parseInt(e.target.value, 10) || 0)
                   setBpm(val)
                   onChange(val)
                 }}
+                onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}
               />
             </div>
           </div>
@@ -89,9 +93,15 @@ export const BPMInput = ({
             <div className='flex-1'>
               <Input
                 type='number'
-                value={beatsPerMeasure}
+                value={localBeats}
                 min={1}
-                onChange={e => onBeatsPerMeasureChange(parseInt(e.target.value, 10) || 1)}
+                onChange={e => setLocalBeats(e.target.value)}
+                onBlur={e => {
+                  const val = Math.max(1, parseInt(e.target.value, 10) || 1)
+                  setLocalBeats(val)
+                  onBeatsPerMeasureChange(val)
+                }}
+                onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}
               />
             </div>
           </div>
