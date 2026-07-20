@@ -21,9 +21,7 @@ export const TimeTextInput = props => {
   return (
     <div className='flex w-full items-center gap-2'>
       {label && (
-        <div className='w-24 text-xs font-medium text-muted-foreground'>
-          {label}
-        </div>
+        <div className='w-24 text-xs font-medium text-foreground'>{label}</div>
       )}
       <div className='flex-1'>
         <ScrubbableNumberInput

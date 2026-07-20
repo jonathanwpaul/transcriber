@@ -61,12 +61,8 @@ export function PlayerLayout({
 }) {
   const [activeTab, setActiveTab] = useState(1)
 
-  const timeCards = (
-    <div
-      className={`flex flex-col gap-2 ${
-        activeTab === 1 ? 'block' : 'hidden lg:flex'
-      }`}
-    >
+  const loopControlsCard = (
+    <div className={activeTab === 1 ? 'block' : 'hidden sm:block'}>
       <LoopControlsCard
         loopEnabled={loopEnabled}
         onLoopEnabledChange={onLoopEnabledChange}
@@ -74,6 +70,11 @@ export function PlayerLayout({
         onSaveLoop={onSaveLoop}
         onMarkLoopEnd={onMarkLoopEnd}
       />
+    </div>
+  )
+
+  const measureTraversalCard = (
+    <div className={activeTab === 1 ? 'block' : 'hidden sm:block'}>
       <MeasureTraversalCard
         bpm={playerMetadata.bpm}
         beatsPerMeasure={playerMetadata.beatsPerMeasure}
@@ -86,6 +87,11 @@ export function PlayerLayout({
         onSeek={onSeek}
         onMeasuresChange={onMeasuresChange}
       />
+    </div>
+  )
+
+  const timeInputsCard = (
+    <div className={activeTab === 1 ? 'block' : 'hidden sm:block'}>
       <TimeInputsCard
         loopStart={loopStart}
         loopEnd={loopEnd}
@@ -120,7 +126,7 @@ export function PlayerLayout({
   )
 
   const loopsCard = (
-    <div className={activeTab === 2 ? 'block lg:block' : 'hidden lg:block'}>
+    <div className={`min-h-0 sm:flex-1 sm:flex sm:flex-col ${activeTab === 2 ? 'block' : 'hidden'}`}>
       <LoopListCard
         loops={playerMetadata.loops}
         loopStart={loopStart}
@@ -136,9 +142,9 @@ export function PlayerLayout({
 
   return (
     <div className='relative flex h-full min-h-0 w-full flex-col gap-2 sm:pb-2'>
-      <div className='grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:overflow-hidden'>
+      <div className='flex min-h-0 flex-1 flex-col overflow-y-auto sm:flex-row sm:flex-wrap sm:overflow-hidden'>
         <section
-          className={`min-w-0 p-2 lg:h-full lg:min-h-0 ${
+          className={`flex flex-col gap-2 p-2 sm:min-h-0 sm:flex-[1.2] sm:min-w-[320px] ${
             activeTab === 3 ? 'max-sm:hidden' : ''
           }`}
         >
@@ -147,10 +153,13 @@ export function PlayerLayout({
             isVideo={isVideo}
             showVideo={showVideo}
           />
+          {loopControlsCard}
+          {measureTraversalCard}
+          {!showVideo && timeInputsCard}
         </section>
 
-        <section className='flex min-w-0 flex-col gap-2 p-2 lg:min-h-0 lg:overflow-y-auto'>
-          {timeCards}
+        <section className='flex flex-col gap-2 p-2 sm:min-h-0 sm:flex-1 sm:min-w-[260px] sm:overflow-y-auto'>
+          {showVideo && timeInputsCard}
           {loopsCard}
           {settingsCard}
         </section>

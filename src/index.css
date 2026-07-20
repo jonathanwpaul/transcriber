@@ -5,16 +5,16 @@
 @layer base {
   :root {
     --radius: 0.75rem;
-    --hard-shadow: 4px 4px 0px 0px #000;
+    --hard-shadow: 2px 2px 0px 0px #000;
 
     /* Light theme */
     /* Slightly tinted background so cards stand out as true "surfaces" */
     --background: 210 40% 97%;
-    --foreground: 222.2 47.4% 11.2%;
+    --foreground: 0 0% 0%;
 
     /* Keep cards pure white for maximum contrast against the tinted background */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card-foreground: 0 0% 0%;
     --interactives: 0 0% 100%;
 
     --border: 214.3 31.8% 91.4%;
@@ -28,17 +28,17 @@
     --secondary-foreground: 0 0% 100%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 0 0% 40%;
 
     --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
   }
 
   .dark {
-    --hard-shadow: 4px 4px 0px 0px #fff;
+    --hard-shadow: 2px 2px 0px 0px #fff;
 
     /* Use a slightly lighter background and slightly brighter cards for separation */
     --background: 0 0% 0%;

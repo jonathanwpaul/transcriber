@@ -50,13 +50,13 @@ export const SavedSection = ({
         }}
         className='flex w-full items-center gap-2 p-3 text-left'
       >
-        <div className='shrink-0'>
-          {hasChildren ? (
+        <div>
+          {hasChildren && (
             <Button
               type='button'
               size='icon'
               variant='outline'
-               className='h-8 w-8 border-border bg-interactives shadow-sm'
+              className='h-8 w-8 bg-interactives shadow-sm'
               onClick={e => {
                 e.stopPropagation()
                 onToggleCollapse?.()
@@ -70,27 +70,22 @@ export const SavedSection = ({
                 }
               />
             </Button>
-          ) : (
-            <div className='h-8 w-8' />
           )}
-        </div>
-
-        <div className='shrink-0 text-xs text-muted-foreground'>
-          {timestampFormatter(startTime)} - {timestampFormatter(endTime)}
         </div>
 
         <div className='min-w-0 flex-1' onClick={e => e.stopPropagation()}>
           <Input
-            value={currentTitle}
+            className='border-muted'
             onChange={handleTitleChange}
-            placeholder='title'
+            placeholder={`${timestampFormatter(startTime)} - ${timestampFormatter(endTime)}`}
+            value={currentTitle}
           />
         </div>
 
         <Button
           type='button'
           size='icon'
-          variant='ghost'
+          variant='outline'
           onClick={e => {
             e.stopPropagation()
             setConfirmOpen(true)
