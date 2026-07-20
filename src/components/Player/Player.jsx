@@ -411,8 +411,8 @@ export const Player = ({ id, type, setShowPlayer }) => {
   return (
     <TooltipProvider>
       <div className='h-full w-full flex flex-col'>
-        <Card className='mx-2 my-1 flex flex-none items-center sm:h-[5vh] sm:px-4'>
-          <div className='hidden min-w-0 flex-1 truncate text-sm font-medium sm:block'>
+        <Card className='hidden sm:flex mx-2 my-1 flex-none items-center sm:h-[5vh] sm:px-4'>
+          <div className='min-w-0 flex-1 truncate text-sm font-medium'>
             {playerMetadata.name}
           </div>
           <div className='flex items-center gap-1'>
