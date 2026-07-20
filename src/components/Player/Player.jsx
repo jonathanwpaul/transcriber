@@ -18,7 +18,7 @@ import {
 
 import { PlayerLayout } from './PlayerLayout'
 
-export const Player = ({ id, type, setShowPlayer }) => {
+export const Player = ({ id, type, setShowPlayer, showToast }) => {
   const { setIsLoading } = useLoading()
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -328,6 +328,10 @@ export const Player = ({ id, type, setShowPlayer }) => {
     mediaPlayerRef.current.setBeatsPerMeasure(newBeatsPerMeasure)
   }
 
+  const handleGlobalStartChange = val => {
+    mediaPlayerRef.current.setGlobalStart(val)
+  }
+
   const handleShowVideoChange = nextShowVideo => {
     setShowVideo(nextShowVideo)
     mediaPlayerRef.current?._saveMetadata?.({ showVideo: nextShowVideo })
@@ -408,6 +412,9 @@ export const Player = ({ id, type, setShowPlayer }) => {
     onBeatsPerMeasureChange: handleBeatsPerMeasureChange,
     onEqBandChange: handleEqBandChange,
     onEqPresetChange: handleEqPresetChange,
+    showToast,
+    globalStart: playerMetadata.globalStart ?? null,
+    onGlobalStartChange: handleGlobalStartChange,
   }
 
   return (
@@ -466,6 +473,8 @@ export const Player = ({ id, type, setShowPlayer }) => {
           beatsPerMeasure={playerMetadata.beatsPerMeasure}
           onBpmChange={handleBpmChange}
           onBeatsPerMeasureChange={handleBeatsPerMeasureChange}
+          globalStart={playerMetadata.globalStart ?? null}
+          onGlobalStartChange={handleGlobalStartChange}
           gains={eqGains}
           onBandChange={handleEqBandChange}
           activePreset={eqPreset}

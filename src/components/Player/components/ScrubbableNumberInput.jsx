@@ -166,8 +166,15 @@ export const ScrubbableNumberInput = ({
     // Only call onChange when the field has a value (allow blank while typing)
     if (raw !== '') {
       const fallback = toComponents(parseValue())
-      const seg = (key, cap) => newDraft[key] !== '' ? Math.min(cap, parseInt(newDraft[key], 10) || 0) : fallback[key]
-      const total = seg('hours', 99) * 3600 + seg('mins', 59) * 60 + seg('secs', 59) + seg('tenths', 9) * 0.1
+      const seg = (key, cap) =>
+        newDraft[key] !== ''
+          ? Math.min(cap, parseInt(newDraft[key], 10) || 0)
+          : fallback[key]
+      const total =
+        seg('hours', 99) * 3600 +
+        seg('mins', 59) * 60 +
+        seg('secs', 59) +
+        seg('tenths', 9) * 0.1
       onChange(clamp(Math.round(total * 10) / 10))
     }
 
@@ -181,15 +188,17 @@ export const ScrubbableNumberInput = ({
     if (e.key === 'Escape') exitEditing()
   }
 
-  const segments = draft ?? (() => {
-    const { hours, mins, secs, tenths } = toComponents(parseValue())
-    return {
-      hours: String(hours).padStart(2, '0'),
-      mins: String(mins).padStart(2, '0'),
-      secs: String(secs).padStart(2, '0'),
-      tenths: String(tenths),
-    }
-  })()
+  const segments =
+    draft ??
+    (() => {
+      const { hours, mins, secs, tenths } = toComponents(parseValue())
+      return {
+        hours: String(hours).padStart(2, '0'),
+        mins: String(mins).padStart(2, '0'),
+        secs: String(secs).padStart(2, '0'),
+        tenths: String(tenths),
+      }
+    })()
 
   const segClass = cn(
     'bg-transparent outline-none text-center font-mono text-sm',
@@ -200,7 +209,7 @@ export const ScrubbableNumberInput = ({
     <div
       ref={containerRef}
       className={cn(
-        'inline-flex items-center rounded-full border select-none',
+        'inline-flex items-center justify-between rounded-full border select-none',
         accent.border,
         className,
       )}

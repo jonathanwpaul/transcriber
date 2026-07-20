@@ -58,6 +58,9 @@ export function PlayerLayout({
   onEqBandChange,
   onEqPresetChange,
   onClose,
+  showToast,
+  globalStart,
+  onGlobalStartChange,
 }) {
   const [activeTab, setActiveTab] = useState(1)
 
@@ -86,6 +89,10 @@ export function PlayerLayout({
         onLoopEndChange={onLoopEndChange}
         onSeek={onSeek}
         onMeasuresChange={onMeasuresChange}
+        showToast={showToast}
+        currentTime={currentTime}
+        globalStart={globalStart}
+        onGlobalStartChange={onGlobalStartChange}
       />
     </div>
   )
@@ -115,6 +122,8 @@ export function PlayerLayout({
         beatsPerMeasure={playerMetadata.beatsPerMeasure}
         onBpmChange={onBpmChange}
         onBeatsPerMeasureChange={onBeatsPerMeasureChange}
+        globalStart={globalStart}
+        onGlobalStartChange={onGlobalStartChange}
         gains={eqGains}
         onBandChange={onEqBandChange}
         activePreset={eqPreset}
@@ -157,12 +166,12 @@ export function PlayerLayout({
             showVideo={showVideo}
           />
           {loopControlsCard}
-          {measureTraversalCard}
-          {!showVideo && timeInputsCard}
+          {timeInputsCard}
+          {!showVideo && measureTraversalCard}
         </section>
 
         <section className='flex flex-col gap-2 p-2 sm:min-h-0 sm:flex-1 sm:min-w-[260px] sm:overflow-y-auto'>
-          {showVideo && timeInputsCard}
+          {showVideo && measureTraversalCard}
           {loopsCard}
           {settingsCard}
         </section>

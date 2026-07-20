@@ -17,6 +17,8 @@ export function SongSettings({
   beatsPerMeasure,
   onBpmChange,
   onBeatsPerMeasureChange,
+  globalStart = null,
+  onGlobalStartChange,
   gains,
   onBandChange,
   activePreset,
@@ -48,6 +50,14 @@ export function SongSettings({
           beatsPerMeasure={beatsPerMeasure}
           onBeatsPerMeasureChange={onBeatsPerMeasureChange}
         />
+        <Button
+          variant='outline'
+          size='sm'
+          disabled={globalStart === null}
+          onClick={() => onGlobalStartChange?.(null)}
+        >
+          Reset global start
+        </Button>
       </Card>
 
       <Card className='flex items-center justify-between gap-3 p-4'>

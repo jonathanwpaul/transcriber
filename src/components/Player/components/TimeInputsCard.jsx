@@ -1,5 +1,12 @@
 import { Card } from '@components/ui'
-import { TimeTextInput } from './TimeTextInput'
+import { ScrubbableNumberInput } from './ScrubbableNumberInput'
+
+const clampedChange = (onChange, min, max) => val => {
+  if (Number.isNaN(val)) return
+  if (min != null && val < min) return
+  if (max != null && val > max) return
+  onChange(val)
+}
 
 export function TimeInputsCard({
   loopStart,
@@ -13,46 +20,38 @@ export function TimeInputsCard({
   onCurrentTimeChange,
 }) {
   return (
-    <Card className='flex flex-col gap-2 p-4'>
-      <div className='flex flex-col gap-3'>
-        <div className='flex-1'>
-          <TimeTextInput
-            onChange={onLoopStartChange}
-            changeAmount={0.1}
-            disabled={controlsDisabled || !loopEnabled}
-            label='loop start'
-            min={0}
-            max={duration}
-            value={loopStart}
-            accentColor='emerald'
-          />
-        </div>
+    <Card className='grid grid-cols-[1fr_2fr] items-center gap-x-4 gap-y-3 p-4'>
+      <div className='text-xs font-medium text-foreground'>loop start</div>
+      <ScrubbableNumberInput
+        value={loopStart}
+        disabled={controlsDisabled || !loopEnabled}
+        onChange={clampedChange(onLoopStartChange, 0, duration)}
+        step={0.1}
+        min={0}
+        max={duration}
+        accentColor='emerald'
+      />
 
-        <div className='flex-1'>
-          <TimeTextInput
-            value={currentTime}
-            disabled={controlsDisabled}
-            onChange={onCurrentTimeChange}
-            label='currently at'
-            changeAmount={0.1}
-            min={0}
-            max={duration}
-          />
-        </div>
+      <div className='text-xs font-medium text-foreground'>current time</div>
+      <ScrubbableNumberInput
+        value={currentTime}
+        disabled={controlsDisabled}
+        onChange={clampedChange(onCurrentTimeChange, 0, duration)}
+        step={0.1}
+        min={0}
+        max={duration}
+      />
 
-        <div className='flex-1'>
-          <TimeTextInput
-            value={loopEnd}
-            disabled={controlsDisabled || !loopEnabled}
-            onChange={onLoopEndChange}
-            changeAmount={0.1}
-            label='loop end'
-            min={0}
-            max={duration}
-            accentColor='red'
-          />
-        </div>
-      </div>
+      <div className='text-xs font-medium text-foreground'>loop end</div>
+      <ScrubbableNumberInput
+        value={loopEnd}
+        disabled={controlsDisabled || !loopEnabled}
+        onChange={clampedChange(onLoopEndChange, 0, duration)}
+        step={0.1}
+        min={0}
+        max={duration}
+        accentColor='red'
+      />
     </Card>
   )
 }

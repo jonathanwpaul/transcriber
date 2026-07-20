@@ -46,6 +46,7 @@ export class MediaPlayer {
       lastLoopStartPosition: null,
       lastLoopEndPosition: null,
       lastPlaybackPosition: null,
+      globalStart: null,
     }
 
     // Async initialization: load metadata from storage.
@@ -107,6 +108,14 @@ export class MediaPlayer {
 
   async setBeatsPerMeasure(beatsPerMeasure) {
     await this._saveMetadata({ beatsPerMeasure })
+  }
+
+  get globalStart() {
+    return this._metadata.globalStart
+  }
+
+  async setGlobalStart(globalStart) {
+    await this._saveMetadata({ globalStart })
   }
 
   get loops() {

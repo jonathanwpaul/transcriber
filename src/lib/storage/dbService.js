@@ -28,6 +28,7 @@ const META_TO_COL = {
   displayName: 'display_name',
   showVideo: 'show_video',
   loopEnabled: 'loop_enabled',
+  globalStart: 'global_start',
 }
 
 function rowToMetadata(row) {
@@ -49,6 +50,7 @@ function rowToMetadata(row) {
     lastPlaybackPosition: row.last_playback_position ?? null,
     showVideo: row.show_video !== 0,
     loopEnabled: row.loop_enabled !== 0,
+    globalStart: row.global_start ?? null,
   }
 }
 
