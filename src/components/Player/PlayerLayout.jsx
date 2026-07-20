@@ -98,6 +98,7 @@ export function PlayerLayout({
         currentTime={currentTime}
         duration={duration}
         controlsDisabled={controlsDisabled}
+        loopEnabled={loopEnabled}
         onLoopStartChange={onLoopStartChange}
         onLoopEndChange={onLoopEndChange}
         onCurrentTimeChange={onCurrentTimeChange}

@@ -1,7 +1,6 @@
 import { ArrowBigLeftDash, ArrowBigRightDash } from 'lucide-react'
-import { Button, Card } from '@components/ui'
+import { Button, Card, Input } from '@components/ui'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip'
-import { ScrubbableNumberInput } from './ScrubbableNumberInput'
 
 export function MeasureTraversalCard({
   bpm,
@@ -41,11 +40,11 @@ export function MeasureTraversalCard({
         </Tooltip>
 
         <div className='w-full'>
-          <ScrubbableNumberInput
+          <Input
+            type='number'
             value={measures}
-            onChange={val => onMeasuresChange(parseInt(val, 10) || 0)}
-            step={1}
             min={1}
+            onChange={e => onMeasuresChange(parseInt(e.target.value, 10) || 1)}
           />
         </div>
 

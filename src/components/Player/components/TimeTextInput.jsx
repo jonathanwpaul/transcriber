@@ -9,6 +9,7 @@ export const TimeTextInput = props => {
     max,
     label,
     disabled,
+    accentColor,
   } = props
 
   const handleChange = newValue => {
@@ -19,11 +20,13 @@ export const TimeTextInput = props => {
   }
 
   return (
-    <div className='flex w-full items-center gap-2'>
+    <div className='flex w-full items-center justify-between gap-2 sm:px-8'>
       {label && (
-        <div className='w-24 text-xs font-medium text-foreground'>{label}</div>
+        <div className='w-24 flex-1 text-xs font-medium text-foreground'>
+          {label}
+        </div>
       )}
-      <div className='flex-1'>
+      <div className='flex items-center'>
         <ScrubbableNumberInput
           value={value}
           disabled={disabled}
@@ -31,6 +34,7 @@ export const TimeTextInput = props => {
           step={changeAmount}
           min={min}
           max={max}
+          accentColor={accentColor}
         />
       </div>
     </div>

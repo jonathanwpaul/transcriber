@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@components/ui/tooltip'
-import { ScrubbableNumberInput } from './ScrubbableNumberInput'
+import { Input } from '@components/ui'
 
 export const BPMInput = ({
   value,
@@ -70,14 +70,15 @@ export const BPMInput = ({
               beats/min
             </div>
             <div className='flex-1'>
-              <ScrubbableNumberInput
+              <Input
+                type='number'
                 value={bpm}
-                onChange={val => {
+                min={0}
+                onChange={e => {
+                  const val = parseInt(e.target.value, 10) || 0
                   setBpm(val)
                   onChange(val)
                 }}
-                step={1}
-                min={0}
               />
             </div>
           </div>
@@ -86,11 +87,11 @@ export const BPMInput = ({
               beats/measure
             </div>
             <div className='flex-1'>
-              <ScrubbableNumberInput
+              <Input
+                type='number'
                 value={beatsPerMeasure}
-                onChange={onBeatsPerMeasureChange}
-                step={1}
                 min={1}
+                onChange={e => onBeatsPerMeasureChange(parseInt(e.target.value, 10) || 1)}
               />
             </div>
           </div>
